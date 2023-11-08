@@ -2,7 +2,7 @@
 2023-2024 Senior Design Project at Bilkent University
 
 ### 📃 Group Members
-- [Utku Kurtulmuş 21903025]([https://github.com/ferhatkorkmaz11](https://github.com/UK628))    
+- [Utku Kurtulmuş 21903025](https://github.com/UK628).   
 - [Kutay Şenyiğit 21902377](https://github.com/trelans)
 - [Kerem Şahin 21901724](https://github.com/KeremSahin22)
 - [Melih Fazıl Keskin 21901831](https://github.com/MelihFazl)
