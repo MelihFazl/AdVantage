@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const sequelize = require('./database/connection');
@@ -8,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
+
 // Use routes
 app.use('/auth', authRoutes);
 
@@ -15,6 +17,7 @@ app.use('/auth', authRoutes);
 sequelize.sync({ force: true }).then(() => {
   console.log('Database and tables synced');
 });
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
