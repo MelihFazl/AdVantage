@@ -13,6 +13,8 @@ public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter private Long teamId;
+    @Getter @Setter private String teamName;
+  //  @Getter @Setter analysis reports
 
     @ManyToOne
     @JoinColumn(name = "administrator_id", referencedColumnName = "id")

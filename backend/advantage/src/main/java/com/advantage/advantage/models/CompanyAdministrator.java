@@ -10,8 +10,8 @@ import java.util.List;
 @Table(name="company_administrator")
 public class CompanyAdministrator extends Employee{
 
-    //companyden alıcak reference olcak
-    //@Getter private long companyId;
 
+    @OneToOne(mappedBy = "companyAdministrator")
+    @Getter @Setter private Company company;
 
 }
