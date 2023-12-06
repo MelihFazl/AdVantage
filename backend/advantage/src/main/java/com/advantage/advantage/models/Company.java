@@ -15,6 +15,8 @@ public class Company {
     @Getter @Setter private String companyName;
     @Getter @Setter private int numberOfEmployees;
 
+
+
     @OneToOne(optional = false)
     @JoinColumn(name = "company_admin", referencedColumnName = "id")
     @Getter @Setter private CompanyAdministrator companyAdministrator;
