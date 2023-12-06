@@ -1,17 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HomePage } from "./pages/home-page";
+import { LoginPage } from "./pages/login-page";
+import { NoPage } from "./pages/no-page";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1> AdVantage </h1>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Welcome to AdVantage!
-        </p>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<NoPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
