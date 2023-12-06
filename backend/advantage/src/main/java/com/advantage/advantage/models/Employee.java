@@ -1,17 +1,20 @@
 package com.advantage.advantage.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@Entity
+@MappedSuperclass
 @Table(name="employee")
-public class Employee
+public abstract class Employee
 {
     @Id
-    private long id;
-    private String name;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Getter private String id;
+    @Getter @Setter private String name;
+    @Getter @Setter private String surname;
+    @Getter @Setter private String email;
+    @Getter @Setter private String hashedPassword;
+
 }
