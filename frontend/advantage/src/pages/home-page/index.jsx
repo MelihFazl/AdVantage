@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+
 import { TopBarHome } from "../../common/top-bar-home"; 
 import React from 'react';
 import { styled } from '@mui/material/styles';
@@ -72,35 +72,34 @@ const Section1 = styled("div")({
   });
 
   
-export const HomePage = () => {
-  const navigate = useNavigate();
-    return( 
-      <> 
-      <TopBarHome/>
-      <Section1>
-        <Content>
-          <Description>
-            <Typography variant="h4" gutterBottom>
-              Advantage
-            </Typography>
-            <Typography variant="body1" paragraph>
-              Helping marketing professionals and developers succeed in the fast-changing world of digital advertising.
-              We want to make digital advertising easier by providing practical strategies and smart solutions. Using advanced technology,
-              we aim to change how advertising works, making it possible for businesses to succeed without spending a lot of money on marketing.
-              Our mission is to improve the digital advertising experience, shaping the future of digital marketing.
-            </Typography>
-            <ButtonsGroup>
-            <Button variant="contained" style={{ textTransform: 'none', marginRight: '16px' }} onClick={() => navigate("/sign-up")}>Sign Up</Button>
-            <Button variant="outlined" style={{ textTransform: 'none' }} onClick={() => navigate("/faq")}>FAQ</Button>
-            </ButtonsGroup>
-
-          </Description>
-      
-        </Content>
-        <Right />
-      </Section1>
-      </>
+  export const HomePage = () => {
+    const navigate = useNavigate();
+    return (
+      <div style={{ backgroundColor: 'rgba(242, 244, 248, 1)', minHeight: '100vh' }}>
+        <TopBarHome />
+        <Section1>
+          <Content>
+            <Description>
+              <Typography variant="h4" gutterBottom style={{ fontWeight: 'bold', marginBottom: '16px' }}>
+                Advantage
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Helping marketing professionals and developers succeed in the fast-changing world of digital advertising.
+                We want to make digital advertising easier by providing practical strategies and smart solutions. Using advanced technology,
+                we aim to change how advertising works, making it possible for businesses to succeed without spending a lot of money on marketing.
+                Our mission is to improve the digital advertising experience, shaping the future of digital marketing.
+              </Typography>
+              <ButtonsGroup>
+                <Button variant="contained" style={{ textTransform: 'none', marginRight: '16px' }} onClick={() => navigate("/sign-up")}>Sign Up</Button>
+                <Button variant="outlined" style={{ textTransform: 'none' }} onClick={() => navigate("/faq")}>FAQ</Button>
+              </ButtonsGroup>
+            </Description>
+          </Content>
+          <Right />
+        </Section1>
+      </div>
     );
+  
   }
   
   export default HomePage;

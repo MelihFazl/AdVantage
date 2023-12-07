@@ -39,7 +39,7 @@ export const AboutUsPage = () => {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div style={{ backgroundColor: 'rgba(242, 244, 248, 1)', minHeight: '100vh' }}>
       <TopBarHome />
       <Container maxWidth="md">
         <AboutText variant="h5">ABOUT</AboutText>
@@ -54,7 +54,7 @@ export const AboutUsPage = () => {
 
         {/* Additional content can be added below the image */}
       </Container>
-    </>
+    </div>
   );
 }
 
