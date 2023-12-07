@@ -13,6 +13,4 @@ public class CompanyAdministrator extends Employee{
     @OneToOne(mappedBy = "companyAdministrator")
     @Getter @Setter private Company company;
 
-
-
 }

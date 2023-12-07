@@ -17,4 +17,6 @@ public abstract class Employee
     @Getter @Setter private String email;
     @Getter @Setter private String hashedPassword;
 
+    @OneToOne
+    @Getter @Setter private Token token;
 }
