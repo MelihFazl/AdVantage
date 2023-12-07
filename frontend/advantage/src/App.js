@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/login-page";
 import { AboutUsPage } from "./pages/about-us-page";
 import { FaqPage } from "./pages/faq-page";
 import { SignUpPage } from "./pages/sign-up-page";
+import {ForgotPasswordPage} from "./pages/forgot-password-page";
 import { NoPage } from "./pages/no-page";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/about-us" element={<AboutUsPage />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="*" element={<NoPage />} />
       </Routes>
     </BrowserRouter>
