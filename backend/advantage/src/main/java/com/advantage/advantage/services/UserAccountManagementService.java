@@ -12,10 +12,23 @@ public interface UserAccountManagementService {
     public List<TeamMember> getAllTeamMembers();
     public List<CompanyAdministrator> getAllCompanyAdministrator();
     public List<Employee> getEmployeeByID(long employeeID);
-    public List<TeamMember> getTeamMemberByID(long teamMemberID);
-    public List<CompanyAdministrator> getCompanyAdministratorByID(long gymStaffID);
+    public List<Employee> getEmployeeByName(String name);
 
-    public TeamMember saveTeamMember(TeamMember gymMember);
+    public List<TeamMember> getTeamMemberByID(long teamMemberID);
+    public List<CompanyAdministrator> getCompanyAdministratorByID(long companyAdministratorID);
+
+    public List<CompanyAdministrator> getCompanyAdministratorByCompanyId(long companyID);
+
+
+    public TeamMember saveTeamMember(TeamMember teamMember);
     public CompanyAdministrator saveCompanyAdministrator(CompanyAdministrator companyAdministrator);
 
+    public TeamMember updateTeamMember(TeamMember teamMember);
+    public CompanyAdministrator updateCompanyAdministrator(CompanyAdministrator companyAdministrator);
+
+    public TeamMember patchTeamMember(TeamMember editedTeamMember, long teamMemberId);
+    public CompanyAdministrator patchCompanyAdministrator(CompanyAdministrator editedCompanyAdministrator, long companyAdministratorId);
+
+    public TeamMember deleteTeamMemberByID(long teamMemberId);
+    public CompanyAdministrator deleteCompanyAdministratorByID(long companyAdministratorId);
 }
