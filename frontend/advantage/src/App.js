@@ -5,8 +5,10 @@ import { LoginPage } from "./pages/login-page";
 import { AboutUsPage } from "./pages/about-us-page";
 import { FaqPage } from "./pages/faq-page";
 import { SignUpPage } from "./pages/sign-up-page";
-import {ForgotPasswordPage} from "./pages/forgot-password-page";
+import { ForgotPasswordPage } from "./pages/forgot-password-page";
 import { NoPage } from "./pages/no-page";
+import { TeamMemberHomePage } from "./pages/team-member-pages/team-member-home";
+import { TeamMemberTextualAnalysisPage } from "./pages/team-member-pages/team-member-textual-analysis";
 
 function App() {
   return (
@@ -18,6 +20,16 @@ function App() {
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route
+          path="/team-member"
+          element={<TeamMemberHomePage></TeamMemberHomePage>}
+        ></Route>
+        <Route
+          path="/team-member/text-analysis"
+          element={
+            <TeamMemberTextualAnalysisPage></TeamMemberTextualAnalysisPage>
+          }
+        ></Route>
         <Route path="*" element={<NoPage />} />
       </Routes>
     </BrowserRouter>
