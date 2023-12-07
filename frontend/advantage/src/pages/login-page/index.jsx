@@ -1,6 +1,6 @@
 import { TopBarHome } from "../../common/top-bar-home";
 import React, { useState } from 'react';
-import { Container, Box, TextField, Checkbox, FormControlLabel, Button, Typography, Link, Paper} from '@mui/material';
+import { Container, Box, TextField, Checkbox, FormControlLabel, Button, Typography, Link, Paper } from '@mui/material';
 import yourImage from '../../assets/images/login.png';
 
 export const LoginPage = () => {
@@ -10,19 +10,25 @@ export const LoginPage = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    // Check if email and password are filled
+    if (email.trim() === '' || password.trim() === '') {
+      alert('Please fill in both email and password fields.');
+      return;
+    }
+
     // Handle the login logic here
     console.log('Email:', email);
     console.log('Password:', password);
     console.log('Remember Me:', rememberMe);
   };
 
-  return (    
+  return (
     <Container maxWidth="false" disableGutters sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <TopBarHome />
       <Box sx={{ display: 'flex', flexGrow: 1 }}>
         <Box sx={{ width: '50%', height: '100%', backgroundImage: `url(${yourImage})`, backgroundSize: 'cover' }} />
         <Paper elevation={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', width: '50%' }}>
-          <Typography component="h1" variant="h5">
+          <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
             Log In
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
@@ -62,10 +68,10 @@ export const LoginPage = () => {
             >
               Log In
             </Button>
-            <Link href="#" variant="body2" sx={{ display: 'block', mt: 2 }}>
+            <Link href="/forgot-password" variant="body2" sx={{ display: 'block', mt: 2 }}>
               Forgot password?
             </Link>
-            <Link href="#" variant="body2">
+            <Link href="/sign-up" variant="body2">
               {"Don't have an account? Sign Up"}
             </Link>
           </Box>
