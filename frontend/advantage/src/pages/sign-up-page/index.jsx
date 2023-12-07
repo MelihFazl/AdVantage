@@ -1,106 +1,163 @@
 import { Link } from "react-router-dom";
-import { TopBarHome } from "../../common/top-bar-home"; 
-import React from 'react';
-import { styled } from '@mui/material/styles';
-import yourImage from '../../assets/images/home.png';
-import { Typography, Button  } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { TopBarHome } from "../../common/top-bar-home";
+import React, { useState } from 'react';
+import { Container, Box, TextField, Checkbox, FormControlLabel, Button, Typography, Paper } from '@mui/material';
+import registerImage from '../../assets/images/register.png';
 
-const Section1 = styled("div")({
-    backgroundColor: `rgba(242, 244, 248, 1)`,
-    display: `flex`,
-    position: `relative`,
-    isolation: `isolate`,
-    flexDirection: `row`,
-    width: `100%`, // Adjusted to 100% width
-    height: `746px`,
-    justifyContent: `flex-start`,
-    alignItems: `flex-start`,
-    padding: `80px 80px 0px 80px`,
-    boxSizing: `border-box`,
-  });
-  
-  const Content = styled("div")({
-    display: `flex`,
-    position: `relative`,
-    isolation: `isolate`,
-    flexDirection: `column`,
-    justifyContent: `center`,
-    alignItems: `flex-start`,
-    padding: `80px 0px`,
-    boxSizing: `border-box`,
-    flex: `1`,
-    margin: `0px`,
-    height: `612px`,
-    width: `100%`, // Adjusted to 100% width
-  });
-  
-  const Description = styled("div")({
-    marginBottom: `24px`,
-  });
-  
-  const ButtonsGroup = styled("div")({
-    display: `flex`,
-    position: `relative`,
-    isolation: `isolate`,
-    flexDirection: `row`,
-    justifyContent: `flex-start`,
-    alignItems: `flex-start`,
-    padding: `0px`,
-    boxSizing: `border-box`,
-    margin: `64px 0px 0px 0px`,
-    height: `56px`,
-    width: `260px`,
-  });
-  
-
-  
-  const Right = styled("div")({
-    display: `flex`,
-    position: `relative`,
-    isolation: `isolate`,
-    flexDirection: `column`, // Adjusted to column
-    justifyContent: `flex-start`,
-    alignItems: `flex-start`,
-    alignSelf: `stretch`,
-    width: `600px`,
-    margin: `0px 50px 0px 80px`,
-    overflow: `hidden`,
-    height: `666px`,
-    backgroundImage: `url(${yourImage})`, // Added background image
-    backgroundSize: 'cover', // Ensures the image covers the container
-  });
-
-  
 export const SignUpPage = () => {
-  const navigate = useNavigate();
-    return( 
-      <> 
-      <TopBarHome/>
-      <Section1>
-        <Content>
-          <Description>
-            <Typography variant="h4" gutterBottom>
-              Sign Up
-            </Typography>
-            <Typography variant="body1" paragraph>
-              Helping marketing professionals and developers succeed in the fast-changing world of digital advertising.
-              We want to make digital advertising easier by providing practical strategies and smart solutions. Using advanced technology,
-              we aim to change how advertising works, making it possible for businesses to succeed without spending a lot of money on marketing.
-              Our mission is to improve the digital advertising experience, shaping the future of digital marketing.
-            </Typography>
-            <ButtonsGroup>
-            <Button variant="contained" style={{ textTransform: 'none', marginRight: '16px' }}>Sign Up</Button>
-            <Button variant="outlined" style={{ textTransform: 'none' }} onClick={() => navigate("/faq")}>FAQ</Button>
-            </ButtonsGroup>
+  const [companyName, setCompanyName] = useState('');
+  const [title, setTitle] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [reEnterPassword, setReEnterPassword] = useState('');
+  const [termsChecked, setTermsChecked] = useState(false);
 
-          </Description>
-      
-        </Content>
-        <Right />
-      </Section1>
-      </>
-    );
-  }
-  
-  export default SignUpPage;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // Validate that all fields are filled and terms are checked
+    if (
+      companyName.trim() === '' ||
+      title.trim() === '' ||
+      firstName.trim() === '' ||
+      lastName.trim() === '' ||
+      email.trim() === '' ||
+      password.trim() === '' ||
+      reEnterPassword.trim() === '' ||
+      !termsChecked
+    ) {
+      alert('Please fill in all fields and accept the terms before submitting.');
+      return;
+    }
+
+    // Additional validation logic can be added here
+    // If all validation passes, proceed with sign-up logic
+    console.log('Company Name:', companyName);
+    console.log('Title:', title);
+    console.log('First Name:', firstName);
+    console.log('Last Name:', lastName);
+    console.log('Email:', email);
+    console.log('Password:', password);
+    console.log('Re-enter Password:', reEnterPassword);
+    console.log('Terms Checked:', termsChecked);
+  };
+
+  return (
+    <Container maxWidth="false" disableGutters sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <TopBarHome />
+      <Box sx={{ display: 'flex', flexGrow: 1 }}>
+        <Paper elevation={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', width: '50%' }}>
+          <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
+            Sign Up
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="companyName"
+              label="Company Name"
+              name="companyName"
+              autoComplete="companyName"
+              autoFocus
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="title"
+              label="Your Title"
+              name="title"
+              autoComplete="title"
+              sx={{ marginRight: '15px' }}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                name="firstName"
+                autoComplete="firstName"
+                sx={{ width: 'calc(50% - 7.5px)' }}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                autoComplete="lastName"
+                sx={{ width: 'calc(50% - 7.5px)' }}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </Box>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="reEnterPassword"
+              label="Re-enter Password"
+              type="password"
+              id="reEnterPassword"
+              autoComplete="new-password"
+              value={reEnterPassword}
+              onChange={(e) => setReEnterPassword(e.target.value)}
+            />
+            <FormControlLabel
+              control={<Checkbox value="termsChecked" color="primary" checked={termsChecked} onChange={(e) => setTermsChecked(e.target.checked)} />}
+              label="I have read the terms"
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3 }}
+            >
+              Sign Up
+            </Button>
+            <Link component={Link} to="/login" variant="body2" sx={{ display: 'block', mt: 2 }}>
+              Already have an account? Log In
+            </Link>
+          </Box>
+        </Paper>
+        <Box sx={{ width: '50%', height: '100%', backgroundImage: `url(${registerImage})`, backgroundSize: 'cover' }} />
+      </Box>
+    </Container>
+  );
+};
+
+export default SignUpPage;
