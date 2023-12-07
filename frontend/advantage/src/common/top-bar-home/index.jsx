@@ -10,7 +10,7 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import { Stack } from '@mui/material';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const pages = ['Home', 'About', 'FAQ'];
 
@@ -102,9 +102,10 @@ export function TopBarHome() { const [anchorElNav, setAnchorElNav] = React.useSt
               {pages.map((page) => (
                 <Button
                   key={page}
-                  onClick={handleCloseNavMenu}
+                  component={Link}
+                  to={page === 'Home' ? '/' : (page === 'About' ? '/about-us' : `/${page.toLowerCase()}`)}
                   sx={{ my: 2, color: '#000000', display: 'block' }}
-                  style={{textTransform: 'none'}}
+                  style={{ textTransform: 'none' }}
                 >
                   {page}
                 </Button>
@@ -112,7 +113,7 @@ export function TopBarHome() { const [anchorElNav, setAnchorElNav] = React.useSt
             </Box>
   
             <Stack spacing={2} direction="row" >
-            <Button variant="outlined" style={{textTransform: 'none'}}>Sign Up!</Button>
+            <Button variant="outlined" style={{textTransform: 'none'}} onClick={()=>navigate("/sign-up")}>Sign Up!</Button>
             <Button variant='contained' disableElevation style={{textTransform: 'none'}} onClick={()=>navigate("/login")}>Login</Button>
             </Stack>
             
