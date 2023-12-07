@@ -27,7 +27,7 @@ export function TopBarHome() { const [anchorElNav, setAnchorElNav] = React.useSt
   
   
     return (
-      <AppBar position="static" style={{background:"#FFFFFF", color: '#000000'}}>
+      <AppBar position="sticky" style={{background:"#FFFFFF", color: '#000000'}}>
         <Container maxWidth="xl" >
           <Toolbar >
             <Typography
@@ -75,7 +75,8 @@ export function TopBarHome() { const [anchorElNav, setAnchorElNav] = React.useSt
                 }}
               >
                 {pages.map((page) => (
-                  <MenuItem key={page} onClick={handleCloseNavMenu}>
+                  <MenuItem key={page}                   component={Link}
+                  to={page === 'Home' ? '/' : (page === 'About' ? '/about-us' : `/${page.toLowerCase()}`)}>
                     <Typography textAlign="center">{page}</Typography>
                   </MenuItem>
                 ))}
@@ -96,7 +97,7 @@ export function TopBarHome() { const [anchorElNav, setAnchorElNav] = React.useSt
                 textDecoration: 'none',
               }}
             >
-              LOGO
+              AdVantage
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               {pages.map((page) => (
@@ -113,8 +114,8 @@ export function TopBarHome() { const [anchorElNav, setAnchorElNav] = React.useSt
             </Box>
   
             <Stack spacing={2} direction="row" >
-            <Button variant="outlined" style={{textTransform: 'none'}} onClick={()=>navigate("/sign-up")}>Sign Up!</Button>
-            <Button variant='contained' disableElevation style={{textTransform: 'none'}} onClick={()=>navigate("/login")}>Login</Button>
+            <Button variant="outlined" style={{textTransform: 'none', minWidth:"90px"}} onClick={()=>navigate("/sign-up")}>Sign Up</Button>
+            <Button variant='contained' disableElevation style={{textTransform: 'none', minWidth:"70px"}} onClick={()=>navigate("/login")}>Login</Button>
             </Stack>
             
           </Toolbar>
