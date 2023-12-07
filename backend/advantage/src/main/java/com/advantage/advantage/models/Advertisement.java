@@ -20,6 +20,4 @@ public abstract class Advertisement {
     @Getter private TeamMember uploader;
 
 
-
-
 }

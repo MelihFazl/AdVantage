@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 
-
 @Entity
 @Table(name="team_member")
 public class TeamMember extends Employee{

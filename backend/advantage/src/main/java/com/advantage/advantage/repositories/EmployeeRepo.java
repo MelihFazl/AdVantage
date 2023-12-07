@@ -7,4 +7,5 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 @RepositoryRestResource
 public interface EmployeeRepo extends JpaRepository<Employee, Long>
 {
+    //employee is currently a super class not en entity, hence no database for the employee repo
 }

@@ -19,4 +19,5 @@ public class Team {
     @ManyToOne
     @JoinColumn(name = "administrator_id", referencedColumnName = "id")
     @Getter @Setter private CompanyAdministrator companyAdministrator;
+
 }
