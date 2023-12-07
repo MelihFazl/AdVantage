@@ -10,7 +10,7 @@ import lombok.Setter;
 public abstract class Employee
 {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter private long id;
     @Getter @Setter private String name;
     @Getter @Setter private String surname;

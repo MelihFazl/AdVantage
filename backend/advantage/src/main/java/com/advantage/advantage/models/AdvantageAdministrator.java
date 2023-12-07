@@ -8,10 +8,9 @@ import lombok.Setter;
 @Table(name="AdvantageAdministrator")
 public class AdvantageAdministrator {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
-    private String id;
+    private Long id;
     @Getter @Setter private String email;
     @Getter @Setter private String hashedPassword;
-
 }

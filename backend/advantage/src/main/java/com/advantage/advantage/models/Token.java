@@ -14,12 +14,12 @@ import java.util.Random;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Token {
-    @Column(name = "token", columnDefinition = "LONGTEXT")
+    @Column(name = "token", columnDefinition = "TEXT")
     private String token;
     private Boolean inUse;
     private LocalDateTime lastActive;
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ID;
 
     public String generateToken()
