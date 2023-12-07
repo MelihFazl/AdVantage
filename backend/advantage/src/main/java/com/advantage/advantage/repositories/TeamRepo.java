@@ -12,5 +12,8 @@ public interface TeamRepo extends JpaRepository<Team, Long>
     public List<Team> findByTeamId(long id);
     public Team deleteByTeamId(long id);
     public List<Team> findByTeamName(String teamName);
+
+    // Find all teams belonging to a specific company
+    List<Team> findByCompanyAdministrator_Company_CompanyId(long companyId);
 }
 

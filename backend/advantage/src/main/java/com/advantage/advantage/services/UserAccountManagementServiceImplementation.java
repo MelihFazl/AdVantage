@@ -8,6 +8,7 @@ import com.advantage.advantage.repositories.CompanyAdministratorRepo;
 import com.advantage.advantage.repositories.TeamMemberRepo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
@@ -18,11 +19,16 @@ import java.util.List;
 @Service
 public class UserAccountManagementServiceImplementation implements UserAccountManagementService {
 
-    @Autowired
-    private CompanyAdministratorRepo companyAdministratorRepository;
+    private final CompanyAdministratorRepo companyAdministratorRepository;
+    private final TeamMemberRepo teamMemberRepository;
 
     @Autowired
-    private TeamMemberRepo teamMemberRepository;
+    public UserAccountManagementServiceImplementation(
+            CompanyAdministratorRepo companyAdministratorRepository,
+            @Qualifier("teamMemberRepo") TeamMemberRepo teamMemberRepository) {
+        this.companyAdministratorRepository = companyAdministratorRepository;
+        this.teamMemberRepository = teamMemberRepository;
+    }
 
     private IgnoredPropertyCreator ignoredPropertyCreator;
 
