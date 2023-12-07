@@ -72,7 +72,7 @@ const Section1 = styled("div")({
   });
 
   
-export const HomePage = () => {
+export const FaqPage = () => {
   const navigate = useNavigate();
     return( 
       <> 
@@ -81,7 +81,7 @@ export const HomePage = () => {
         <Content>
           <Description>
             <Typography variant="h4" gutterBottom>
-              Advantage
+              FAQ
             </Typography>
             <Typography variant="body1" paragraph>
               Helping marketing professionals and developers succeed in the fast-changing world of digital advertising.
@@ -90,7 +90,7 @@ export const HomePage = () => {
               Our mission is to improve the digital advertising experience, shaping the future of digital marketing.
             </Typography>
             <ButtonsGroup>
-            <Button variant="contained" style={{ textTransform: 'none', marginRight: '16px' }} onClick={() => navigate("/sign-up")}>Sign Up</Button>
+            <Button variant="contained" style={{ textTransform: 'none', marginRight: '16px' }}>Sign Up</Button>
             <Button variant="outlined" style={{ textTransform: 'none' }} onClick={() => navigate("/faq")}>FAQ</Button>
             </ButtonsGroup>
 
@@ -103,4 +103,4 @@ export const HomePage = () => {
     );
   }
   
-  export default HomePage;
+  export default FaqPage;
