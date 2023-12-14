@@ -14,6 +14,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const drawerWidth = 240;
 
@@ -37,6 +38,11 @@ const closedMixin = (theme) => ({
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
 });
+
+function getWindowSize() {
+  const { innerWidth, innerHeight } = window;
+  return { innerWidth, innerHeight };
+}
 
 const DrawerHeader = styled("div")(({ theme, open }) => ({
   display: "flex",
@@ -67,6 +73,19 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function LeftDrawer({ drawerItems }) {
+  const [windowSize, setWindowSize] = useState(getWindowSize());
+
+  useEffect(() => {
+    function handleWindowResize() {
+      setWindowSize(getWindowSize());
+    }
+
+    window.addEventListener("resize", handleWindowResize);
+
+    return () => {
+      window.removeEventListener("resize", handleWindowResize);
+    };
+  }, []);
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
 
@@ -77,6 +96,10 @@ export default function LeftDrawer({ drawerItems }) {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  if (open && windowSize.innerWidth < 1071) {
+    setOpen(false);
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -100,9 +123,11 @@ export default function LeftDrawer({ drawerItems }) {
               AdVantage
             </Typography>
           )}
-          <IconButton onClick={!open ? handleDrawerOpen : handleDrawerClose}>
-            {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
+          {windowSize.innerWidth > 1071 && (
+            <IconButton onClick={!open ? handleDrawerOpen : handleDrawerClose}>
+              {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          )}
         </DrawerHeader>
         <Divider />
         <List>
