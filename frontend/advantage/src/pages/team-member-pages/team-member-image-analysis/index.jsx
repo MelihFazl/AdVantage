@@ -19,6 +19,13 @@ const BannerText = styled(Typography)({
   fontSize: "20px",
 });
 
+const DevelopmentText = styled(Typography)({
+  textAlign: "center",
+  color: "#000080", // Dark blue color
+  fontWeight: "bold", // Added fontWeight: 'bold'
+  fontSize: "100px",
+});
+
 export const TeamMemberImageAnalysisPage = () => {
   return (
     <Stack direction={"row"}>
@@ -60,6 +67,20 @@ export const TeamMemberImageAnalysisPage = () => {
           top={38}
         >
           <TeamText>Analyze an image based advertisement</TeamText>
+        </Box>
+        <Box
+          minWidth={"530px"}
+          display={"flex"}
+          flexGrow={"1"}
+          flexShrink={"1"}
+          flexBasis={"auto"}
+          justifyContent="center"
+          alignItems="center"
+          position={"sticky"}
+          backgroundColor={"#FFFFFF"}
+          paddingTop={"200px"}
+        >
+          <DevelopmentText>IN DEVELOPMENT...</DevelopmentText>
         </Box>
       </Stack>
     </Stack>

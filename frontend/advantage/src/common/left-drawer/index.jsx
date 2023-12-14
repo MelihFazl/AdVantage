@@ -12,9 +12,10 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 
 const drawerWidth = 240;
 
@@ -162,6 +163,30 @@ export default function LeftDrawer({ drawerItems }) {
             </ListItem>
           ))}
         </List>
+        <ListItemButton
+          sx={{
+            minHeight: 48,
+            maxHeight: 48,
+            justifyContent: open ? "initial" : "center",
+            px: 2.5,
+          }}
+          onClick={() => navigate("/")}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: open ? 3 : "auto",
+              justifyContent: "center",
+              color: "#B23B3B",
+            }}
+          >
+            <LogoutRoundedIcon></LogoutRoundedIcon>
+          </ListItemIcon>
+          <ListItemText
+            primary={"Log out"}
+            sx={{ opacity: open ? 1 : 0, color: "#B23B3B" }}
+          />
+        </ListItemButton>
       </Drawer>
     </Box>
   );

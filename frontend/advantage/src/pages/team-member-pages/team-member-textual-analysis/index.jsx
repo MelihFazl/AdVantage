@@ -18,6 +18,7 @@ import { Form, Field } from "react-final-form";
 import arrayMutators from "final-form-arrays";
 import { FieldArray } from "react-final-form-arrays";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { isFieldEmpty } from "../../../common/validator-functions/isFieldEmpty";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -113,8 +114,11 @@ export const TeamMemberTextualAnalysisPage = () => {
                   }}
                 >
                   <Stack direction={"column"} gap={"8px"}>
-                    <Field name="reportTitle">
-                      {({ input }) => (
+                    <Field
+                      name="reportTitle"
+                      validate={isFieldEmpty("Report title must be entered.")}
+                    >
+                      {({ input, meta }) => (
                         <Box
                           display={"flex"}
                           alignSelf={"stretch"}
@@ -124,7 +128,11 @@ export const TeamMemberTextualAnalysisPage = () => {
                           <Typography>Report Title</Typography>
                           <TextField
                             {...input}
+                            error={meta.touched && meta.error ? true : false}
                             variant="outlined"
+                            helperText={
+                              meta.touched && meta.error ? meta.error : ""
+                            }
                             size="small"
                           />
                         </Box>
@@ -194,8 +202,14 @@ export const TeamMemberTextualAnalysisPage = () => {
                     {({ fields }) => (
                       <Stack direction={"column"} gap={"12px"}>
                         {fields.map((element, index) => (
-                          <Field name={element} key={index}>
-                            {({ input }) => (
+                          <Field
+                            name={element}
+                            key={index}
+                            validate={isFieldEmpty(
+                              "Ad content must be entered."
+                            )}
+                          >
+                            {({ input, meta }) => (
                               <Box
                                 display={"flex"}
                                 alignSelf={"stretch"}
@@ -219,6 +233,14 @@ export const TeamMemberTextualAnalysisPage = () => {
                                   {" "}
                                   <TextField
                                     {...input}
+                                    error={
+                                      meta.touched && meta.error ? true : false
+                                    }
+                                    helperText={
+                                      meta.touched && meta.error
+                                        ? meta.error
+                                        : ""
+                                    }
                                     variant="outlined"
                                     size="small"
                                     sx={{ flexGrow: 1 }}
@@ -264,7 +286,10 @@ export const TeamMemberTextualAnalysisPage = () => {
                           onClick={() => {
                             fields.push("");
                           }}
-                          sx={{ width: "fit-content", alignSelf: "flex-end" }}
+                          sx={{
+                            width: "fit-content",
+                            alignSelf: "flex-end",
+                          }}
                         >
                           Add another ad
                         </Button>
