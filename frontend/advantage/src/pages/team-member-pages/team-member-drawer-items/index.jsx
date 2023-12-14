@@ -16,6 +16,6 @@ export const TeamMemberDrawerItems = [
   {
     text: "Image analysis",
     icon: <PhotoLibraryRoundedIcon></PhotoLibraryRoundedIcon>,
-    navigateTo: "/team-member/image-analyis",
+    navigateTo: "/team-member/image-analysis",
   },
 ];

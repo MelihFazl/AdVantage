@@ -1,16 +1,8 @@
 import LeftDrawer from "../../../common/left-drawer";
 import React from "react";
 import { TeamMemberDrawerItems } from "../team-member-drawer-items";
-import { Paper, Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import ReportListCard from "./report-list-card";
-
-const BannerText = styled(Typography)({
-  textAlign: "center",
-  color: "#000080",
-  fontWeight: "bold", // Added fontWeight: 'bold'
-  fontSize: "20px",
-});
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -20,15 +12,21 @@ const TeamText = styled(Typography)({
   marginRight: "50px",
 });
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
+const BannerText = styled(Typography)({
   textAlign: "center",
-  color: "#000",
-}));
+  color: "#000080", // Dark blue color
+  fontWeight: "bold", // Added fontWeight: 'bold'
+  fontSize: "20px",
+});
 
-export const TeamMemberHomePage = () => {
+const DevelopmentText = styled(Typography)({
+  textAlign: "center",
+  color: "#000080", // Dark blue color
+  fontWeight: "bold", // Added fontWeight: 'bold'
+  fontSize: "100px",
+});
+
+export const TeamMemberImageAnalysisPage = () => {
   return (
     <Stack direction={"row"}>
       <LeftDrawer drawerItems={TeamMemberDrawerItems}></LeftDrawer>
@@ -68,31 +66,21 @@ export const TeamMemberHomePage = () => {
           paddingBottom={"8px"}
           top={38}
         >
-          <TeamText>See team Veni Vidi Code's previous reports</TeamText>
+          <TeamText>Analyze an image based advertisement</TeamText>
         </Box>
-        <Box sx={{ width: 1 }}>
-          <Box
-            backgroundColor="#FFFFFF"
-            display="grid"
-            gridTemplateColumns="repeat(auto-fit,  minmax(263.2px, 1fr))"
-            gap={"20px"}
-            padding={"20px 80px 80px 80px"}
-            flexWrap={"wrap"}
-          >
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-          </Box>
+        <Box
+          minWidth={"530px"}
+          display={"flex"}
+          flexGrow={"1"}
+          flexShrink={"1"}
+          flexBasis={"auto"}
+          justifyContent="center"
+          alignItems="center"
+          position={"sticky"}
+          backgroundColor={"#FFFFFF"}
+          paddingTop={"200px"}
+        >
+          <DevelopmentText>IN DEVELOPMENT...</DevelopmentText>
         </Box>
       </Stack>
     </Stack>

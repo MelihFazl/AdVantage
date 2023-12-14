@@ -9,6 +9,7 @@ import { ForgotPasswordPage } from "./pages/forgot-password-page";
 import { NoPage } from "./pages/no-page";
 import { TeamMemberHomePage } from "./pages/team-member-pages/team-member-home";
 import { TeamMemberTextualAnalysisPage } from "./pages/team-member-pages/team-member-textual-analysis";
+import { TeamMemberImageAnalysisPage } from "./pages/team-member-pages/team-member-image-analysis";
 
 function App() {
   return (
@@ -29,6 +30,10 @@ function App() {
           element={
             <TeamMemberTextualAnalysisPage></TeamMemberTextualAnalysisPage>
           }
+        ></Route>
+        <Route
+          path="/team-member/image-analysis"
+          element={<TeamMemberImageAnalysisPage></TeamMemberImageAnalysisPage>}
         ></Route>
         <Route path="*" element={<NoPage />} />
       </Routes>
