@@ -18,8 +18,8 @@ public class TextualAdvertisementController {
     TextualAdvertisementService textAdService;
 
     @PostMapping("/create")
-    public String createTextAdvertisement(@RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date uploadedAt, @RequestParam String adText){
-        return textAdService.saveAdvertisement(category, uploaderId, uploadedAt, adText);
+    public void createTextAdvertisement(@RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date uploadedAt, @RequestParam String adText){
+        textAdService.saveAdvertisement(category, uploaderId, uploadedAt, adText);
     }
 
 }

@@ -1,12 +1,10 @@
 package com.advantage.advantage.services;
 
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
-import com.advantage.advantage.models.AdCategory;
-import com.advantage.advantage.models.Advertisement;
-import com.advantage.advantage.models.TextualAdvertisement;
-import com.advantage.advantage.models.TeamMember;
+import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.BeanUtils;
 
@@ -49,23 +47,29 @@ public class TextualAdvertisementServiceImplementation implements TextualAdverti
     }
 
     @Override
-    public String saveAdvertisement(AdCategory category, long uploaderId, Date uploadedAt, String adText) {
+    public TextualAdvertisement saveAdvertisement(AdCategory category, long uploaderId, Date uploadedAt, String adText) {
         TextualAdvertisement ad = new TextualAdvertisement();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
 
         if (uploaders == null){
-            return "The uploader does not exist";
+            System.out.println("The uploader does not exist");
+            return null;
         }
         TeamMember uploader = uploaders.get(0);
         if(adText.equals("") ){
-            return "Please enter the text of your advertisement";
+            System.out.println("Please enter the text of your advertisement");
+            return null;
         }
         ad.setCategory(category);
         ad.setUploader(uploader);
         ad.setUploadedAt(uploadedAt);
         ad.setAdText(adText);
-        advertisementRepo.save(ad);
-        return "Advertisement " + ad.getAdvertisementId() + "adText " + ad.getAdText()  + "uploader " + ad.getUploader().getName() + "category" + ad.getCategory() + " created";
+        try {
+            return advertisementRepo.save(ad);
+        } catch (DataAccessException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
     @Override
