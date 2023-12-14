@@ -13,6 +13,15 @@ public abstract class AnalysisReport {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter private Long reportId;
 
+    @Getter
+    @Setter
+    private String title;
     @Getter @Setter private Date createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "team_member_id", referencedColumnName = "id")
+    @Getter @Setter private TeamMember uploader;
+
+
 
 }

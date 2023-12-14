@@ -12,12 +12,11 @@ import java.util.List;
 public abstract class Advertisement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter @Setter private Long advertisementId;
+    @Getter private Long advertisementId;
     @Getter @Setter private AdCategory category;
     @Getter @Setter private Date uploadedAt;
     @ManyToOne
-    @JoinColumn(name = "ad_id", referencedColumnName = "id")
-    @Getter private TeamMember uploader;
-
+    @JoinColumn(name = "team_member_id", referencedColumnName = "id")
+    @Getter @Setter private TeamMember uploader;
 
 }
