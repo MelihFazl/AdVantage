@@ -16,9 +16,13 @@ public interface UserAccountManagementService {
 
     public List<TeamMember> getTeamMemberByID(long teamMemberID);
 
+    public TeamMember secureGetTeamMemberByID(long teamMemberID);
+
     public List<TeamMember> getTeamMemberByEmail(String email);
 
     public List<CompanyAdministrator> getCompanyAdministratorByID(long companyAdministratorID);
+
+    public List<CompanyAdministrator> secureGetCompanyAdministratorByID(long companyAdministratorID);
 
     public List<CompanyAdministrator> getCompanyAdministratorByEmail(String email);
 
