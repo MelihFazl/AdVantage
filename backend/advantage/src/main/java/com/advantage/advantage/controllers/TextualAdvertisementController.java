@@ -8,6 +8,7 @@ import com.advantage.advantage.services.*;
 import com.advantage.advantage.repositories.*;
 import com.advantage.advantage.helpers.*;
 
+
 import java.util.Date;
 
 @RestController
@@ -18,8 +19,8 @@ public class TextualAdvertisementController {
     TextualAdvertisementService textAdService;
 
     @PostMapping("/create")
-    public void createTextAdvertisement(@RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date uploadedAt, @RequestParam String adText){
-        textAdService.saveAdvertisement(category, uploaderId, uploadedAt, adText);
+    public TextualAdvertisement createTextAdvertisement(@RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date uploadedAt, @RequestParam String adText){
+        return textAdService.saveAdvertisement(category, uploaderId, uploadedAt, adText);
     }
 
 }
