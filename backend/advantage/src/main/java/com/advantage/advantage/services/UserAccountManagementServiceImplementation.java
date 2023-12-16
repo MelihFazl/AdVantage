@@ -53,10 +53,10 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     @Override
     public List<Employee> getEmployeeByID(long employeeID) {
         List<TeamMember> teamMembers = teamMemberRepository.findById(employeeID);
-        if(teamMembers == null)
+        if(teamMembers == null || teamMembers.isEmpty())
         {
             List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findById(employeeID);
-            if(companyAdministrators == null)
+            if(companyAdministrators == null || companyAdministrators.isEmpty())
                 return null;
             else
             {
@@ -115,7 +115,7 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     public TeamMember saveTeamMember(TeamMember teamMember) {
         List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findById(teamMember.getId());
         List<TeamMember> teamMembers = teamMemberRepository.findById(teamMember.getId());
-        if(companyAdministrators  == null && teamMembers== null)
+        if((companyAdministrators  == null || companyAdministrators.isEmpty()) && (teamMembers == null || teamMembers.isEmpty()))
             return teamMemberRepository.save(teamMember);
         return  null;
     }
@@ -124,7 +124,7 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     public CompanyAdministrator saveCompanyAdministrator(CompanyAdministrator companyAdministrator) {
         List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findById(companyAdministrator.getId());
         List<TeamMember> teamMembers = teamMemberRepository.findById(companyAdministrator.getId());
-        if(companyAdministrators  == null && teamMembers== null)
+        if((companyAdministrators  == null || companyAdministrators.isEmpty()) && (teamMembers == null || teamMembers.isEmpty()))
             return companyAdministratorRepository.save(companyAdministrator);
         return  null;
     }
@@ -142,7 +142,7 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     @Override
     public TeamMember patchTeamMember(TeamMember editedTeamMember, long teamMemberId) {
         List<TeamMember> teamMembers = teamMemberRepository.findById(teamMemberId);
-        if(teamMembers == null)
+        if(teamMembers == null || teamMembers.isEmpty())
         {
             return null;
         }
@@ -161,7 +161,7 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     @Override
     public CompanyAdministrator patchCompanyAdministrator(CompanyAdministrator editedCompanyAdministrator, long companyAdministratorId) {
         List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findById(companyAdministratorId);
-        if(companyAdministrators == null)
+        if(companyAdministrators == null || companyAdministrators.isEmpty())
         {
             return null;
         }

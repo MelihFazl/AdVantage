@@ -72,7 +72,7 @@ public class MultipleAdAnalysisReportAssociationServiceImplementation implements
     @Override
     public AdvertisementReportAssociation updateAdvertisementReportAssociation(AdvertisementReportAssociation editedAssociation, long oldAssociationId) {
         List<AdvertisementReportAssociation> repAdAssociations = associationRepo.findById(oldAssociationId);
-        if(repAdAssociations == null)
+        if(repAdAssociations == null || repAdAssociations.isEmpty())
         {
             return null;
         }

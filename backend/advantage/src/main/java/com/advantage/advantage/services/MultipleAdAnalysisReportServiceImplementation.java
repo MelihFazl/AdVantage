@@ -56,7 +56,7 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
     public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison) {
         MultipleAdAnalysisReport newReport = new MultipleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
-        if (uploaders == null){
+        if (uploaders == null || uploaders.isEmpty()){
             System.out.println("The uploader does not exist");
             return null;
         }
@@ -87,7 +87,7 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
     @Override
     public MultipleAdAnalysisReport updateAnalysisReport(MultipleAdAnalysisReport editedAnalysisReport, long oldAnalysisReportId) {
         List<MultipleAdAnalysisReport> reports = reportRepo.findByReportId(oldAnalysisReportId);
-        if(reports == null)
+        if(reports == null || reports.isEmpty())
         {
             return null;
         }

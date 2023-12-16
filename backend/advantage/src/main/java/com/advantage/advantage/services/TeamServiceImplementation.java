@@ -40,7 +40,7 @@ public class TeamServiceImplementation implements  TeamService {
     @Override
     public Team saveTeam(Team team) {
         List<Team> teams = teamRepository.findByTeamId(team.getTeamId());
-        if(teams == null) {
+        if(teams == null || teams.isEmpty()) {
             return teamRepository.save(team);
         }
         return null;
