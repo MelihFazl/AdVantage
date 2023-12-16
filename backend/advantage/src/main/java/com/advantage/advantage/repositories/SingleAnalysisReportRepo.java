@@ -10,7 +10,7 @@ public interface SingleAnalysisReportRepo  extends JpaRepository<SingleAdAnalysi
         public List<SingleAdAnalysisReport> findAll();
         public List<SingleAdAnalysisReport> findByReportId(long reportId);
 
-        public List<SingleAdAnalysisReport> findByUploader(TeamMember uploader);
+        public List<SingleAdAnalysisReport> findByUploaderId(long uploaderId);
         public List<SingleAdAnalysisReport>  findByTitle(String title);
         public List<SingleAdAnalysisReport> findByCreatedAt(Date createdAt);
         public List<SingleAdAnalysisReport> findByAdvertisement(Advertisement advertisement);

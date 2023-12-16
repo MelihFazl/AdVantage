@@ -36,8 +36,8 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public List<SingleAdAnalysisReport> getByUploader(TeamMember uploader) {
-        return reportRepo.findByUploader(uploader);
+    public List<SingleAdAnalysisReport> getByUploaderId(long uploaderId) {
+        return reportRepo.findByUploaderId(uploaderId);
     }
 
     @Override

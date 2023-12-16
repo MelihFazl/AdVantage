@@ -38,8 +38,8 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
     }
 
     @Override
-    public List<MultipleAdAnalysisReport> getByUploader(TeamMember uploader) {
-        return reportRepo.findByUploader(uploader);
+    public List<MultipleAdAnalysisReport> getByUploaderId(long uploaderId) {
+        return reportRepo.findByUploaderId(uploaderId);
     }
 
     @Override
