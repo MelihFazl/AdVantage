@@ -44,7 +44,7 @@ public class UserAccountManagementController {
     public String saveTeamMember(@RequestParam String token, @RequestBody TeamMember teamMember)
     {
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getAllCompanyAdministrator();
-        if (companyAdministrators != null) {
+        if (companyAdministrators != null || !companyAdministrators.isEmpty()) {
             boolean tokenMatch = false;
             for (int i = 0; companyAdministrators.size() > i; i++) {
                 if (companyAdministrators.get(i).getToken() != null) {
@@ -144,7 +144,7 @@ public class UserAccountManagementController {
         passwordHashHandler = PasswordHashHandler.getInstance();
         passwordHashHandler.setPassword(password);
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByID(userID);
-        if (teamMembers == null)
+        if (teamMembers == null || teamMembers.isEmpty())
             return "No team member was found with ID " + userID;
         else {
             TeamMember teamMemberLoggingIn = teamMembers.get(0);
@@ -172,7 +172,7 @@ public class UserAccountManagementController {
         passwordHashHandler.setPassword(password);
 
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
-        if (teamMembers == null)
+        if (teamMembers == null || teamMembers.isEmpty())
             return "No team member was found with email " + email;
         else {
             TeamMember teamMemberLoggingIn = teamMembers.get(0);
@@ -195,7 +195,7 @@ public class UserAccountManagementController {
         passwordHashHandler = PasswordHashHandler.getInstance();
         passwordHashHandler.setPassword(password);
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByID(companyAdministratorId);
-        if (companyAdministrators == null)
+        if (companyAdministrators == null || companyAdministrators.isEmpty())
             return "No Company Administrator was found with ID " + companyAdministratorId;
         CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
         if (passwordHashHandler.hashPassword().equals(companyAdministratorLoggingIn.getHashedPassword())) {
@@ -221,7 +221,7 @@ public class UserAccountManagementController {
         passwordHashHandler.setPassword(password);
 
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
-        if (companyAdministrators == null)
+        if (companyAdministrators == null || companyAdministrators.isEmpty())
             return "No company administrator was found with email " + email;
         else {
             CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
@@ -242,9 +242,9 @@ public class UserAccountManagementController {
     @PostMapping("/logout/{id}")
     public String logOut(@PathVariable("id") long userID) {
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByID(userID);
-        if (teamMembers == null) {
+        if (teamMembers == null || teamMembers.isEmpty()) {
             List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByID(userID);
-            if (companyAdministrators == null)
+            if (companyAdministrators == null || companyAdministrators.isEmpty())
                 return "No user found with ID " + userID;
             else {
                 CompanyAdministrator curCompanyAdministrator = companyAdministrators.get(0);
@@ -268,9 +268,9 @@ public class UserAccountManagementController {
     @PostMapping("/logout")
     public String logOutByEmail(@RequestParam String email) {
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
-        if (teamMembers == null) {
+        if (teamMembers == null || teamMembers.isEmpty()) {
             List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
-            if (companyAdministrators == null)
+            if (companyAdministrators == null || companyAdministrators.isEmpty())
                 return "No user found with email " + email;
             else {
                 CompanyAdministrator curCompanyAdministrator = companyAdministrators.get(0);

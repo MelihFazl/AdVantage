@@ -59,7 +59,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, TextualAdvertisement ad) {
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
-        if (uploaders == null){
+        if (uploaders == null || uploaders.isEmpty()){
             System.out.println("The uploader does not exist");
             return null;
         }
@@ -97,7 +97,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     @Override
     public SingleAdAnalysisReport updateAnalysisReport(SingleAdAnalysisReport editedAnalysisReport, long oldAnalysisReportId) {
         List<SingleAdAnalysisReport> reports = reportRepo.findByReportId(oldAnalysisReportId);
-        if(reports == null)
+        if(reports == null || reports.isEmpty())
         {
             return null;
         }
