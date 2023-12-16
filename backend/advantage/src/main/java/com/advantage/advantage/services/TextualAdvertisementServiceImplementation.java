@@ -50,8 +50,7 @@ public class TextualAdvertisementServiceImplementation implements TextualAdverti
     public TextualAdvertisement saveAdvertisement(AdCategory category, long uploaderId, Date uploadedAt, String adText) {
         TextualAdvertisement ad = new TextualAdvertisement();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
-
-        if (uploaders == null){
+        if (uploaders.isEmpty()){
             System.out.println("The uploader does not exist");
             return null;
         }
