@@ -1,13 +1,12 @@
 package com.advantage.advantage.controllers;
-import com.advantage.advantage.models.AdCategory;
-import com.advantage.advantage.models.SingleAdAnalysisReport;
-import com.advantage.advantage.models.TextualAdvertisement;
+import com.advantage.advantage.models.*;
 import com.advantage.advantage.services.SingleAnalysisAdReportService;
 import com.advantage.advantage.services.TextualAdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/singleanalysisreport")
@@ -22,7 +21,6 @@ public class SingleAnalysisReportController {
     @PostMapping("/create")
     public String createSingleAnalysisReport(@RequestParam String title, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
                                              @RequestParam AdCategory category, @RequestParam String adText) {
-        SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         if (title.equals("")) {
             return "Please enter valid title";
         }
@@ -40,5 +38,17 @@ public class SingleAnalysisReportController {
             return "Advertisement saved successfully!";
         }
         return "There is an error";
+    }
+
+    @GetMapping("/allreports")
+    public List<SingleAdAnalysisReport> getAllReports()
+    {
+        return repService.getAllReports();
+    }
+
+    @GetMapping("/userreports")
+    public List<SingleAdAnalysisReport> getReportsById(@RequestParam long uploaderId)
+    {
+        return repService.getByUploaderId(uploaderId);
     }
 }
