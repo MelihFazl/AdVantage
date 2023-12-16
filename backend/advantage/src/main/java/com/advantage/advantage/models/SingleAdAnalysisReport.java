@@ -23,6 +23,6 @@ public class SingleAdAnalysisReport extends AnalysisReport{
 
     @OneToOne(optional = false)
     @JoinColumn(name = "advertisement_id", referencedColumnName = "advertisementId")
-    @Getter private TextualAdvertisement advertisement;
+    @Getter @Setter private TextualAdvertisement advertisement;
 
 }
