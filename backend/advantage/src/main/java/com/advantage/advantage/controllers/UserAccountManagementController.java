@@ -9,6 +9,7 @@ import com.advantage.advantage.helpers.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -89,7 +90,7 @@ public class UserAccountManagementController {
     }
 
     @PostMapping("/teamMember/login/{id}")
-    public String loginTeamMember(@RequestParam String password, @PathVariable("id") long userID) {
+    public String loginTeamMemberById(@RequestParam String password, @PathVariable("id") long userID) {
         passwordHashHandler = PasswordHashHandler.getInstance();
         passwordHashHandler.setPassword(password);
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByID(userID);
@@ -111,8 +112,36 @@ public class UserAccountManagementController {
         }
     }
 
+    @PostMapping("/teamMember/login")
+    public String loginTeamMemberByEmail(@RequestBody Map<String, String> loginRequest) {
+
+        String email = loginRequest.get("email");
+        String password = loginRequest.get("password");
+
+        passwordHashHandler = PasswordHashHandler.getInstance();
+        passwordHashHandler.setPassword(password);
+
+        List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
+        if (teamMembers == null)
+            return "No team member was found with email " + email;
+        else {
+            TeamMember teamMemberLoggingIn = teamMembers.get(0);
+            if (passwordHashHandler.hashPassword().equals(teamMemberLoggingIn.getHashedPassword())) {
+                Token token = new Token();
+                token.setInUse(true);
+                token.setLastActive(LocalDateTime.now());
+                String tokenStr = token.generateToken();
+                tokenRepository.save(token);
+                teamMemberLoggingIn.setToken(token);
+                userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
+                return "TM " + tokenStr;
+            }
+            return "Login credentials are incorrect";
+        }
+    }
+
     @PostMapping("/companyAdministrator/login/{id}")
-    public String loginCompanyAdministrator(@RequestParam String password, @PathVariable("id") long companyAdministratorId) {
+    public String loginCompanyAdministratorById(@RequestParam String password, @PathVariable("id") long companyAdministratorId) {
         passwordHashHandler = PasswordHashHandler.getInstance();
         passwordHashHandler.setPassword(password);
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByID(companyAdministratorId);
@@ -132,6 +161,33 @@ public class UserAccountManagementController {
         return "Login credentials are incorrect";
     }
 
+    @PostMapping("/companyAdministrator/login")
+    public String loginCompanyAdministratorByEmail(@RequestBody Map<String, String> loginRequest) {
+
+        String email = loginRequest.get("email");
+        String password = loginRequest.get("password");
+
+        passwordHashHandler = PasswordHashHandler.getInstance();
+        passwordHashHandler.setPassword(password);
+
+        List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
+        if (companyAdministrators == null)
+            return "No company administrator was found with email " + email;
+        else {
+            CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
+            if (passwordHashHandler.hashPassword().equals(companyAdministratorLoggingIn.getHashedPassword())) {
+                Token token = new Token();
+                token.setInUse(true);
+                token.setLastActive(LocalDateTime.now());
+                String tokenStr = token.generateToken();
+                tokenRepository.save(token);
+                companyAdministratorLoggingIn.setToken(token);
+                userAccountManagementService.updateCompanyAdministrator(companyAdministratorLoggingIn);
+                return "CA " + tokenStr;
+            }
+            return "Login credentials are incorrect";
+        }
+    }
 
     @PostMapping("/logout/{id}")
     public String logOut(@PathVariable("id") long userID) {
@@ -155,7 +211,7 @@ public class UserAccountManagementController {
             curTeamMember.getToken().setInUse(false);
             tokenRepository.save(curTeamMember.getToken());
             userAccountManagementService.saveTeamMember(curTeamMember);
-            return "GymStaff with ID " + userID + " successfully logged out";
+            return "Team Member with ID " + userID + " successfully logged out";
         }
     }
 

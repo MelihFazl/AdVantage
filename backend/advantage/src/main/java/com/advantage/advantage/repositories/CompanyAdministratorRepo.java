@@ -10,6 +10,9 @@ import java.util.List;
 public interface CompanyAdministratorRepo extends JpaRepository<CompanyAdministrator, Long>
 {
     public List<CompanyAdministrator> findById(long id);
+
+    public List<CompanyAdministrator> findByEmail(String email);
+
     public CompanyAdministrator deleteById(long id);
     public List<CompanyAdministrator> findByName(String name);
     public List<CompanyAdministrator> findByCompany_CompanyId(long companyId);

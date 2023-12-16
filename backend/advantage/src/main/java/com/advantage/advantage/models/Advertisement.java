@@ -16,7 +16,7 @@ public abstract class Advertisement {
     @Getter @Setter private AdCategory category;
     @Getter @Setter private Date uploadedAt;
     @ManyToOne
-    @JoinColumn(name = "ad_id", referencedColumnName = "id")
+    @JoinColumn(name = "team_member_id", referencedColumnName = "id")
     @Getter private TeamMember uploader;
 
 
