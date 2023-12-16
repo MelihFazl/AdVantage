@@ -10,6 +10,8 @@ import com.advantage.advantage.services.TextualAdvertisementService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Date;
 import java.util.List;
@@ -31,31 +33,40 @@ public class MultipleAdAnalysisReportController {
     MultipleAdAnalysisReportAssociationService associationService;
 
     @PostMapping("/create")
-    public String createMultipleAnalysisReport(@RequestParam String title, @RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
-                                               @RequestBody AdRequestsWrapper adRequestsWrapper) {
+    public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String title, @RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
+                                                               @RequestBody AdRequestsWrapper adRequestsWrapper) {
         List<String> adRequests = adRequestsWrapper.getAdRequests();
+
         MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,"");
-        if(newReport == null){
-            return "There is no report";
-        }
+
         if (createdAt == null) {
-            return "There is not valid date";
-        }
-        if(title.equals("")){
-            return "Please enter a title";
-        }
-        if(category == null){
-            return "Please specify a category";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is not a valid date");
         }
 
-        for(String adRequest : adRequests){
-           TextualAdvertisement newTextAd =textAdService.saveAdvertisement(category,uploaderId,createdAt,adRequest);
-           AdvertisementReportAssociation newAssociation = adReportService.saveAdvertisementReportAssociation(newTextAd, newReport, "", "", 0) ;
-            if (newAssociation == null){
-                return "There is an error";
+        if (title.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a title");
+        }
+
+        if (category == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify a category");
+        }
+
+        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId, "");
+
+        if (newReport == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
+        }
+
+        for (String adRequest : adRequests) {
+            TextualAdvertisement newTextAd = textAdService.saveAdvertisement(category, uploaderId, createdAt, adRequest);
+            AdvertisementReportAssociation newAssociation = adReportService.saveAdvertisementReportAssociation(newTextAd, newReport, "", "", 0);
+
+            if (newAssociation == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the association");
             }
         }
-        return "Success";
+
+        return ResponseEntity.status(HttpStatus.OK).body("Success");
     }
 
     @GetMapping("/allreports")

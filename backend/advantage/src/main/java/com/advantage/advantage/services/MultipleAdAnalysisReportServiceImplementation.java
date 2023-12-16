@@ -56,7 +56,7 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
     public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison) {
         MultipleAdAnalysisReport newReport = new MultipleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
-        if (uploaders.isEmpty()){
+        if (uploaders == null){
             System.out.println("The uploader does not exist");
             return null;
         }
