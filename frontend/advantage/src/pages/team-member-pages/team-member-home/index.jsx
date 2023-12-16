@@ -4,10 +4,11 @@ import { TeamMemberDrawerItems } from "../team-member-drawer-items";
 import { Paper, Box, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ReportListCard from "./report-list-card";
-
+import ReportDialog from "../report-dialog";
+import { useState } from "react";
 const BannerText = styled(Typography)({
   textAlign: "center",
-  color: "#000080", // Dark blue color
+  color: "#000080",
   fontWeight: "bold", // Added fontWeight: 'bold'
   fontSize: "20px",
 });
@@ -16,6 +17,8 @@ const TeamText = styled(Typography)({
   textAlign: "center",
   fontWeight: "bold", // Added fontWeight: 'bold'
   fontSize: "32px",
+  marginLeft: "50px",
+  marginRight: "50px",
 });
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -27,6 +30,23 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export const TeamMemberHomePage = () => {
+  const [selectedReport, setSelectedReport] = useState({
+    title: "",
+    content: " ",
+    category: "",
+    uploader: "",
+  });
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleCardClick = (report) => {
+    setSelectedReport(report);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   return (
     <Stack direction={"row"}>
       <LeftDrawer drawerItems={TeamMemberDrawerItems}></LeftDrawer>
@@ -47,7 +67,8 @@ export const TeamMemberHomePage = () => {
           alignItems="center"
           justifyContent="center"
           position={"sticky"}
-          paddingTop={"20px"}
+          zIndex={10}
+          paddingTop={"8px"}
           top={0}
           backgroundColor={"#FFFFFF"}
         >
@@ -61,34 +82,49 @@ export const TeamMemberHomePage = () => {
           flexBasis={"auto"}
           justifyContent="center"
           alignItems="center"
+          zIndex={10}
           position={"sticky"}
           backgroundColor={"#FFFFFF"}
-          paddingBottom={"32px"}
-          top={50}
+          paddingBottom={"8px"}
+          top={38}
         >
           <TeamText>See team Veni Vidi Code's previous reports</TeamText>
         </Box>
         <Box sx={{ width: 1 }}>
           <Box
+            backgroundColor="#FFFFFF"
             display="grid"
             gridTemplateColumns="repeat(auto-fit,  minmax(263.2px, 1fr))"
             gap={"20px"}
-            padding={"5px 80px 80px 80px"}
+            padding={"20px 80px 80px 80px"}
             flexWrap={"wrap"}
           >
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
+            <React.Fragment>
+              <ReportListCard
+                onReportCardClick={handleCardClick}
+                report={{
+                  title: "melo",
+                  content: "deneme deneme",
+                  category: "Political",
+                  uploader: "MELO FAZO",
+                }}
+              ></ReportListCard>
+              <ReportListCard
+                onReportCardClick={handleCardClick}
+                report={{
+                  title: "fazo",
+                  content:
+                    "enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed ",
+                  category: "Political",
+                  uploader: "FAZO TASO",
+                }}
+              ></ReportListCard>
+              <ReportDialog
+                open={openDialog}
+                handleClose={handleCloseDialog}
+                report={selectedReport}
+              ></ReportDialog>
+            </React.Fragment>
           </Box>
         </Box>
       </Stack>
