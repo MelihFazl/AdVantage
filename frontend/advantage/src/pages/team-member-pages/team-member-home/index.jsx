@@ -4,7 +4,8 @@ import { TeamMemberDrawerItems } from "../team-member-drawer-items";
 import { Paper, Box, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ReportListCard from "./report-list-card";
-
+import ReportDialog from "../report-dialog";
+import { useState } from "react";
 const BannerText = styled(Typography)({
   textAlign: "center",
   color: "#000080",
@@ -29,6 +30,23 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export const TeamMemberHomePage = () => {
+  const [selectedReport, setSelectedReport] = useState({
+    title: "",
+    content: " ",
+    category: "",
+    uploader: "",
+  });
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleCardClick = (report) => {
+    setSelectedReport(report);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   return (
     <Stack direction={"row"}>
       <LeftDrawer drawerItems={TeamMemberDrawerItems}></LeftDrawer>
@@ -49,6 +67,7 @@ export const TeamMemberHomePage = () => {
           alignItems="center"
           justifyContent="center"
           position={"sticky"}
+          zIndex={10}
           paddingTop={"8px"}
           top={0}
           backgroundColor={"#FFFFFF"}
@@ -63,6 +82,7 @@ export const TeamMemberHomePage = () => {
           flexBasis={"auto"}
           justifyContent="center"
           alignItems="center"
+          zIndex={10}
           position={"sticky"}
           backgroundColor={"#FFFFFF"}
           paddingBottom={"8px"}
@@ -79,19 +99,32 @@ export const TeamMemberHomePage = () => {
             padding={"20px 80px 80px 80px"}
             flexWrap={"wrap"}
           >
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
-            <ReportListCard></ReportListCard>
+            <React.Fragment>
+              <ReportListCard
+                onReportCardClick={handleCardClick}
+                report={{
+                  title: "melo",
+                  content: "deneme deneme",
+                  category: "Political",
+                  uploader: "MELO FAZO",
+                }}
+              ></ReportListCard>
+              <ReportListCard
+                onReportCardClick={handleCardClick}
+                report={{
+                  title: "fazo",
+                  content:
+                    "enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed ",
+                  category: "Political",
+                  uploader: "FAZO TASO",
+                }}
+              ></ReportListCard>
+              <ReportDialog
+                open={openDialog}
+                handleClose={handleCloseDialog}
+                report={selectedReport}
+              ></ReportDialog>
+            </React.Fragment>
           </Box>
         </Box>
       </Stack>
