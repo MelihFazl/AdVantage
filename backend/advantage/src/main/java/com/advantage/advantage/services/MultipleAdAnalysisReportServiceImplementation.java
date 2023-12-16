@@ -1,65 +1,62 @@
 package com.advantage.advantage.services;
 
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
-import com.advantage.advantage.models.Advertisement;
+import com.advantage.advantage.models.MultipleAdAnalysisReport;
 import com.advantage.advantage.models.SingleAdAnalysisReport;
 import com.advantage.advantage.models.TeamMember;
-import com.advantage.advantage.models.TextualAdvertisement;
-import com.advantage.advantage.repositories.SingleAnalysisReportRepo;
+import com.advantage.advantage.helpers.IgnoredPropertyCreator;
 import com.advantage.advantage.repositories.TeamMemberRepo;
-import com.advantage.advantage.repositories.TextualAdvertisementRepo;
 import org.springframework.beans.BeanUtils;
+
+
+import java.util.Date;
+import java.util.List;
+
+import com.advantage.advantage.repositories.MultipleAnalysisReportRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
 @Service
-public class SingleAnalysisAdReportServiceImplementation implements SingleAnalysisAdReportService{
+public class MultipleAdAnalysisReportServiceImplementation implements MultipleAdAnalysisReportService{
+
     @Autowired
-    SingleAnalysisReportRepo reportRepo;
+    MultipleAnalysisReportRepo reportRepo;
+
     @Autowired
     TeamMemberRepo teamMemberRepo;
-    @Autowired
-    TextualAdvertisementRepo adRepo;
-
     private IgnoredPropertyCreator ignoredPropertyCreator;
+
     @Override
-    public List<SingleAdAnalysisReport> getAllReports() {
+    public List<MultipleAdAnalysisReport> getAllReports() {
         return reportRepo.findAll();
     }
 
     @Override
-    public List<SingleAdAnalysisReport> getByReportId(long reportId) {
+    public List<MultipleAdAnalysisReport> getByReportId(long reportId) {
         return reportRepo.findByReportId(reportId);
     }
 
     @Override
-    public List<SingleAdAnalysisReport> getByUploader(TeamMember uploader) {
+    public List<MultipleAdAnalysisReport> getByUploader(TeamMember uploader) {
         return reportRepo.findByUploader(uploader);
     }
 
     @Override
-    public List<SingleAdAnalysisReport> getByCreatedAt(Date createdAt) {
+    public List<MultipleAdAnalysisReport> getByCreatedAt(Date createdAt) {
         return reportRepo.findByCreatedAt(createdAt);
     }
 
     @Override
-    public List<SingleAdAnalysisReport> getByTitle(String title) {
+    public List<MultipleAdAnalysisReport> getByTitle(String title) {
         return reportRepo.findByTitle(title);
     }
 
     @Override
-    public List<SingleAdAnalysisReport> getByAdvertisement(Advertisement ad) {
-        return reportRepo.findByAdvertisement(ad);
-    }
-
-    @Override
-    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, TextualAdvertisement ad) {
-        SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
+    public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison) {
+        MultipleAdAnalysisReport newReport = new MultipleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
-        if (uploaders == null){
+        if (uploaders.isEmpty()){
             System.out.println("The uploader does not exist");
             return null;
         }
@@ -73,21 +70,14 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
             System.out.println("There is not valid date");
             return null;
         }
-        if(ad == null){
-            System.out.println("There is not valid advertisement");
-            return null;
-        }
+
         newReport.setTitle(title);
         newReport.setUploader(uploader);
         newReport.setCreatedAt(createdAt);
-        newReport.setPros(pros);
-        newReport.setCons(cons);
-        newReport.setOverview(overview);
-        newReport.setSuccessPrediction(prediction);
-        newReport.setAdvertisement(ad);
+        newReport.setComparison(comparison);
+
         try {
-            SingleAdAnalysisReport savedReport = reportRepo.save(newReport);
-            return savedReport;
+            return reportRepo.save(newReport);
         } catch (DataAccessException e) {
             System.out.println( e.getMessage());
             return null;
@@ -95,15 +85,15 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public SingleAdAnalysisReport updateAnalysisReport(SingleAdAnalysisReport editedAnalysisReport, long oldAnalysisReportId) {
-        List<SingleAdAnalysisReport> reports = reportRepo.findByReportId(oldAnalysisReportId);
+    public MultipleAdAnalysisReport updateAnalysisReport(MultipleAdAnalysisReport editedAnalysisReport, long oldAnalysisReportId) {
+        List<MultipleAdAnalysisReport> reports = reportRepo.findByReportId(oldAnalysisReportId);
         if(reports == null)
         {
             return null;
         }
         else
         {
-            SingleAdAnalysisReport oldReport = reports.get(0);
+            MultipleAdAnalysisReport oldReport = reports.get(0);
             ignoredPropertyCreator = IgnoredPropertyCreator.getInstance();
             ignoredPropertyCreator.setObj(editedAnalysisReport);
             String[] ignoredProperties = ignoredPropertyCreator.getNullPropertyNames();
@@ -114,8 +104,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public SingleAdAnalysisReport deleteReportByReportId(long reportId) {
+    public MultipleAdAnalysisReport deleteReportByReportId(long reportId) {
         return reportRepo.deleteByReportId(reportId);
     }
 }
-

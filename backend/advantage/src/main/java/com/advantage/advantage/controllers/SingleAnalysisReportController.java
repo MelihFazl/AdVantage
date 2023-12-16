@@ -1,19 +1,13 @@
 package com.advantage.advantage.controllers;
-
 import com.advantage.advantage.models.AdCategory;
 import com.advantage.advantage.models.SingleAdAnalysisReport;
-import com.advantage.advantage.models.TeamMember;
 import com.advantage.advantage.models.TextualAdvertisement;
 import com.advantage.advantage.services.SingleAnalysisAdReportService;
 import com.advantage.advantage.services.TextualAdvertisementService;
-import com.advantage.advantage.services.TextualAdvertisementServiceImplementation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
-import java.util.List;
 
 @RestController
 @RequestMapping("/singleanalysisreport")
