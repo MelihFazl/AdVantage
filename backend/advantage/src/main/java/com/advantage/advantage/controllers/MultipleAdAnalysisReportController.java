@@ -37,6 +37,8 @@ public class MultipleAdAnalysisReportController {
                                                                @RequestBody AdRequestsWrapper adRequestsWrapper) {
         List<String> adRequests = adRequestsWrapper.getAdRequests();
 
+        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,"");
+
         if (createdAt == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is not a valid date");
         }
@@ -67,7 +69,18 @@ public class MultipleAdAnalysisReportController {
         return ResponseEntity.status(HttpStatus.OK).body("Success");
     }
 
+    @GetMapping("/allreports")
+    public List<MultipleAdAnalysisReport> getAllReports()
+    {
+        return repService.getAllReports();
+    }
 
-
+    @GetMapping("/userreports")
+    public List<MultipleAdAnalysisReport> getReportsByUploaderId(@RequestParam long uploaderId)
+    {
+        return repService.getByUploaderId(uploaderId);
+    }
 }
+
+
 

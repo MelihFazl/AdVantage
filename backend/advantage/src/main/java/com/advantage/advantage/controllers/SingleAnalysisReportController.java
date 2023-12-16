@@ -1,7 +1,5 @@
 package com.advantage.advantage.controllers;
-import com.advantage.advantage.models.AdCategory;
-import com.advantage.advantage.models.SingleAdAnalysisReport;
-import com.advantage.advantage.models.TextualAdvertisement;
+import com.advantage.advantage.models.*;
 import com.advantage.advantage.services.SingleAnalysisAdReportService;
 import com.advantage.advantage.services.TextualAdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/singleanalysisreport")
@@ -26,6 +26,7 @@ public class SingleAnalysisReportController {
                                                              @RequestParam AdCategory category, @RequestParam String adText) {
         if (title.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a valid title");
+
         }
 
         if (createdAt == null) {
@@ -53,5 +54,17 @@ public class SingleAnalysisReportController {
         }
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
+    }
+
+    @GetMapping("/allreports")
+    public List<SingleAdAnalysisReport> getAllReports()
+    {
+        return repService.getAllReports();
+    }
+
+    @GetMapping("/userreports")
+    public List<SingleAdAnalysisReport> getReportsById(@RequestParam long uploaderId)
+    {
+        return repService.getByUploaderId(uploaderId);
     }
 }
