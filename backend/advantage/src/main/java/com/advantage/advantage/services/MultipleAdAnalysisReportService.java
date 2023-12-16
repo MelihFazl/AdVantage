@@ -8,7 +8,7 @@ import java.util.List;
 public interface MultipleAdAnalysisReportService {
     public List<MultipleAdAnalysisReport> getAllReports();
     public List<MultipleAdAnalysisReport> getByReportId(long reportId);
-    public List<MultipleAdAnalysisReport> getByUploader(TeamMember uploader);
+    public List<MultipleAdAnalysisReport> getByUploaderId(long uploaderId);
     public List<MultipleAdAnalysisReport> getByCreatedAt(Date createdAt);
     public List<MultipleAdAnalysisReport> getByTitle(String title);
     public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison);

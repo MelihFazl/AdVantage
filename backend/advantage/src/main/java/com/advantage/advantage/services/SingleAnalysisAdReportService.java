@@ -9,7 +9,7 @@ public interface SingleAnalysisAdReportService {
     public List<SingleAdAnalysisReport> getAllReports();
 
     public List<SingleAdAnalysisReport> getByReportId(long reportId);
-    public List<SingleAdAnalysisReport> getByUploader(TeamMember uploader);
+    public List<SingleAdAnalysisReport> getByUploaderId(long uploaderId);
     public List<SingleAdAnalysisReport> getByCreatedAt(Date createdAt);
     public List<SingleAdAnalysisReport> getByTitle(String title);
 

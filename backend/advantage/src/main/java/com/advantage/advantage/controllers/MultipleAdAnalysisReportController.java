@@ -51,8 +51,6 @@ public class MultipleAdAnalysisReportController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify a category");
         }
 
-        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId, "");
-
         if (newReport == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
         }

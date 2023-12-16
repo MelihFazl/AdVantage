@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface MultipleAnalysisReportRepo  extends JpaRepository<MultipleAdAnalysisReport, Long> {
     public List<MultipleAdAnalysisReport> findAll();
-    public List<MultipleAdAnalysisReport> findByUploader(TeamMember uploader);
+    public List<MultipleAdAnalysisReport> findByUploaderId(long uploaderId);
     public List<MultipleAdAnalysisReport>  findByTitle(String title);
     public List<MultipleAdAnalysisReport> findByReportId(long reportId);
     public MultipleAdAnalysisReport deleteByReportId(long reportId);
