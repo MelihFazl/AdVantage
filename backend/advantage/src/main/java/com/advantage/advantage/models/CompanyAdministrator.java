@@ -9,8 +9,7 @@ import java.util.List;
 @Entity
 @Table(name="company_administrator")
 public class CompanyAdministrator extends Employee{
-
-    @OneToOne(mappedBy = "companyAdministrator")
+    @OneToOne
+    @JoinColumn(name = "company_id", referencedColumnName = "companyId")
     @Getter @Setter private Company company;
-
 }

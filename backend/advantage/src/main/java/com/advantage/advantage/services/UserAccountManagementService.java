@@ -15,7 +15,12 @@ public interface UserAccountManagementService {
     public List<Employee> getEmployeeByName(String name);
 
     public List<TeamMember> getTeamMemberByID(long teamMemberID);
+
+    public List<TeamMember> getTeamMemberByEmail(String email);
+
     public List<CompanyAdministrator> getCompanyAdministratorByID(long companyAdministratorID);
+
+    public List<CompanyAdministrator> getCompanyAdministratorByEmail(String email);
 
     public List<CompanyAdministrator> getCompanyAdministratorByCompanyId(long companyID);
 

@@ -7,6 +7,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name="team_member")
+@PrimaryKeyJoinColumn(name = "employee_id")
 public class TeamMember extends Employee{
     @Getter @Setter int monthlyAnalysisUsage;
     @ManyToOne

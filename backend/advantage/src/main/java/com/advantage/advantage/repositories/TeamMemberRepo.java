@@ -10,6 +10,9 @@ import java.util.List;
 public interface TeamMemberRepo extends JpaRepository<TeamMember, Long>
 {
     public List<TeamMember> findById(long id);
+
+    public List<TeamMember> findByEmail(String email);
+
     public TeamMember deleteById(long id);
     public List<TeamMember> findByName(String name);
 }
