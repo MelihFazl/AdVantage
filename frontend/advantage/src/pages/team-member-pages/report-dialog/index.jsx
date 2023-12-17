@@ -26,7 +26,9 @@ export default function ReportDialog({ open, handleClose, report }) {
       onClose={handleClose}
       aria-labelledby="responsive-dialog-title"
     >
-      <DialogTitle id="responsive-dialog-title">{report.title}</DialogTitle>
+      <DialogTitle id="responsive-dialog-title">
+        {report?.report?.title}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
@@ -38,7 +40,9 @@ export default function ReportDialog({ open, handleClose, report }) {
               color="text.secondary"
               gutterBottom
             >
-              Name Surname
+              {report?.report?.uploader?.name +
+                " " +
+                report?.report?.uploader?.surname}
             </Typography>
           </Box>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
@@ -56,33 +60,43 @@ export default function ReportDialog({ open, handleClose, report }) {
           <Typography variant="body2" color={"#000"}>
             Results:
           </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            -CPI of Ad1: 123
-          </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            -CPI of Ad2: 12
-          </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            -CPI of Ad3: 1
-          </Typography>
-          <Typography variant="body2" color={"#000"}>
-            Content of Ad1:
-          </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            {report.content}
-          </Typography>
-          <Typography variant="body2" color={"#000"}>
-            Content of Ad2:
-          </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            {report.content}
-          </Typography>
-          <Typography variant="body2" color={"#000"}>
-            Content of Ad3:
-          </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            {report.content}
-          </Typography>
+          {report?.type === "SingleAdAnalysisReport" ? (
+            <Typography sx={{ mb: 1.2 }} color="text.secondary">
+              CPI of Ad: {report?.report?.successPrediction}
+            </Typography>
+          ) : (
+            report?.report?.comparison?.split(" ")?.map((element, index) => {
+              return (
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  CPI of Ad{index + 1}: {element}
+                </Typography>
+              );
+            })
+          )}
+
+          {report?.type === "SingleAdAnalysisReport" ? (
+            <React.Fragment>
+              <Typography variant="body2" color={"#000"}>
+                Content of Ad:
+              </Typography>
+              <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                {report.advertisementText}
+              </Typography>
+            </React.Fragment>
+          ) : (
+            report?.advertisementTexts?.map((element, index) => {
+              return (
+                <React.Fragment>
+                  <Typography variant="body2" color={"#000"}>
+                    Content of Ad{index + 1}:
+                  </Typography>
+                  <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                    {element}
+                  </Typography>
+                </React.Fragment>
+              );
+            })
+          )}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

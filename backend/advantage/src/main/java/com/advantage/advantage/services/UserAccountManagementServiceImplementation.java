@@ -92,6 +92,11 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     }
 
     @Override
+    public TeamMember secureGetTeamMemberByID(long teamMemberID) {
+        return teamMemberRepository.secureFindByUserId(teamMemberID);
+    }
+
+    @Override
     public List<TeamMember> getTeamMemberByEmail(String email) {
         return teamMemberRepository.findByEmail(email);
     }
@@ -99,6 +104,11 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     @Override
     public List<CompanyAdministrator> getCompanyAdministratorByID(long companyAdministratorID) {
         return companyAdministratorRepository.findById(companyAdministratorID);
+    }
+
+    @Override
+    public List<CompanyAdministrator> secureGetCompanyAdministratorByID(long companyAdministratorID) {
+        return companyAdministratorRepository.secureFindByUserId(companyAdministratorID);
     }
 
     @Override

@@ -1,11 +1,14 @@
 import LeftDrawer from "../../../common/left-drawer";
-import React from "react";
+import React, { useEffect } from "react";
 import { TeamMemberDrawerItems } from "../team-member-drawer-items";
 import { Paper, Box, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ReportListCard from "./report-list-card";
 import ReportDialog from "../report-dialog";
 import { useState } from "react";
+import { BASE_URL } from "../../../common/constans";
+import LinearProgress from "@mui/material/LinearProgress";
+
 const BannerText = styled(Typography)({
   textAlign: "center",
   color: "#000080",
@@ -37,6 +40,41 @@ export const TeamMemberHomePage = () => {
     uploader: "",
   });
   const [openDialog, setOpenDialog] = useState(false);
+  const [reports, setReports] = useState([]);
+  const [isReportsRecevied, setIsReportsReceived] = useState(false);
+
+  useEffect(() => {
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    fetch(
+      BASE_URL + "/user/teamMember?userID=" + localStorage.getItem("userId"),
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        var requestOptions = {
+          method: "GET",
+          redirect: "follow",
+        };
+
+        fetch(
+          BASE_URL +
+            "/analysisReport/getAllByTeamId?teamId=" +
+            JSON.parse(result)[0].team.teamId,
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => {
+            setReports(JSON.parse(result).reverse());
+            setIsReportsReceived(true);
+          })
+          .catch((error) => console.log("error", error));
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
 
   const handleCardClick = (report) => {
     setSelectedReport(report);
@@ -88,45 +126,41 @@ export const TeamMemberHomePage = () => {
           paddingBottom={"8px"}
           top={38}
         >
-          <TeamText>See team Veni Vidi Code's previous reports</TeamText>
+          <TeamText>See team's previous reports</TeamText>
         </Box>
-        <Box sx={{ width: 1 }}>
-          <Box
-            backgroundColor="#FFFFFF"
-            display="grid"
-            gridTemplateColumns="repeat(auto-fit,  minmax(263.2px, 1fr))"
-            gap={"20px"}
-            padding={"20px 80px 80px 80px"}
-            flexWrap={"wrap"}
-          >
-            <React.Fragment>
-              <ReportListCard
-                onReportCardClick={handleCardClick}
-                report={{
-                  title: "melo",
-                  content: "deneme deneme",
-                  category: "Political",
-                  uploader: "MELO FAZO",
-                }}
-              ></ReportListCard>
-              <ReportListCard
-                onReportCardClick={handleCardClick}
-                report={{
-                  title: "fazo",
-                  content:
-                    "enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed enemed ",
-                  category: "Political",
-                  uploader: "FAZO TASO",
-                }}
-              ></ReportListCard>
-              <ReportDialog
-                open={openDialog}
-                handleClose={handleCloseDialog}
-                report={selectedReport}
-              ></ReportDialog>
-            </React.Fragment>
+        {isReportsRecevied ? (
+          <Box sx={{ width: 1 }}>
+            <Box
+              backgroundColor="#FFFFFF"
+              display="grid"
+              gridTemplateColumns="repeat(auto-fit,  minmax(263.2px, 1fr))"
+              gap={"20px"}
+              padding={"20px 80px 80px 80px"}
+              flexWrap={"wrap"}
+            >
+              <React.Fragment>
+                {reports.map((element) => {
+                  return (
+                    <ReportListCard
+                      onReportCardClick={handleCardClick}
+                      report={element}
+                    ></ReportListCard>
+                  );
+                })}
+
+                <ReportDialog
+                  open={openDialog}
+                  handleClose={handleCloseDialog}
+                  report={selectedReport}
+                ></ReportDialog>
+              </React.Fragment>
+            </Box>
           </Box>
-        </Box>
+        ) : (
+          <Box sx={{ width: "100%" }}>
+            <LinearProgress />
+          </Box>
+        )}
       </Stack>
     </Stack>
   );

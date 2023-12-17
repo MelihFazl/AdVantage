@@ -22,6 +22,4 @@ public abstract class AnalysisReport {
     @JoinColumn(name = "team_member_id", referencedColumnName = "id")
     @Getter @Setter private TeamMember uploader;
 
-
-
 }

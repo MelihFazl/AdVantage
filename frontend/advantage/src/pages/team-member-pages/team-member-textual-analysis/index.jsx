@@ -1,5 +1,5 @@
 import LeftDrawer from "../../../common/left-drawer";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { TeamMemberDrawerItems } from "../team-member-drawer-items";
 import {
@@ -19,6 +19,8 @@ import arrayMutators from "final-form-arrays";
 import { FieldArray } from "react-final-form-arrays";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { isFieldEmpty } from "../../../common/validator-functions/isFieldEmpty";
+import { BASE_URL } from "../../../common/constans";
+import { useNavigate } from "react-router-dom";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -36,7 +38,25 @@ const BannerText = styled(Typography)({
 });
 
 export const TeamMemberTextualAnalysisPage = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
   const matches = useMediaQuery("(min-width:897px)");
+  useEffect(() => {
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    fetch(
+      BASE_URL + "/user/teamMember?userID=" + localStorage.getItem("userId"),
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        setUser(JSON.parse(result)[0]);
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
 
   return (
     <Stack direction={"row"}>
@@ -84,9 +104,70 @@ export const TeamMemberTextualAnalysisPage = () => {
         <Form
           keepDirtyOnReinitialize
           onSubmit={(values) => {
-            console.log(values);
+            const currentDate = new Date();
+            const formattedCurrentDate = `${currentDate.getFullYear()}-${(
+              currentDate.getMonth() + 1
+            )
+              .toString()
+              .padStart(2, "0")}-${currentDate
+              .getDate()
+              .toString()
+              .padStart(2, "0")} ${currentDate
+              .getHours()
+              .toString()
+              .padStart(2, "0")}:${currentDate
+              .getMinutes()
+              .toString()
+              .padStart(2, "0")}:${currentDate
+              .getSeconds()
+              .toString()
+              .padStart(2, "0")}`;
+            if (values.adContents.length === 1) {
+              var requestOptions = {
+                method: "POST",
+                redirect: "follow",
+              };
+
+              fetch(
+                BASE_URL +
+                  `/singleanalysisreport/create?category=${values.adCategory}&uploaderId=${user.id}&createdAt=${formattedCurrentDate}&adText=${values.adContents[0]}&title=${values.reportTitle}`,
+                requestOptions
+              )
+                .then((response) => response.text())
+                .then((result) => {
+                  navigate("/team-member");
+                })
+                .catch((error) => console.log("error", error));
+            } else if (values.adContents.length > 1) {
+              var myHeaders = new Headers();
+              myHeaders.append("Content-Type", "application/json");
+
+              var raw = JSON.stringify({
+                adRequests: values.adContents,
+              });
+
+              var requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: raw,
+                redirect: "follow",
+              };
+
+              fetch(
+                BASE_URL +
+                  `/multipleanalysisreport/create?category=${values.adCategory}&uploaderId=${user.id}&createdAt=${formattedCurrentDate}&title=${values.reportTitle}`,
+                requestOptions
+              )
+                .then((response) => response.text())
+                .then((result) => {
+                  navigate("/team-member");
+                })
+                .catch((error) => console.log("error", error));
+            } else {
+              console.log("empyt");
+            }
           }}
-          initialValues={{ adCategory: "political", adContents: [""] }}
+          initialValues={{ adCategory: "Political", adContents: [""] }}
           mutators={{ ...arrayMutators }}
           render={({ handleSubmit }) => (
             <form onSubmit={handleSubmit}>
@@ -148,7 +229,7 @@ export const TeamMemberTextualAnalysisPage = () => {
                         >
                           <Typography>Category of Ad(s)</Typography>
                           <Select {...input} size="small">
-                            <MenuItem value={"political"}>Political</MenuItem>
+                            <MenuItem value={"Political"}>Political</MenuItem>
                           </Select>
                         </Box>
                       )}

@@ -1,5 +1,5 @@
 import { TopBarHome } from "../../common/top-bar-home";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Container,
@@ -11,9 +11,11 @@ import {
   Typography,
   Link,
   Paper,
+  unstable_composeClasses,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import yourImage from "../../assets/images/login.png";
+import { BASE_URL } from "../../common/constans";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -30,11 +32,37 @@ export const LoginPage = () => {
     }
 
     // Handle the login logic here
-    console.log("Email:", email);
-    console.log("Password:", password);
-    console.log("Remember Me:", rememberMe);
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
 
-    navigate("/team-member");
+    var raw = JSON.stringify({
+      email: email,
+      password: password,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch(BASE_URL + "/user/teamMember/login", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        var userId = result.split("Token: ")[0];
+        var token = result.split("Token: ")[1];
+
+        if (token && token.substring(0, 2) === "TM") {
+          localStorage.setItem("userType", "tm");
+          localStorage.setItem("userToken", token);
+          localStorage.setItem("userId", userId.substring(8));
+          navigate("/team-member");
+        } else {
+          alert(result);
+        }
+      })
+      .catch((error) => console.log("error", error));
   };
 
   return (

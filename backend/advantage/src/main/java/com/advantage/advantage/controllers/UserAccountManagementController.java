@@ -97,7 +97,7 @@ public class UserAccountManagementController {
 
 
     @GetMapping("/teamMember")
-    public List<TeamMember> getTeamMember(@RequestParam long userID)
+    public List<TeamMember>  getTeamMember(@RequestParam long userID)
     {
         return userAccountManagementService.getTeamMemberByID(userID);
     }
@@ -131,22 +131,21 @@ public class UserAccountManagementController {
         }
     }
 
-
     @GetMapping("/employee/getAll")
     public List<Employee> getAllEmployees()
     {
         return userAccountManagementService.getAllEmployee();
     }
 
-
     @PostMapping("/teamMember/login/{id}")
-    public String loginTeamMemberById(@RequestParam String password, @PathVariable("id") long userID) {
+    public ResponseEntity<String> loginTeamMemberById(@RequestParam String password, @PathVariable("id") long userID) {
         passwordHashHandler = PasswordHashHandler.getInstance();
         passwordHashHandler.setPassword(password);
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByID(userID);
-        if (teamMembers == null || teamMembers.isEmpty())
-            return "No team member was found with ID " + userID;
-        else {
+
+        if (teamMembers == null || teamMembers.isEmpty()) {
+            return new ResponseEntity<>("No team member was found with ID " + userID, HttpStatus.NOT_FOUND);
+        } else {
             TeamMember teamMemberLoggingIn = teamMembers.get(0);
             if (passwordHashHandler.hashPassword().equals(teamMemberLoggingIn.getHashedPassword())) {
                 Token token = new Token();
@@ -156,14 +155,19 @@ public class UserAccountManagementController {
                 tokenRepository.save(token);
                 teamMemberLoggingIn.setToken(token);
                 userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
-                return "TM " + tokenStr;
+
+                // Include userID in the response string
+                String responseString = "UserID: " + userID + " Token: TM " + tokenStr ;
+
+                return new ResponseEntity<>(responseString, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
             }
-            return "Login credentials are incorrect";
         }
     }
 
     @PostMapping("/teamMember/login")
-    public String loginTeamMemberByEmail(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<String> loginTeamMemberByEmail(@RequestBody Map<String, String> loginRequest) {
 
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
@@ -172,9 +176,10 @@ public class UserAccountManagementController {
         passwordHashHandler.setPassword(password);
 
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
-        if (teamMembers == null || teamMembers.isEmpty())
-            return "No team member was found with email " + email;
-        else {
+
+        if (teamMembers == null || teamMembers.isEmpty()) {
+            return new ResponseEntity<>("No team member was found with email " + email, HttpStatus.NOT_FOUND);
+        } else {
             TeamMember teamMemberLoggingIn = teamMembers.get(0);
             if (passwordHashHandler.hashPassword().equals(teamMemberLoggingIn.getHashedPassword())) {
                 Token token = new Token();
@@ -184,19 +189,27 @@ public class UserAccountManagementController {
                 tokenRepository.save(token);
                 teamMemberLoggingIn.setToken(token);
                 userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
-                return "TM " + tokenStr;
+
+                // Include userID in the response string
+                String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
+
+                return new ResponseEntity<>(responseString, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
             }
-            return "Login credentials are incorrect";
         }
     }
 
     @PostMapping("/companyAdministrator/login/{id}")
-    public String loginCompanyAdministratorById(@RequestParam String password, @PathVariable("id") long companyAdministratorId) {
+    public ResponseEntity<String> loginCompanyAdministratorById(@RequestParam String password, @PathVariable("id") long companyAdministratorId) {
         passwordHashHandler = PasswordHashHandler.getInstance();
         passwordHashHandler.setPassword(password);
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByID(companyAdministratorId);
-        if (companyAdministrators == null || companyAdministrators.isEmpty())
-            return "No Company Administrator was found with ID " + companyAdministratorId;
+
+        if (companyAdministrators == null || companyAdministrators.isEmpty()) {
+            return new ResponseEntity<>("No Company Administrator was found with ID " + companyAdministratorId, HttpStatus.NOT_FOUND);
+        }
+
         CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
         if (passwordHashHandler.hashPassword().equals(companyAdministratorLoggingIn.getHashedPassword())) {
             Token token = new Token();
@@ -206,13 +219,18 @@ public class UserAccountManagementController {
             tokenRepository.save(token);
             companyAdministratorLoggingIn.setToken(token);
             userAccountManagementService.updateCompanyAdministrator(companyAdministratorLoggingIn);
-            return "CA " + tokenStr;
+
+            // Include companyAdministratorId in the response string
+            String responseString = "CompanyAdministratorID: " + companyAdministratorId + " Token: CA " + tokenStr;
+
+            return new ResponseEntity<>(responseString, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
         }
-        return "Login credentials are incorrect";
     }
 
     @PostMapping("/companyAdministrator/login")
-    public String loginCompanyAdministratorByEmail(@RequestBody Map<String, String> loginRequest) {
+    public ResponseEntity<String> loginCompanyAdministratorByEmail(@RequestBody Map<String, String> loginRequest) {
 
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
@@ -221,9 +239,10 @@ public class UserAccountManagementController {
         passwordHashHandler.setPassword(password);
 
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
-        if (companyAdministrators == null || companyAdministrators.isEmpty())
-            return "No company administrator was found with email " + email;
-        else {
+
+        if (companyAdministrators == null || companyAdministrators.isEmpty()) {
+            return new ResponseEntity<>("No company administrator was found with email " + email, HttpStatus.NOT_FOUND);
+        } else {
             CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
             if (passwordHashHandler.hashPassword().equals(companyAdministratorLoggingIn.getHashedPassword())) {
                 Token token = new Token();
@@ -233,27 +252,36 @@ public class UserAccountManagementController {
                 tokenRepository.save(token);
                 companyAdministratorLoggingIn.setToken(token);
                 userAccountManagementService.updateCompanyAdministrator(companyAdministratorLoggingIn);
-                return "CA " + tokenStr;
+
+                // Include companyAdministratorId in the response string
+                String responseString = "CompanyAdministratorID: " + companyAdministratorLoggingIn.getId() + " Token: CA " + tokenStr;
+
+                return new ResponseEntity<>(responseString, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
             }
-            return "Login credentials are incorrect";
         }
     }
 
     @PostMapping("/logout/{id}")
-    public String logOut(@PathVariable("id") long userID) {
+    public ResponseEntity<String> logOut(@PathVariable("id") long userID) {
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByID(userID);
+
         if (teamMembers == null || teamMembers.isEmpty()) {
             List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByID(userID);
-            if (companyAdministrators == null || companyAdministrators.isEmpty())
-                return "No user found with ID " + userID;
-            else {
+
+            if (companyAdministrators == null || companyAdministrators.isEmpty()) {
+                // No user found with the given ID
+                return new ResponseEntity<>("No user found with ID " + userID, HttpStatus.NOT_FOUND);
+            } else {
                 CompanyAdministrator curCompanyAdministrator = companyAdministrators.get(0);
                 curCompanyAdministrator.getToken().setLastActive(LocalDateTime.now());
                 curCompanyAdministrator.getToken().setInUse(false);
                 tokenRepository.save(curCompanyAdministrator.getToken());
                 userAccountManagementService.saveCompanyAdministrator(curCompanyAdministrator);
 
-                return "CompanyAdministrator with ID " + userID + " successfully logged out";
+                // Successfully logged out for CompanyAdministrator
+                return new ResponseEntity<>("CompanyAdministrator with ID " + userID + " successfully logged out", HttpStatus.OK);
             }
         } else {
             TeamMember curTeamMember = teamMembers.get(0);
@@ -261,25 +289,31 @@ public class UserAccountManagementController {
             curTeamMember.getToken().setInUse(false);
             tokenRepository.save(curTeamMember.getToken());
             userAccountManagementService.saveTeamMember(curTeamMember);
-            return "Team Member with ID " + userID + " successfully logged out";
+
+            // Successfully logged out for Team Member
+            return new ResponseEntity<>("Team Member with ID " + userID + " successfully logged out", HttpStatus.OK);
         }
     }
 
     @PostMapping("/logout")
-    public String logOutByEmail(@RequestParam String email) {
+    public ResponseEntity<String> logOutByEmail(@RequestParam String email) {
         List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
+
         if (teamMembers == null || teamMembers.isEmpty()) {
             List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
-            if (companyAdministrators == null || companyAdministrators.isEmpty())
-                return "No user found with email " + email;
-            else {
+
+            if (companyAdministrators == null || companyAdministrators.isEmpty()) {
+                // No user found with the given email
+                return new ResponseEntity<>("No user found with email " + email, HttpStatus.NOT_FOUND);
+            } else {
                 CompanyAdministrator curCompanyAdministrator = companyAdministrators.get(0);
                 curCompanyAdministrator.getToken().setLastActive(LocalDateTime.now());
                 curCompanyAdministrator.getToken().setInUse(false);
                 tokenRepository.save(curCompanyAdministrator.getToken());
                 userAccountManagementService.saveCompanyAdministrator(curCompanyAdministrator);
 
-                return "CompanyAdministrator with email " + email + " successfully logged out";
+                // Successfully logged out for CompanyAdministrator
+                return new ResponseEntity<>("CompanyAdministrator with email " + email + " successfully logged out", HttpStatus.OK);
             }
         } else {
             TeamMember curTeamMember = teamMembers.get(0);
@@ -287,7 +321,9 @@ public class UserAccountManagementController {
             curTeamMember.getToken().setInUse(false);
             tokenRepository.save(curTeamMember.getToken());
             userAccountManagementService.saveTeamMember(curTeamMember);
-            return "Team Member with email " + email + " successfully logged out";
+
+            // Successfully logged out for Team Member
+            return new ResponseEntity<>("Team Member with email " + email + " successfully logged out", HttpStatus.OK);
         }
     }
 

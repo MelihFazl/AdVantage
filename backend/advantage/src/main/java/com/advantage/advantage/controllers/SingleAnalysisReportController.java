@@ -48,8 +48,8 @@ public class SingleAnalysisReportController {
         }
 
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
-
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", 0, newAd) != null) {
+        float prediction = (float) (Math.random() * 0.9999);
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd) != null) {
             return ResponseEntity.status(HttpStatus.OK).body("Advertisement and report saved successfully!");
         }
 
