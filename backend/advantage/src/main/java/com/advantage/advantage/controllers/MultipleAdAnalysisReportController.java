@@ -25,10 +25,8 @@ public class MultipleAdAnalysisReportController {
     MultipleAdAnalysisReportService repService;
     @Autowired
     TextualAdvertisementService textAdService;
-
     @Autowired
     MultipleAdAnalysisReportAssociationService adReportService;
-
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
 
@@ -36,8 +34,6 @@ public class MultipleAdAnalysisReportController {
     public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String title, @RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
                                                                @RequestBody AdRequestsWrapper adRequestsWrapper) {
         List<String> adRequests = adRequestsWrapper.getAdRequests();
-
-        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,"");
 
         if (createdAt == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is not a valid date");
@@ -50,6 +46,8 @@ public class MultipleAdAnalysisReportController {
         if (category == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify a category");
         }
+
+        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,"");
 
         if (newReport == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");

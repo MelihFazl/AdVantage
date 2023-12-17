@@ -131,13 +131,11 @@ public class UserAccountManagementController {
         }
     }
 
-
     @GetMapping("/employee/getAll")
     public List<Employee> getAllEmployees()
     {
         return userAccountManagementService.getAllEmployee();
     }
-
 
     @PostMapping("/teamMember/login/{id}")
     public ResponseEntity<String> loginTeamMemberById(@RequestParam String password, @PathVariable("id") long userID) {
