@@ -47,7 +47,13 @@ public class MultipleAdAnalysisReportController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify a category");
         }
 
-        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,"");
+        String comparisons = "";
+        for (String adRequest : adRequests) {
+            float comparison = (float) (Math.random() * 0.9999);
+            comparisons += String.format("%.4f ", comparison);
+        }
+
+        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,comparisons.trim());
 
         if (newReport == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
