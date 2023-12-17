@@ -17,7 +17,7 @@ export default function ReportListCard({ report, onReportCardClick }) {
       >
         <CardContent>
           <Typography variant="h5" component="div">
-            Title of Ad
+            {report.report.title}
           </Typography>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
             <Typography sx={{ fontSize: 14 }} gutterBottom>
@@ -28,7 +28,9 @@ export default function ReportListCard({ report, onReportCardClick }) {
               color="text.secondary"
               gutterBottom
             >
-              Name Surname
+              {report.report.uploader.name +
+                " " +
+                report.report.uploader.surname}
             </Typography>
           </Box>
           <Box
@@ -39,12 +41,14 @@ export default function ReportListCard({ report, onReportCardClick }) {
           >
             {" "}
             <Typography variant="body2" color={"#000"}>
-              Content of report's ad(s):
+              Content of report's ad:
             </Typography>
             <Typography sx={{ mb: 1.2 }} color="text.secondary">
-              {
-                "REAL SLIM SHADY PLEASE STAND UP THIS LOOK LIKE A JOB FOR ME BUT EVERYBODU JUST FOLLOW ME BECAUSE WE NEED A LITTLE CONTROVERSY FEEL SO EMPTY WITHOUT ME CANT BE YOUR SUPERMAN"
-              }
+              {report.type === "SingleAdAnalysisReport"
+                ? report.advertisementText
+                : "This report contains more than one add that is analyzed. Click to card to see details about all " +
+                  report.advertisementTexts.length +
+                  " advertisements"}
             </Typography>
           </Box>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
