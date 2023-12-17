@@ -9,7 +9,7 @@ import java.util.List;
 public interface SingleAnalysisReportRepo  extends JpaRepository<SingleAdAnalysisReport, Long>{
         public List<SingleAdAnalysisReport> findAll();
 
-        public List<AnalysisReport> findByUploader_Team_TeamId(Long teamId);
+        public List<SingleAdAnalysisReport> findByUploader_Team_TeamId(Long teamId);
 
         public List<SingleAdAnalysisReport> findByReportId(long reportId);
 
