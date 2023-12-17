@@ -60,15 +60,20 @@ export default function ReportDialog({ open, handleClose, report }) {
           <Typography variant="body2" color={"#000"}>
             Results:
           </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            -CPI of Ad1:
-          </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            -CPI of Ad2:
-          </Typography>
-          <Typography sx={{ mb: 1.2 }} color="text.secondary">
-            -CPI of Ad3:
-          </Typography>
+          {report?.type === "SingleAdAnalysisReport" ? (
+            <Typography sx={{ mb: 1.2 }} color="text.secondary">
+              CPI of Ad: {report?.report?.successPrediction}
+            </Typography>
+          ) : (
+            report?.report?.comparison?.split(" ")?.map((element, index) => {
+              return (
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  CPI of Ad{index + 1}: {element}
+                </Typography>
+              );
+            })
+          )}
+
           {report?.type === "SingleAdAnalysisReport" ? (
             <React.Fragment>
               <Typography variant="body2" color={"#000"}>

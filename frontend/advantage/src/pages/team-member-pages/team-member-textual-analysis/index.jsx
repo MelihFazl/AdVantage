@@ -20,6 +20,7 @@ import { FieldArray } from "react-final-form-arrays";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { isFieldEmpty } from "../../../common/validator-functions/isFieldEmpty";
 import { BASE_URL } from "../../../common/constans";
+import { useNavigate } from "react-router-dom";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -37,6 +38,7 @@ const BannerText = styled(Typography)({
 });
 
 export const TeamMemberTextualAnalysisPage = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const matches = useMediaQuery("(min-width:897px)");
   useEffect(() => {
@@ -132,7 +134,9 @@ export const TeamMemberTextualAnalysisPage = () => {
                 requestOptions
               )
                 .then((response) => response.text())
-                .then((result) => console.log(result))
+                .then((result) => {
+                  navigate("/team-member");
+                })
                 .catch((error) => console.log("error", error));
             } else if (values.adContents.length > 1) {
               var myHeaders = new Headers();
@@ -155,7 +159,9 @@ export const TeamMemberTextualAnalysisPage = () => {
                 requestOptions
               )
                 .then((response) => response.text())
-                .then((result) => console.log(result))
+                .then((result) => {
+                  navigate("/team-member");
+                })
                 .catch((error) => console.log("error", error));
             } else {
               console.log("empyt");
