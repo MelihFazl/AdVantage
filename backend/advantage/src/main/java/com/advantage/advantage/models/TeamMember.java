@@ -11,7 +11,7 @@ import lombok.Setter;
 public class TeamMember extends Employee{
     @Getter @Setter int monthlyAnalysisUsage;
     @ManyToOne
-    @JoinColumn(name = "team_id", referencedColumnName = "teamId")
+    @Getter @Setter @JoinColumn(name = "team_id", referencedColumnName = "teamId")
     private Team team;
 
     @ManyToOne

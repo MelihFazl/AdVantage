@@ -39,7 +39,7 @@ export default function ReportListCard({ report, onReportCardClick }) {
           >
             {" "}
             <Typography variant="body2" color={"#000"}>
-              Content:
+              Content of report's ad(s):
             </Typography>
             <Typography sx={{ mb: 1.2 }} color="text.secondary">
               {

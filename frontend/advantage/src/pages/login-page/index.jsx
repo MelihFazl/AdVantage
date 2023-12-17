@@ -11,6 +11,7 @@ import {
   Typography,
   Link,
   Paper,
+  unstable_composeClasses,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import yourImage from "../../assets/images/login.png";
@@ -49,9 +50,13 @@ export const LoginPage = () => {
     fetch(BASE_URL + "/user/teamMember/login", requestOptions)
       .then((response) => response.text())
       .then((result) => {
-        if (result.substring(0, 2) === "TM") {
+        var userId = result.split("Token: ")[0];
+        var token = result.split("Token: ")[1];
+
+        if (token && token.substring(0, 2) === "TM") {
           localStorage.setItem("userType", "tm");
-          localStorage.setItem("userToken", result);
+          localStorage.setItem("userToken", token);
+          localStorage.setItem("userId", userId.substring(8));
           navigate("/team-member");
         } else {
           alert(result);

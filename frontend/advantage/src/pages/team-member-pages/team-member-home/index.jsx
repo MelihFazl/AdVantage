@@ -1,11 +1,12 @@
 import LeftDrawer from "../../../common/left-drawer";
-import React from "react";
+import React, { useEffect } from "react";
 import { TeamMemberDrawerItems } from "../team-member-drawer-items";
 import { Paper, Box, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ReportListCard from "./report-list-card";
 import ReportDialog from "../report-dialog";
 import { useState } from "react";
+import { BASE_URL } from "../../../common/constans";
 const BannerText = styled(Typography)({
   textAlign: "center",
   color: "#000080",
@@ -36,7 +37,26 @@ export const TeamMemberHomePage = () => {
     category: "",
     uploader: "",
   });
+  const [user, setUser] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    fetch(
+      BASE_URL + "/user/teamMember?userID=" + localStorage.getItem("userId"),
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        setUser(JSON.parse(result)[0]);
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
 
   const handleCardClick = (report) => {
     setSelectedReport(report);
@@ -88,7 +108,7 @@ export const TeamMemberHomePage = () => {
           paddingBottom={"8px"}
           top={38}
         >
-          <TeamText>See team Veni Vidi Code's previous reports</TeamText>
+          <TeamText>See team's previous reports</TeamText>
         </Box>
         <Box sx={{ width: 1 }}>
           <Box
@@ -100,6 +120,7 @@ export const TeamMemberHomePage = () => {
             flexWrap={"wrap"}
           >
             <React.Fragment>
+              {reports.forEach((element) => {})}
               <ReportListCard
                 onReportCardClick={handleCardClick}
                 report={{
