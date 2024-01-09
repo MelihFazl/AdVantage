@@ -34,13 +34,7 @@ public class CompanyServiceImplementation implements CompanyService{
 
     @Override
     public Company saveCompany(Company company) {
-        List<Company> companies = companyRepository.findByCompanyId(company.getCompanyId());
-
-        if(companies == null || companies.isEmpty()) {
-            return companyRepository.save(company);
-        }
-
-        return null;
+        return companyRepository.save(company);
     }
 
     @Override

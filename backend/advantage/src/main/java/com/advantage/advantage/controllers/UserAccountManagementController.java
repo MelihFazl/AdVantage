@@ -36,19 +36,18 @@ public class UserAccountManagementController {
 
     /**
      * Only an authorized company administrator can create a team member
-     * @param token
-     * @param teamMember
-     * @return
+     * @param token authentication token
+     * @param teamMember team member information to create
+     * @return ResponseEntity with the result of the request
      */
     @PostMapping("/teamMember/add")
-    public String saveTeamMember(@RequestParam String token, @RequestBody TeamMember teamMember)
-    {
+    public ResponseEntity<String> saveTeamMember(@RequestParam String token, @RequestBody TeamMember teamMember) {
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getAllCompanyAdministrator();
-        if (companyAdministrators != null || !companyAdministrators.isEmpty()) {
+        if (companyAdministrators != null && !companyAdministrators.isEmpty()) {
             boolean tokenMatch = false;
-            for (int i = 0; companyAdministrators.size() > i; i++) {
-                if (companyAdministrators.get(i).getToken() != null) {
-                    if (companyAdministrators.get(i).getToken().getToken().equals(token) && companyAdministrators.get(i).getToken().getInUse()) {
+            for (CompanyAdministrator companyAdministrator : companyAdministrators) {
+                if (companyAdministrator.getToken() != null) {
+                    if (companyAdministrator.getToken().getToken().equals(token) && companyAdministrator.getToken().getInUse()) {
                         tokenMatch = true;
                         break;
                     }
@@ -57,44 +56,53 @@ public class UserAccountManagementController {
             if (tokenMatch) {
                 passwordHashHandler.setPassword(teamMember.getHashedPassword());
                 teamMember.setHashedPassword(passwordHashHandler.hashPassword());
-                if (userAccountManagementService.saveTeamMember(teamMember) != null)
-                    return "Team Member with name (" + teamMember.getName() + ") and with id (" + teamMember.getId() + ") has been created.";
-                else
-                    return "There is already an existing team member with the id" + teamMember.getId();
+                if (userAccountManagementService.saveTeamMember(teamMember) != null) {
+                    return ResponseEntity.status(HttpStatus.CREATED)
+                            .body("Team Member with name (" + teamMember.getName() + ") and with id (" + teamMember.getId() + ") has been created.");
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("There is already an existing team member with the id" + teamMember.getId());
+                }
             } else {
-                return "Unauthorized request.";
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Unauthorized request.");
             }
         }
-        return "Unauthorized request.";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("Unauthorized request.");
     }
 
-
-    /*
+    /**
+     * Endpoint to add a new Company Administrator along with a new Company
+     * @param companyAdministrator The Company Administrator information
+     * @param companyName The name of the Company
+     * @return ResponseEntity with the result of the request
+     */
     @PostMapping("/companyAdministrator/add")
-    public String saveCompanyAdministrator(@RequestBody CompanyAdministrator companyAdministrator)
-    {
+    public ResponseEntity<String> saveCompanyAdministrator(@RequestBody CompanyAdministrator companyAdministrator, @RequestParam String companyName) {
         // Create a new Company instance
         Company company = new Company();
-        company.setCompanyName("Default Company Name"); // Set other properties as needed
+        company.setCompanyName(companyName);
         company.setNumberOfEmployees(1);
 
         // Set the CompanyAdministrator for the Company
         companyAdministrator.setCompany(company);
 
-        // Set the Company for the CompanyAdministrator
-        company.setCompanyAdministrator(companyAdministrator);
+        //hash password
+        passwordHashHandler.setPassword(companyAdministrator.getHashedPassword());
+        companyAdministrator.setHashedPassword(passwordHashHandler.hashPassword());
 
         // Save both entities
         companyService.saveCompany(company);
+        if(userAccountManagementService.saveCompanyAdministrator(companyAdministrator) != null) {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Company with name (" + companyName + ") \n Company Administrator with name (" + companyAdministrator.getName() + ") and with id (" + companyAdministrator.getId() + ") has been created.");
+        }else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("There is already an existing companyAdministrator with the id" + companyAdministrator.getId());
+        }
 
-        // The CompanyAdministrator will be saved automatically due to the cascading relationship
-        // To update the company information call the necessary route from company controller
-
-        return "Company Administrator and Company saved successfully";
     }
-    */
-
-
 
     @GetMapping("/teamMember")
     public List<TeamMember>  getTeamMember(@RequestParam long userID)
