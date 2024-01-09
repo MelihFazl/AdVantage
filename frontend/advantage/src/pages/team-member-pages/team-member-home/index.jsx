@@ -68,7 +68,7 @@ export const TeamMemberHomePage = () => {
         )
           .then((response) => response.text())
           .then((result) => {
-            setReports(JSON.parse(result));
+            setReports(JSON.parse(result).reverse());
             setIsReportsReceived(true);
           })
           .catch((error) => console.log("error", error));
