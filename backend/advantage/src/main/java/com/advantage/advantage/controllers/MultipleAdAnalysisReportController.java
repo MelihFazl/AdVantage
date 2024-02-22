@@ -1,12 +1,10 @@
 package com.advantage.advantage.controllers;
 
 import com.advantage.advantage.helpers.AdRequestsWrapper;
+import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.MultipleAdAnalysisReportAssociationRepo;
-import com.advantage.advantage.services.MultipleAdAnalysisReportAssociationService;
-import com.advantage.advantage.services.MultipleAdAnalysisReportService;
-import com.advantage.advantage.services.SingleAnalysisAdReportService;
-import com.advantage.advantage.services.TextualAdvertisementService;
+import com.advantage.advantage.services.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +28,25 @@ public class MultipleAdAnalysisReportController {
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
 
+    private final UserAccountManagementService userAccountManagementService;
+    private final JwtUtils jwtUtils;
+
+    public MultipleAdAnalysisReportController(UserAccountManagementService userAccountManagementService) {
+        this.userAccountManagementService = userAccountManagementService;
+        this.jwtUtils = new JwtUtils(userAccountManagementService);
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String title, @RequestParam AdCategory category, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
+    public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam AdCategory category, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
                                                                @RequestBody AdRequestsWrapper adRequestsWrapper) {
+
+        if(!jwtUtils.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
+        long uploaderId = jwtUtils.getUserId(token);
+
+
         List<String> adRequests = adRequestsWrapper.getAdRequests();
 
         if (createdAt == null) {
