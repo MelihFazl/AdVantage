@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { TopBarHome } from "../../common/top-bar-home";
+import styled from "@emotion/styled";
 import React, { useState } from "react";
 import {
   Grid,
@@ -13,6 +14,29 @@ import {
   Paper,
 } from "@mui/material";
 import registerImage from "../../assets/images/register.png";
+
+const ImageBox = styled(Box)`
+  width: 50%;
+  height: 100%;
+  background-image: url(${registerImage});
+  background-size: cover;
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
+`;
+
+const FormContainer = styled(Paper)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 50%;
+
+  @media (max-width: 1000px) {
+    width: 100%;
+  }
+`;
 
 export const SignUpPage = () => {
   const [companyName, setCompanyName] = useState("");
@@ -63,16 +87,7 @@ export const SignUpPage = () => {
     >
       <TopBarHome />
       <Box sx={{ display: "flex", flexGrow: 1 }}>
-        <Paper
-          elevation={3}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "20px",
-            width: "50%",
-          }}
-        >
+        <FormContainer elevation={3}>
           <Typography component="h1" variant="h5" sx={{ fontWeight: "bold" }}>
             Sign Up
           </Typography>
@@ -212,15 +227,8 @@ export const SignUpPage = () => {
               Already have an account? Log In
             </Link>
           </Grid>
-        </Paper>
-        <Box
-          sx={{
-            width: "50%",
-            height: "100%",
-            backgroundImage: `url(${registerImage})`,
-            backgroundSize: "cover",
-          }}
-        />
+        </FormContainer>
+        <ImageBox />
       </Box>
     </Container>
   );

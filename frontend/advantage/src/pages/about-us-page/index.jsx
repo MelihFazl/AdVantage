@@ -9,7 +9,7 @@ import DeveloperCard from "./developer-card";
 const AboutText = styled(Typography)({
   textAlign: "center",
   color: "#000080", // Dark blue color
-  marginTop: "20px",
+  marginTop: "50px",
   fontWeight: "bold", // Added fontWeight: 'bold'
 });
 
@@ -17,21 +17,6 @@ const WhoWeAreText = styled(Typography)({
   textAlign: "center",
   color: "#000000", // Black color
   fontSize: "2rem",
-  marginTop: "20px",
-});
-
-const AboutImageCard = styled(Card)({
-  borderRadius: "15px",
-  margin: "20px auto",
-  overflow: "hidden",
-  width: "100%", // Set to 100% width
-  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-});
-
-const AboutImage = styled("img")({
-  width: "100%", // Set to 100% width
-  height: "auto",
-  borderRadius: "15px",
 });
 
 const DeveloperCardsContainer = styled("div")({

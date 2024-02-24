@@ -1,5 +1,6 @@
 import { TopBarHome } from "../../common/top-bar-home";
 import React, { useState, useEffect } from "react";
+import styled from "@emotion/styled";
 import {
   Grid,
   Container,
@@ -16,6 +17,29 @@ import {
 import { useNavigate } from "react-router-dom";
 import yourImage from "../../assets/images/login.png";
 import { BASE_URL } from "../../common/constans";
+
+const ImageBox = styled(Box)`
+  width: 50%;
+  height: 100%;
+  background-image: url(${yourImage});
+  background-size: cover;
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
+`;
+
+const FormContainer = styled(Paper)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 50%;
+
+  @media (max-width: 1000px) {
+    width: 100%;
+  }
+`;
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -73,24 +97,8 @@ export const LoginPage = () => {
     >
       <TopBarHome />
       <Box sx={{ display: "flex", flexGrow: 1 }}>
-        <Box
-          sx={{
-            width: "50%",
-            height: "100%",
-            backgroundImage: `url(${yourImage})`,
-            backgroundSize: "cover",
-          }}
-        />
-        <Paper
-          elevation={0}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "20px",
-            width: "50%",
-          }}
-        >
+        <ImageBox></ImageBox>
+        <FormContainer>
           <Typography component="h1" variant="h5" sx={{ fontWeight: "bold" }}>
             Log In
           </Typography>
@@ -162,7 +170,7 @@ export const LoginPage = () => {
               {"Forgot password?"}
             </Link>
           </Grid>
-        </Paper>
+        </FormContainer>
       </Box>
     </Container>
   );
