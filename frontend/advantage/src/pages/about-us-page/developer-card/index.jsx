@@ -23,7 +23,8 @@ export default function DeveloperCard({ name, title, image }) {
           borderRadius: "50%", // Make the image round
         }}
         image={image}
-        title="green iguana"
+        title={name}
+        component={"img"}
       />
       <CardContent>
         <Typography
