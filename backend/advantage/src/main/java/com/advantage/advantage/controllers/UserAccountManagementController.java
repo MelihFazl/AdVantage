@@ -156,7 +156,6 @@ public class UserAccountManagementController {
                 teamMemberLoggingIn.setToken(token);
                 userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
 
-                // Include userID in the response string
                 String responseString = "UserID: " + userID + " Token: TM " + tokenStr ;
 
                 return new ResponseEntity<>(responseString, HttpStatus.OK);
@@ -190,7 +189,6 @@ public class UserAccountManagementController {
                 teamMemberLoggingIn.setToken(token);
                 userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
 
-                // Include userID in the response string
                 String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
 
                 return new ResponseEntity<>(responseString, HttpStatus.OK);
