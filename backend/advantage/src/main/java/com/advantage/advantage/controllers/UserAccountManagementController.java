@@ -135,6 +135,33 @@ public class UserAccountManagementController {
         return userAccountManagementService.getAllEmployee();
     }
 
+    @PostMapping("/teamMember/login/{id}")
+    public ResponseEntity<String> loginTeamMemberById(@RequestParam String password, @PathVariable("id") long userID) {
+        passwordHashHandler = PasswordHashHandler.getInstance();
+        passwordHashHandler.setPassword(password);
+        List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByID(userID);
+
+        if (teamMembers == null || teamMembers.isEmpty()) {
+            return new ResponseEntity<>("No team member was found with ID " + userID, HttpStatus.NOT_FOUND);
+        } else {
+            TeamMember teamMemberLoggingIn = teamMembers.get(0);
+            if (passwordHashHandler.hashPassword().equals(teamMemberLoggingIn.getHashedPassword())) {
+                Token token = new Token();
+                token.setInUse(true);
+                token.setLastActive(LocalDateTime.now());
+                String tokenStr = token.generateToken();
+                tokenRepository.save(token);
+                teamMemberLoggingIn.setToken(token);
+                userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
+
+                String responseString = "UserID: " + userID + " Token: TM " + tokenStr ;
+
+                return new ResponseEntity<>(responseString, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
+            }
+        }
+    }
     @PostMapping("/teamMember/login")
     public ResponseEntity<String> loginTeamMemberByEmail(@RequestBody Map<String, String> loginRequest) {
         String email = loginRequest.get("email");
@@ -162,6 +189,8 @@ public class UserAccountManagementController {
 
                 // Include userID in the response string
                 //String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
+                String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
+
 
                 return new ResponseEntity<>(tokenStr, HttpStatus.OK);
             } else {

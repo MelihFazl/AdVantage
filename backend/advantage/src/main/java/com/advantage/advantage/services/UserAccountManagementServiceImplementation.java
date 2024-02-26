@@ -74,12 +74,12 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
         List<Employee> result = new ArrayList<>();
 
         List<TeamMember> teamMembers = teamMemberRepository.findByName(name);
-        if(teamMembers != null) {
+        if(teamMembers != null && !teamMembers.isEmpty()) {
             result.addAll(teamMembers);
         }
 
         List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findByName(name);
-        if(companyAdministrators != null) {
+        if(companyAdministrators != null && !companyAdministrators.isEmpty()) {
             result.addAll(companyAdministrators);
         }
 
