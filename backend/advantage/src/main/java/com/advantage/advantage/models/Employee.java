@@ -1,9 +1,9 @@
 package com.advantage.advantage.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
 
 @MappedSuperclass
 @Table(name="employee")
