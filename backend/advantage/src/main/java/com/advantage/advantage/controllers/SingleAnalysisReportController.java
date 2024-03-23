@@ -1,6 +1,7 @@
 package com.advantage.advantage.controllers;
 import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
+import com.advantage.advantage.services.ModelService;
 import com.advantage.advantage.services.SingleAnalysisAdReportService;
 import com.advantage.advantage.services.TextualAdvertisementService;
 import com.advantage.advantage.services.UserAccountManagementService;
@@ -23,6 +24,10 @@ public class SingleAnalysisReportController {
 
     TextualAdvertisementService textAdService;
 
+
+    @Autowired
+    ModelService modelService;
+
     private final UserAccountManagementService userAccountManagementService;
     private final JwtUtils jwtUtils;
 
@@ -30,6 +35,7 @@ public class SingleAnalysisReportController {
         this.userAccountManagementService = userAccountManagementService;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
     }
+
 
     @PostMapping("/create")
     public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
@@ -65,7 +71,7 @@ public class SingleAnalysisReportController {
         }
 
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
-        float prediction = (float) (Math.random() * 0.9999);
+        float prediction = modelService.getTextualPrediction(adText);
         if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd) != null) {
             return ResponseEntity.status(HttpStatus.OK).body("Advertisement and report saved successfully!");
         }
