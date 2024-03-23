@@ -88,7 +88,25 @@ public class FileServiceImplementation implements FileService{
         }
         return false;
     }
+    public boolean deleteObject(String fileName){
+        if (bucketIsEmpty()) {
+            return false;
+        }
+        // Check if the file exists in the bucket
+        ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName).withPrefix(fileName);
+        ListObjectsV2Result result = s3Client.listObjectsV2(req);
 
+        for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
+            if (objectSummary.getKey().equals(fileName)) {
+                // File exists, proceed with deletion
+                s3Client.deleteObject(new DeleteObjectRequest(bucketName, fileName));
+                return true; // Return true to indicate the file was found and deleted
+            }
+        }
+        // File does not exist, return false
+        return false;
+
+    }
     private boolean bucketIsEmpty() {
         ListObjectsV2Result result = s3Client.listObjectsV2(this.bucketName);
         if (result == null){
