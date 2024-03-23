@@ -1,8 +1,10 @@
 package com.advantage.advantage.controllers;
+import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.services.ModelService;
 import com.advantage.advantage.services.SingleAnalysisAdReportService;
 import com.advantage.advantage.services.TextualAdvertisementService;
+import com.advantage.advantage.services.UserAccountManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -22,12 +24,29 @@ public class SingleAnalysisReportController {
 
     TextualAdvertisementService textAdService;
 
+
     @Autowired
     ModelService modelService;
 
+    private final UserAccountManagementService userAccountManagementService;
+    private final JwtUtils jwtUtils;
+
+    public SingleAnalysisReportController(UserAccountManagementService userAccountManagementService) {
+        this.userAccountManagementService = userAccountManagementService;
+        this.jwtUtils = new JwtUtils(userAccountManagementService);
+    }
+
+
     @PostMapping("/create")
-    public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String title, @RequestParam long uploaderId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
+    public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
                                                              @RequestParam AdCategory category, @RequestParam String adText) {
+
+        if(!jwtUtils.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
+        long uploaderId = jwtUtils.getUserId(token);
+
         if (title.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a valid title");
 

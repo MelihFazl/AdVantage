@@ -1,12 +1,16 @@
 package com.advantage.advantage.controllers;
 
+import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.MultipleAdAnalysisReportAssociationRepo;
 import com.advantage.advantage.services.MultipleAdAnalysisReportAssociationService;
+import com.advantage.advantage.services.UserAccountManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.advantage.advantage.repositories.MultipleAnalysisReportRepo;
 import com.advantage.advantage.repositories.SingleAnalysisReportRepo;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,19 +23,31 @@ import java.util.stream.Collectors;
 @CrossOrigin
 public class AnalysisReportController {
 
+    private final UserAccountManagementService userAccountManagementService;
+    private final JwtUtils jwtUtils;
     private final MultipleAnalysisReportRepo multipleAnalysisReportRepository;
     private final SingleAnalysisReportRepo singleAnalysisReportRepository;
 
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
 
-    public AnalysisReportController(MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository) {
+    public AnalysisReportController(MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+        this.userAccountManagementService = userAccountManagementService;
         this.multipleAnalysisReportRepository = multipleAnalysisReportRepository;
         this.singleAnalysisReportRepository = singleAnalysisReportRepository;
+        this.jwtUtils = new JwtUtils(userAccountManagementService);
     }
 
     @GetMapping("/getAllByTeamId")
-    public List<Map<String, Object>> getAllReports(@RequestParam long teamId) {
+    public  ResponseEntity<?> getAllReports(@RequestParam String token) {
+
+        if(!jwtUtils.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
+        Long userID = jwtUtils.getUserId(token);
+        Long teamId = userAccountManagementService.getTeamMemberByID(userID).get(0).getTeam().getTeamId();
+
         List<SingleAdAnalysisReport> singleReports = singleAnalysisReportRepository.findByUploader_Team_TeamId(teamId);
         List<MultipleAdAnalysisReport> multiReports = multipleAnalysisReportRepository.findByUploader_Team_TeamId(teamId);
         List<Map<String, Object>> result = new ArrayList<>();
@@ -75,7 +91,7 @@ public class AnalysisReportController {
             result.add(reportAndAds);
         }
 
-        return result;
+        return ResponseEntity.ok(result);
     }
 
 }
