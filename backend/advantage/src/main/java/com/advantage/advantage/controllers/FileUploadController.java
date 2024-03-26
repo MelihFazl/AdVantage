@@ -79,9 +79,9 @@ public class FileUploadController {
         }
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete_object")
     public ResponseEntity<?> delete(@RequestParam("fileName") @NotBlank @NotNull String fileName){
-        boolean isDeleted = fileService.delete(fileName);
+        boolean isDeleted = fileService.deleteObject(fileName);
         if (isDeleted){
             APIResponse apiResponse = APIResponse.builder().message("file deleted!")
                     .statusCode(200).build();
