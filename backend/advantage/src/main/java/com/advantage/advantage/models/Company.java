@@ -14,4 +14,8 @@ public class Company {
     @Getter private Long companyId;
     @Getter @Setter private String companyName;
     @Getter @Setter private int numberOfEmployees;
+
+    @OneToOne
+    @JoinColumn(name = "subscription_id", referencedColumnName = "subscriptionId")
+    @Getter @Setter private CompanySubscription subscription;
 }
