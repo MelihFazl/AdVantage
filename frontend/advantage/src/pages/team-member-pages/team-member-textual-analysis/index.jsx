@@ -39,24 +39,7 @@ const BannerText = styled(Typography)({
 
 export const TeamMemberTextualAnalysisPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const matches = useMediaQuery("(min-width:897px)");
-  useEffect(() => {
-    var requestOptions = {
-      method: "GET",
-      redirect: "follow",
-    };
-
-    fetch(
-      BASE_URL + "/user/teamMember?userID=" + localStorage.getItem("userId"),
-      requestOptions
-    )
-      .then((response) => response.text())
-      .then((result) => {
-        setUser(JSON.parse(result)[0]);
-      })
-      .catch((error) => console.log("error", error));
-  }, []);
 
   return (
     <Stack direction={"row"}>
@@ -130,12 +113,19 @@ export const TeamMemberTextualAnalysisPage = () => {
 
               fetch(
                 BASE_URL +
-                  `/singleanalysisreport/create?category=${values.adCategory}&uploaderId=${user.id}&createdAt=${formattedCurrentDate}&adText=${values.adContents[0]}&title=${values.reportTitle}`,
+                  `/singleanalysisreport/create?category=${
+                    values.adCategory
+                  }&token=${localStorage.getItem(
+                    "userToken"
+                  )}&createdAt=${formattedCurrentDate}&adText=${
+                    values.adContents[0]
+                  }&title=${values.reportTitle}`,
                 requestOptions
               )
-                .then((response) => response.text())
-                .then((result) => {
-                  navigate("/team-member");
+                .then((response) => {
+                  if (response.ok) navigate("/team-member");
+                  else;
+                  //TODO
                 })
                 .catch((error) => console.log("error", error));
             } else if (values.adContents.length > 1) {
@@ -155,12 +145,19 @@ export const TeamMemberTextualAnalysisPage = () => {
 
               fetch(
                 BASE_URL +
-                  `/multipleanalysisreport/create?category=${values.adCategory}&uploaderId=${user.id}&createdAt=${formattedCurrentDate}&title=${values.reportTitle}`,
+                  `/multipleanalysisreport/create?category=${
+                    values.adCategory
+                  }&token=${localStorage.getItem(
+                    "userToken"
+                  )}&createdAt=${formattedCurrentDate}&title=${
+                    values.reportTitle
+                  }`,
                 requestOptions
               )
-                .then((response) => response.text())
-                .then((result) => {
-                  navigate("/team-member");
+                .then((response) => {
+                  if (response.ok) navigate("/team-member");
+                  else;
+                  //TODO
                 })
                 .catch((error) => console.log("error", error));
             } else {
