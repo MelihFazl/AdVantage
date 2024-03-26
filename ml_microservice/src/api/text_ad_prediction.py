@@ -1,12 +1,16 @@
 import os
 import logging
+import shap
 from warnings import filterwarnings, simplefilter
 import ssl
 import joblib
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from src.service.text_ad_predictor import TextAdPredictor
-import sklearn.ensemble
+import nltk
+from gensim.models import Word2Vec
+nltk.download('stopwords')
+nltk.download('punkt')
 
 filterwarnings("ignore")
 simplefilter(action='ignore', category=FutureWarning)
@@ -31,7 +35,11 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 app = FastAPI()
-model = joblib.load('./ml_models/gradient_boosting_model.pkl')
+prediction_model = joblib.load('./ml_models/gradient_boosting_model.pkl')
+tfidf_vectorizer = joblib.load('./ml_models/tfidf_vectorizer.joblib')
+gb_regressor_suggestion = joblib.load('./ml_models/gb_regressor_suggestion.joblib')
+shap_tree_explainer = shap.TreeExplainer(gb_regressor_suggestion)
+word2vec_model = Word2Vec.load('./ml_models/word2vec_model.model')
 
 @app.post("/text_ad/predict")
 async def image_detect(request: Request):
@@ -46,26 +54,20 @@ async def image_detect(request: Request):
     if request.method == "POST":
         try:
             # Get JSON payload from request body
-            logger.info("allah1")
-
             data = await request.json()
             text_ad = data.get('text_ad')
-
-
-            logger.info("allah2")
 
             if text_ad is None:
                 return JSONResponse({"message": "text_ad is required in the request body",
                                      "errors": "error"}, 
                                     status_code=400,
                                     )
-            logger.info("allah")
-
-            predictor = TextAdPredictor(text_ad, model)
+            predictor = TextAdPredictor(text_ad, prediction_model, shap_tree_explainer, tfidf_vectorizer, word2vec_model)
             # Perform text prediction
             prediction_result = predictor.text_ad_predict()
             logger.info("Detection results: %s", prediction_result)
-            return JSONResponse({"cpi": prediction_result[0],
+            return JSONResponse({"cpi": prediction_result["CPI_prediction"][0],
+                                 "shap_values": prediction_result["shap_values"],
                                 "message": "object detected successfully",
                                 "errors": None},
                                 status_code=200)
