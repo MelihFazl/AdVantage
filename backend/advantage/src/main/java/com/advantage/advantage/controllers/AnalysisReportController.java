@@ -3,8 +3,7 @@ package com.advantage.advantage.controllers;
 import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.MultipleAdAnalysisReportAssociationRepo;
-import com.advantage.advantage.services.MultipleAdAnalysisReportAssociationService;
-import com.advantage.advantage.services.UserAccountManagementService;
+import com.advantage.advantage.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,18 +23,26 @@ import java.util.stream.Collectors;
 public class AnalysisReportController {
 
     private final UserAccountManagementService userAccountManagementService;
+    private final TextualAdvertisementService advertisementService;
     private final JwtUtils jwtUtils;
+
+    private final MultipleAdAnalysisReportService multipleAdService;
+
+    private final SingleAnalysisAdReportService singleAdService;
     private final MultipleAnalysisReportRepo multipleAnalysisReportRepository;
     private final SingleAnalysisReportRepo singleAnalysisReportRepository;
 
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
 
-    public AnalysisReportController(MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+    public AnalysisReportController( TextualAdvertisementService advertisementService, MultipleAdAnalysisReportService multipleAdService, SingleAnalysisAdReportService singleAdService, MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+        this.advertisementService = advertisementService;
         this.userAccountManagementService = userAccountManagementService;
         this.multipleAnalysisReportRepository = multipleAnalysisReportRepository;
         this.singleAnalysisReportRepository = singleAnalysisReportRepository;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
+        this.multipleAdService = multipleAdService;
+        this.singleAdService = singleAdService;
     }
 
     @GetMapping("/getAllByTeamId")
@@ -92,6 +99,31 @@ public class AnalysisReportController {
         }
 
         return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping ("/delete")
+    public  ResponseEntity<?> deleteReport(@RequestParam String token, @RequestParam long reportId, @RequestParam String reportType) {
+        //Check if the token is available
+        if(!jwtUtils.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+        // Delete the report based on the report type
+        switch (reportType) {
+            case "MultipleAdAnalysisReport":
+                multipleAdService.deleteReportByReportId(reportId);
+                break;
+            case "SingleAdAnalysisReport":
+                List <SingleAdAnalysisReport> report = singleAdService.getByReportId(reportId);
+                TextualAdvertisement ad = report.get(0).getAdvertisement();
+                singleAdService.deleteReportByReportId(reportId);
+                advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+                break;
+            default:
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid report type");
+        }
+
+        return ResponseEntity.ok().body("Report deleted successfully");
+
     }
 
 }
