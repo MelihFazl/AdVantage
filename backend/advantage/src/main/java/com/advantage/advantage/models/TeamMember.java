@@ -13,6 +13,7 @@ public class TeamMember extends Employee{
     private Team team;
 
     @ManyToOne
+    @Getter @Setter
     @JoinColumn(name = "administrator_id", referencedColumnName = "id")
     private CompanyAdministrator companyAdministrator;
 }

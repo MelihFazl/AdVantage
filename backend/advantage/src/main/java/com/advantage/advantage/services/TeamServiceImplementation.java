@@ -48,7 +48,7 @@ public class TeamServiceImplementation implements  TeamService {
     }
 
     @Override
-    public Team deleteTeamById(long teamId) {
+    public Long deleteTeamById(long teamId) {
         return teamRepository.deleteByTeamId(teamId);
     }
 }

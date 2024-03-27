@@ -19,7 +19,7 @@ public interface TeamService {
     public Team saveTeam(Team team);
     public Team updateTeam(Team team);
 
-    public Team deleteTeamById(long teamId);
+    public Long deleteTeamById(long teamId);
 
 
 }
