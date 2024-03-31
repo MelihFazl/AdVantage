@@ -94,7 +94,7 @@ public class MultipleAdAnalysisReportAssociationServiceImplementation implements
     }
 
     @Override
-    public AdvertisementReportAssociation deleteAdvertisementReportAssociationByAssociationId(long associationId) {
+    public Long deleteAdvertisementReportAssociationByAssociationId(long associationId) {
         return associationRepo.deleteById(associationId);
     }
 }

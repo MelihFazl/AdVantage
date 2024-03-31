@@ -14,7 +14,7 @@ public interface MultipleAdAnalysisReportAssociationRepo extends JpaRepository<A
     public List<AdvertisementReportAssociation> findById(long id);
 
     public List<AdvertisementReportAssociation>  findByReport(MultipleAdAnalysisReport adReport);
-    public AdvertisementReportAssociation deleteById(long id);
+    public Long deleteById(long id);
     public List<AdvertisementReportAssociation> findByAdvertisement(TextualAdvertisement advertisement);
     public List<AdvertisementReportAssociation> findByPros(String pros);
     public List<AdvertisementReportAssociation> findByCons(String cons);

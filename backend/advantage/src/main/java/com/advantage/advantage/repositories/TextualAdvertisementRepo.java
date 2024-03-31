@@ -10,7 +10,7 @@ public interface TextualAdvertisementRepo extends JpaRepository<TextualAdvertise
     public List<TextualAdvertisement> findAll();
 
     public List<TextualAdvertisement> findByAdvertisementId(long advertisementId);
-    public TextualAdvertisement deleteByAdvertisementId(long advertisementId);
+    public long deleteByAdvertisementId(long advertisementId);
 
     public List<TextualAdvertisement> findByUploader(TeamMember uploader);
     public List<TextualAdvertisement> findByCategory(AdCategory category);

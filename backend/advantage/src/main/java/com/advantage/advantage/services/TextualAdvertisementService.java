@@ -19,5 +19,5 @@ public interface TextualAdvertisementService {
     public List<TextualAdvertisement> getByUploadedAt(Date uploadedAt);
     public TextualAdvertisement saveAdvertisement(AdCategory category, long uploaderId, Date uploadedAt, String adText);
     public TextualAdvertisement updateAdvertisement(TextualAdvertisement editedAdvertisement, long oldAdvertisementId);
-    public TextualAdvertisement deleteAdvertisementById(long advertisementId);
+    public long deleteAdvertisementById(long advertisementId);
     }
