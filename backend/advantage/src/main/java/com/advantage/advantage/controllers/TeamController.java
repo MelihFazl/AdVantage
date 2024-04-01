@@ -7,6 +7,7 @@ import com.advantage.advantage.models.Team;
 import com.advantage.advantage.repositories.TokenRepository;
 import com.advantage.advantage.services.TeamService;
 import com.advantage.advantage.services.UserAccountManagementService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -85,7 +86,7 @@ public class TeamController {
 
                 try {
                     teamService.deleteTeamById(teamId);
-                    return ResponseEntity.status(HttpStatus.CREATED)
+                    return ResponseEntity.status(HttpStatus.OK)
                             .body("Team with name (" + team.getTeamName() + ") and with id (" + team.getTeamId() + ") has been deleted.");
                 } catch (Error e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -102,4 +103,104 @@ public class TeamController {
 
         }
     }
+
+    @PostMapping("/getAllTeams")
+    public ResponseEntity<String> getAllTeams(@RequestParam String token) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            Long companyId = userAccountManagementService.getCompanyAdministratorByID(userId).get(0).getCompany().getCompanyId();
+
+            try{
+                List<Team> teams = teamService.getAllTeamsBelongToCompany(companyId);
+                ObjectMapper objectMapper = new ObjectMapper();
+                String teamsJson = objectMapper.writeValueAsString(teams);
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(teamsJson);
+
+            }catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(e.getMessage());
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized request.");
+        }
+    }
+
+    @PostMapping("/getTeam")
+    public ResponseEntity<String> getTeam(@RequestParam String token, @RequestParam Long teamId) {
+
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            long caId = userAccountManagementService.getCompanyAdministratorByID(userId).get(0).getId();
+
+            try{
+                List<Team> teams = teamService.getTeamById(teamId);
+
+                if(teams.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("The Team doesn't exist");
+                }
+
+                if( teams.get(0).getCompanyAdministrator().getId() != caId) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Unauthorized request.");
+                }
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                String teamsJson = objectMapper.writeValueAsString(teams);
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(teamsJson);
+
+            }catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(e.getMessage());
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized request.");
+        }
+    }
+
+    @PostMapping("/updateTeam")
+    public ResponseEntity<String> updateTeam(@RequestParam String token, @RequestParam Long teamId, @RequestBody Team updatedTeam) {
+
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            long caId = userAccountManagementService.getCompanyAdministratorByID(userId).get(0).getId();
+
+            try{
+                List<Team> teams = teamService.getTeamById(teamId);
+
+                if(teams.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("The Team doesn't exist");
+                }
+
+                if( teams.get(0).getCompanyAdministrator().getId() != caId) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Unauthorized request.");
+                }
+
+                teamService.patchTeam(updatedTeam, teamId);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body("Team with the id " + teamId + " is successfully updated");
+
+            }catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(e.getMessage());
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized request.");
+        }
+    }
+
 }
