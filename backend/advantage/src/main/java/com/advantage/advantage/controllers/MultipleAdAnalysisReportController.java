@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/multipleanalysisreport")
@@ -38,13 +39,26 @@ public class MultipleAdAnalysisReportController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam AdCategory category, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
-                                                               @RequestBody AdRequestsWrapper adRequestsWrapper) {
+                                                               @RequestBody AdRequestsWrapper adRequestsWrapper, @RequestParam Long teamId) {
 
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
         long uploaderId = jwtUtils.getUserId(token);
+        List<Team> userTeams = userAccountManagementService.getTeamMemberByID(uploaderId).get(0).getTeams();
+
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        }
 
 
         List<String> adRequests = adRequestsWrapper.getAdRequests();
@@ -67,14 +81,14 @@ public class MultipleAdAnalysisReportController {
             comparisons += String.format("%.4f ", comparison);
         }
 
-        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,comparisons.trim());
+        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,comparisons.trim(), teamId);
 
         if (newReport == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
         }
 
         for (String adRequest : adRequests) {
-            TextualAdvertisement newTextAd = textAdService.saveAdvertisement(category, uploaderId, createdAt, adRequest);
+            TextualAdvertisement newTextAd = textAdService.saveAdvertisement(category, uploaderId, createdAt, adRequest, teamId);
             AdvertisementReportAssociation newAssociation = adReportService.saveAdvertisementReportAssociation(newTextAd, newReport, "", "", 0);
 
             if (newAssociation == null) {

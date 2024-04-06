@@ -12,6 +12,7 @@ import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
+import java.util.Objects;
 
 
 @RestController
@@ -39,13 +40,26 @@ public class SingleAnalysisReportController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
-                                                             @RequestParam AdCategory category, @RequestParam String adText) {
+                                                             @RequestParam AdCategory category, @RequestParam String adText, @RequestParam Long teamId) {
 
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
         long uploaderId = jwtUtils.getUserId(token);
+        List<Team> userTeams = userAccountManagementService.getTeamMemberByID(uploaderId).get(0).getTeams();
+
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        }
 
         if (title.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a valid title");
@@ -64,15 +78,16 @@ public class SingleAnalysisReportController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify an advertisement category");
         }
 
-        TextualAdvertisement newAd = textAdService.saveAdvertisement(category, uploaderId, createdAt, adText);
+        TextualAdvertisement newAd = textAdService.saveAdvertisement(category, uploaderId, createdAt, adText, teamId);
 
         if (newAd == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error saving the advertisement");
         }
 
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
-        float prediction = modelService.getTextualPrediction(adText);
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd) != null) {
+        //float prediction = modelService.getTextualPrediction(adText);
+        float prediction = 0.5f;
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd, teamId) != null) {
             return ResponseEntity.status(HttpStatus.OK).body("Advertisement and report saved successfully!");
         }
 

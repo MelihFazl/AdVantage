@@ -3,9 +3,11 @@ package com.advantage.advantage.services;
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
 import com.advantage.advantage.models.MultipleAdAnalysisReport;
 import com.advantage.advantage.models.SingleAdAnalysisReport;
+import com.advantage.advantage.models.Team;
 import com.advantage.advantage.models.TeamMember;
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
 import com.advantage.advantage.repositories.TeamMemberRepo;
+import com.advantage.advantage.repositories.TeamRepo;
 import org.springframework.beans.BeanUtils;
 
 
@@ -25,6 +27,9 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
 
     @Autowired
     TeamMemberRepo teamMemberRepo;
+
+    @Autowired
+    TeamRepo teamRepo;
     private IgnoredPropertyCreator ignoredPropertyCreator;
 
     @Override
@@ -53,13 +58,21 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
     }
 
     @Override
-    public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison) {
+    public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison, Long teamId) {
         MultipleAdAnalysisReport newReport = new MultipleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
         if (uploaders == null || uploaders.isEmpty()){
             System.out.println("The uploader does not exist");
             return null;
         }
+
+        List<Team> teams = teamRepo.findByTeamId(teamId);
+        if (teams == null || teams.isEmpty()){
+            System.out.println("The team does not exist");
+            return null;
+        }
+
+        Team team = teams.get(0);
         TeamMember uploader = uploaders.get(0);
         if(title.equals("")){
             System.out.println("Please enter valid title");
@@ -75,6 +88,7 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
         newReport.setUploader(uploader);
         newReport.setCreatedAt(createdAt);
         newReport.setComparison(comparison);
+        newReport.setTeam(team);
 
         try {
             return reportRepo.save(newReport);

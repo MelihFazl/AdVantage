@@ -15,7 +15,7 @@ public interface SingleAnalysisAdReportService {
 
     public List<SingleAdAnalysisReport> getByAdvertisement(Advertisement ad);
 
-    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, TextualAdvertisement ad);
+    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, TextualAdvertisement ad, Long teamId);
     public SingleAdAnalysisReport updateAnalysisReport(SingleAdAnalysisReport editedAnalysisReport, long oldAnalysisReportId);
     public SingleAdAnalysisReport deleteReportByReportId(long reportId);
 }

@@ -10,7 +10,7 @@ public interface MultipleAnalysisReportRepo  extends JpaRepository<MultipleAdAna
     public List<MultipleAdAnalysisReport> findAll();
     public List<MultipleAdAnalysisReport> findByUploaderId(long uploaderId);
 
-    public List<MultipleAdAnalysisReport> findByUploader_Team_TeamId(Long teamId);
+    public List<MultipleAdAnalysisReport> findByTeam_TeamId(Long teamId);
 
     public List<MultipleAdAnalysisReport>  findByTitle(String title);
     public List<MultipleAdAnalysisReport> findByReportId(long reportId);
