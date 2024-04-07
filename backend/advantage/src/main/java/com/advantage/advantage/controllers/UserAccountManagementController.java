@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -21,17 +22,19 @@ public class UserAccountManagementController {
     private final UserAccountManagementService userAccountManagementService;
     private final CompanyService companyService;
     private final TokenRepository tokenRepository;
-
+    private final CompanySubscriptionService subscriptionService ;
     private final JwtUtils jwtUtils;
 
     @Autowired
     public UserAccountManagementController(
             UserAccountManagementService userAccountManagementService,
             CompanyService companyService,
+            CompanySubscriptionService subscriptionService,
             TokenRepository tokenRepository) {
         this.userAccountManagementService = userAccountManagementService;
         this.companyService = companyService;
         this.tokenRepository = tokenRepository;
+        this.subscriptionService = subscriptionService;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
     }
 
@@ -135,6 +138,12 @@ public class UserAccountManagementController {
         Company company = new Company();
         company.setCompanyName(companyName);
         company.setNumberOfEmployees(1);
+        CompanySubscription newSubscription;
+        Date cd = new Date();
+
+        newSubscription = subscriptionService.saveSubscription(PaymentPlanType.Free, PaymentPeriodType.Monthly, cd);
+        company.setSubscription(newSubscription);
+
 
         // Set the CompanyAdministrator for the Company
         companyAdministrator.setCompany(company);

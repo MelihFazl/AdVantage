@@ -5,6 +5,9 @@ import com.advantage.advantage.models.MultipleAdAnalysisReport;
 import com.advantage.advantage.models.SingleAdAnalysisReport;
 import com.advantage.advantage.models.Team;
 import com.advantage.advantage.models.TeamMember;
+
+import com.advantage.advantage.models.*;
+
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
 import com.advantage.advantage.repositories.TeamMemberRepo;
 import com.advantage.advantage.repositories.TeamRepo;
@@ -24,6 +27,12 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
 
     @Autowired
     MultipleAnalysisReportRepo reportRepo;
+
+    @Autowired
+    MultipleAdAnalysisReportAssociationService associationService;
+
+    @Autowired
+    TextualAdvertisementService advertisementService;
 
     @Autowired
     TeamMemberRepo teamMemberRepo;
@@ -118,7 +127,20 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
     }
 
     @Override
-    public MultipleAdAnalysisReport deleteReportByReportId(long reportId) {
-        return reportRepo.deleteByReportId(reportId);
+    public boolean deleteReportByReportId(long reportId) {
+        List<MultipleAdAnalysisReport> reports = reportRepo.findByReportId(reportId);
+        if(reports == null || reports.isEmpty())
+        {
+            return false;
+        }
+        MultipleAdAnalysisReport deletedReport = reports.get(0);
+        List<AdvertisementReportAssociation> associations = associationService.getByReport(deletedReport);
+        for( AdvertisementReportAssociation  association : associations){
+            TextualAdvertisement ad = association.getAdvertisement();
+            associationService.deleteAdvertisementReportAssociationByAssociationId(association.getId());
+            advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+        }
+        reportRepo.deleteByReportId(reportId);
+        return true;
     }
 }

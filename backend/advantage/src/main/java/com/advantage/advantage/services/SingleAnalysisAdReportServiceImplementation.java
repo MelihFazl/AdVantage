@@ -24,6 +24,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
 
     @Autowired
     TeamRepo teamRepo;
+    TextualAdvertisementService textualAdvertisementService;
     private IgnoredPropertyCreator ignoredPropertyCreator;
     @Override
     public List<SingleAdAnalysisReport> getAllReports() {
@@ -124,8 +125,13 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public SingleAdAnalysisReport deleteReportByReportId(long reportId) {
-        return reportRepo.deleteByReportId(reportId);
+    public boolean deleteReportByReportId(long reportId) {
+        List<SingleAdAnalysisReport> reports = reportRepo.findByReportId(reportId);
+        if(reports == null || reports.isEmpty()){
+            return false;
+        }
+        reportRepo.deleteByReportId(reportId);
+        return true;
     }
 }
 

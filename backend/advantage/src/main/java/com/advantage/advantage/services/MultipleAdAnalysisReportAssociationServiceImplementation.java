@@ -42,6 +42,11 @@ public class MultipleAdAnalysisReportAssociationServiceImplementation implements
     public List<AdvertisementReportAssociation> getByAdvertisement(TextualAdvertisement ad) {
         return associationRepo.findByAdvertisement(ad);
     }
+    public TextualAdvertisement getAdByAssociation(AdvertisementReportAssociation advertisementReportAssociation){
+
+        TextualAdvertisement ad= advertisementReportAssociation.getAdvertisement();
+        return ad;
+    }
 
     @Override
     public AdvertisementReportAssociation saveAdvertisementReportAssociation(TextualAdvertisement ad, MultipleAdAnalysisReport report, String pros, String cons, float pred) {
