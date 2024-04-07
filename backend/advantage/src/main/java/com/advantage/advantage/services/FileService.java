@@ -11,4 +11,6 @@ public interface FileService {
     Object downloadFile(String fileName) throws FileDownloadException, IOException;
 
     boolean delete(String fileName);
+
+    boolean deleteObject(String fileName);
 }

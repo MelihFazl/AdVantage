@@ -11,7 +11,7 @@ public interface MultipleAdAnalysisReportService {
     public List<MultipleAdAnalysisReport> getByUploaderId(long uploaderId);
     public List<MultipleAdAnalysisReport> getByCreatedAt(Date createdAt);
     public List<MultipleAdAnalysisReport> getByTitle(String title);
-    public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison);
+    public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison, Long teamId);
     public MultipleAdAnalysisReport updateAnalysisReport(MultipleAdAnalysisReport editedAnalysisReport, long oldAnalysisReportId);
     public boolean deleteReportByReportId(long reportId);
 }

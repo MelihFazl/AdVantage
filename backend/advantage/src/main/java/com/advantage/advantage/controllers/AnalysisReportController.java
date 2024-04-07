@@ -12,10 +12,7 @@ import com.advantage.advantage.repositories.MultipleAnalysisReportRepo;
 import com.advantage.advantage.repositories.SingleAnalysisReportRepo;
 import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -47,17 +44,29 @@ public class AnalysisReportController {
     }
 
     @GetMapping("/getAllByTeamId")
-    public  ResponseEntity<?> getAllReports(@RequestParam String token) {
+    public  ResponseEntity<?> getAllReports(@RequestParam String token, @RequestParam Long teamId) {
 
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
         Long userID = jwtUtils.getUserId(token);
-        Long teamId = userAccountManagementService.getTeamMemberByID(userID).get(0).getTeam().getTeamId();
+        List<Team> userTeams = userAccountManagementService.getTeamMemberByID(userID).get(0).getTeams();
 
-        List<SingleAdAnalysisReport> singleReports = singleAnalysisReportRepository.findByUploader_Team_TeamId(teamId);
-        List<MultipleAdAnalysisReport> multiReports = multipleAnalysisReportRepository.findByUploader_Team_TeamId(teamId);
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        }
+
+        List<SingleAdAnalysisReport> singleReports = singleAnalysisReportRepository.findByTeam_TeamId(teamId);
+        List<MultipleAdAnalysisReport> multiReports = multipleAnalysisReportRepository.findByTeam_TeamId(teamId);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (SingleAdAnalysisReport singleReport : singleReports) {

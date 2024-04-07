@@ -19,6 +19,9 @@ public class TextualAdvertisementServiceImplementation implements TextualAdverti
     @Autowired
     TeamMemberRepo teamMemberRepo;
 
+    @Autowired
+    TeamRepo teamRepo;
+
     private IgnoredPropertyCreator ignoredPropertyCreator;
     @Override
     public List<TextualAdvertisement> getAllAdvertisements() {
@@ -47,14 +50,23 @@ public class TextualAdvertisementServiceImplementation implements TextualAdverti
     }
 
     @Override
-    public TextualAdvertisement saveAdvertisement(AdCategory category, long uploaderId, Date uploadedAt, String adText) {
+    public TextualAdvertisement saveAdvertisement(AdCategory category, long uploaderId, Date uploadedAt, String adText, Long teamId) {
         TextualAdvertisement ad = new TextualAdvertisement();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
         if (uploaders == null || uploaders.isEmpty()){
             System.out.println("The uploader does not exist");
             return null;
         }
+
+        List<Team> teams = teamRepo.findByTeamId(teamId);
+        if (teams == null || teams.isEmpty()){
+            System.out.println("The team does not exist");
+            return null;
+        }
+
         TeamMember uploader = uploaders.get(0);
+        Team team = teams.get(0);
+
         if(adText.equals("") ){
             System.out.println("Please enter the text of your advertisement");
             return null;
@@ -63,6 +75,8 @@ public class TextualAdvertisementServiceImplementation implements TextualAdverti
         ad.setUploader(uploader);
         ad.setUploadedAt(uploadedAt);
         ad.setAdText(adText);
+        ad.setTeam(team);
+
         try {
             return advertisementRepo.save(ad);
         } catch (DataAccessException e) {

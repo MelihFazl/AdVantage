@@ -22,4 +22,8 @@ public abstract class AnalysisReport {
     @JoinColumn(name = "team_member_id", referencedColumnName = "id")
     @Getter @Setter private TeamMember uploader;
 
+    @ManyToOne
+    @JoinColumn(name = "team_id", referencedColumnName = "teamId")
+    @Getter @Setter private Team team;
+
 }

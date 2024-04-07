@@ -1,12 +1,10 @@
 package com.advantage.advantage.services;
 
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
-import com.advantage.advantage.models.Advertisement;
-import com.advantage.advantage.models.SingleAdAnalysisReport;
-import com.advantage.advantage.models.TeamMember;
-import com.advantage.advantage.models.TextualAdvertisement;
+import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.SingleAnalysisReportRepo;
 import com.advantage.advantage.repositories.TeamMemberRepo;
+import com.advantage.advantage.repositories.TeamRepo;
 import com.advantage.advantage.repositories.TextualAdvertisementRepo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +23,8 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     TextualAdvertisementRepo adRepo;
 
     @Autowired
+    TeamRepo teamRepo;
     TextualAdvertisementService textualAdvertisementService;
-
     private IgnoredPropertyCreator ignoredPropertyCreator;
     @Override
     public List<SingleAdAnalysisReport> getAllReports() {
@@ -59,14 +57,23 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, TextualAdvertisement ad) {
+    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, TextualAdvertisement ad, Long teamId) {
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
         if (uploaders == null || uploaders.isEmpty()){
             System.out.println("The uploader does not exist");
             return null;
         }
+
+        List<Team> teams = teamRepo.findByTeamId(teamId);
+        if (teams == null || teams.isEmpty()){
+            System.out.println("The team does not exist");
+            return null;
+        }
+
         TeamMember uploader = uploaders.get(0);
+        Team team = teams.get(0);
+
         if(title.equals("")){
             System.out.println("Please enter valid title");
             return null;
@@ -88,6 +95,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
         newReport.setOverview(overview);
         newReport.setSuccessPrediction(prediction);
         newReport.setAdvertisement(ad);
+        newReport.setTeam(team);
         try {
             SingleAdAnalysisReport savedReport = reportRepo.save(newReport);
             return savedReport;
