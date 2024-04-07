@@ -1,4 +1,5 @@
 package com.advantage.advantage.models;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class Team {
   //  @Getter @Setter analysis reports
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "administrator_id", referencedColumnName = "id")
     @Getter @Setter private CompanyAdministrator companyAdministrator;
 
