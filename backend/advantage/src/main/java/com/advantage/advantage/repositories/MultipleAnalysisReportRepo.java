@@ -14,7 +14,7 @@ public interface MultipleAnalysisReportRepo  extends JpaRepository<MultipleAdAna
 
     public List<MultipleAdAnalysisReport>  findByTitle(String title);
     public List<MultipleAdAnalysisReport> findByReportId(long reportId);
-    public MultipleAdAnalysisReport deleteByReportId(long reportId);
+    public Long deleteByReportId(long reportId);
     public List<MultipleAdAnalysisReport> findByCreatedAt(Date createdAt);
     public List<MultipleAdAnalysisReport> findByComparison(String overview);
 

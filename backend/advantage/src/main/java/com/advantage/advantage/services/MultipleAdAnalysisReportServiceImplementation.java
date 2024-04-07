@@ -137,8 +137,8 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
         List<AdvertisementReportAssociation> associations = associationService.getByReport(deletedReport);
         for( AdvertisementReportAssociation  association : associations){
             TextualAdvertisement ad = association.getAdvertisement();
-            associationService.deleteAdvertisementReportAssociationByAssociationId(association.getId());
             advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+            associationService.deleteAdvertisementReportAssociationByAssociationId(association.getId());
         }
         reportRepo.deleteByReportId(reportId);
         return true;

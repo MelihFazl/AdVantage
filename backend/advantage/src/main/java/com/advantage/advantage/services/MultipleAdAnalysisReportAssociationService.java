@@ -12,5 +12,5 @@ public interface MultipleAdAnalysisReportAssociationService  {
     public List<AdvertisementReportAssociation> getByAdvertisement(TextualAdvertisement ad);
     public AdvertisementReportAssociation saveAdvertisementReportAssociation(TextualAdvertisement ad, MultipleAdAnalysisReport report, String pros, String cons, float pred);
     public AdvertisementReportAssociation updateAdvertisementReportAssociation(AdvertisementReportAssociation editedAssociation, long oldAssociationId);
-    public AdvertisementReportAssociation deleteAdvertisementReportAssociationByAssociationId(long associationId);
+    public Long deleteAdvertisementReportAssociationByAssociationId(long associationId);
 }

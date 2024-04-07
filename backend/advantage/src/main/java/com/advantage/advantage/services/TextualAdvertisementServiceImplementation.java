@@ -105,7 +105,7 @@ public class TextualAdvertisementServiceImplementation implements TextualAdverti
     }
 
     @Override
-    public TextualAdvertisement deleteAdvertisementById(long advertisementId) {
+    public long deleteAdvertisementById(long advertisementId) {
         return advertisementRepo.deleteByAdvertisementId(advertisementId);
     }
 }

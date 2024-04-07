@@ -4,6 +4,7 @@ import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.MultipleAdAnalysisReportAssociationRepo;
 import com.advantage.advantage.services.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -111,22 +112,47 @@ public class AnalysisReportController {
     }
 
     @DeleteMapping ("/delete")
+    @Transactional
     public  ResponseEntity<?> deleteReport(@RequestParam String token, @RequestParam long reportId, @RequestParam String reportType) {
         //Check if the token is available
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
+
+        //Additional check mechanism might be required, who can delete the report not all team members can delete the report.
+        long requesterId = jwtUtils.getUserId(token);
+        long requesterTeamId = userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeam().getTeamId();
+
         // Delete the report based on the report type
         switch (reportType) {
             case "MultipleAdAnalysisReport":
-                multipleAdService.deleteReportByReportId(reportId);
-                break;
+                try {
+                    long reportTeamId = multipleAdService.getByReportId(reportId).get(0).getUploader().getTeam().getTeamId();
+                    if(requesterTeamId != reportTeamId) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You do not have permission to delete this report");
+                    }
+
+                    multipleAdService.deleteReportByReportId(reportId);
+                    break;
+                }catch(Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+                }
             case "SingleAdAnalysisReport":
-                List <SingleAdAnalysisReport> report = singleAdService.getByReportId(reportId);
-                TextualAdvertisement ad = report.get(0).getAdvertisement();
-                singleAdService.deleteReportByReportId(reportId);
-                advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
-                break;
+                try{
+                    List <SingleAdAnalysisReport> report = singleAdService.getByReportId(reportId);
+                    long reportTeamId = report.get(0).getUploader().getTeam().getTeamId();
+                    if(requesterTeamId != reportTeamId) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You do not have permission to delete this report");
+                    }
+                    TextualAdvertisement ad = report.get(0).getAdvertisement();
+                    singleAdService.deleteReportByReportId(reportId);
+                    advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+                    break;
+                }catch(Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+                }
+
+
             default:
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid report type");
         }

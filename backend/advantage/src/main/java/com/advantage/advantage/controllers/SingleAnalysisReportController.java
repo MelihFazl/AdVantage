@@ -87,6 +87,9 @@ public class SingleAnalysisReportController {
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         //float prediction = modelService.getTextualPrediction(adText);
         float prediction = 0.5f;
+
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd) != null) {
+
         if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd, teamId) != null) {
             return ResponseEntity.status(HttpStatus.OK).body("Advertisement and report saved successfully!");
         }
