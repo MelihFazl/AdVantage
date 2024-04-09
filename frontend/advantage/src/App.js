@@ -10,7 +10,7 @@ import { NoPage } from "./pages/no-page";
 import { TeamMemberHomePage } from "./pages/team-member-pages/team-member-home";
 import { TeamMemberTextualAnalysisPage } from "./pages/team-member-pages/team-member-textual-analysis";
 import { TeamMemberImageAnalysisPage} from "./pages/team-member-pages/team-member-image-analysis";
-import {DenemePage} from "./pages/deneme";
+import {PDFPage} from "./pages/save-pdf";
 function App() {
   return (
     <BrowserRouter>
@@ -21,7 +21,7 @@ function App() {
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/deneme" element={<DenemePage />} />
+        <Route path="/save-pdf" element={<PDFPage />} />
         <Route
           path="/team-member"
           element={<TeamMemberHomePage></TeamMemberHomePage>}
