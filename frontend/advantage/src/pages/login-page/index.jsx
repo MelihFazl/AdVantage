@@ -1,69 +1,50 @@
 import { TopBarHome } from "../../common/top-bar-home";
 import React, { useState, useEffect } from "react";
+import styled from "@emotion/styled";
+import { jwtDecode } from "jwt-decode";
+import { Form, Field } from "react-final-form";
+import { isFieldEmpty } from "../../common/validator-functions/isFieldEmpty";
 import {
   Grid,
   Container,
   Box,
   TextField,
   Checkbox,
-  FormControlLabel,
   Button,
   Typography,
   Link,
   Paper,
-  unstable_composeClasses,
+  FormControlLabel,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import yourImage from "../../assets/images/login.png";
 import { BASE_URL } from "../../common/constans";
 
+const ImageBox = styled(Box)`
+  width: 50%;
+  height: 100%;
+  background-image: url(${yourImage});
+  background-size: cover;
+
+  @media (max-width: 1000px) {
+    display: none;
+  }
+`;
+
+const FormContainer = styled(Paper)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 50%;
+
+  @media (max-width: 1000px) {
+    width: 100%;
+  }
+`;
+
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Check if email and password are filled
-    if (email.trim() === "" || password.trim() === "") {
-      alert("Please fill in both email and password fields.");
-      return;
-    }
-
-    // Handle the login logic here
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    var raw = JSON.stringify({
-      email: email,
-      password: password,
-    });
-
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-
-    fetch(BASE_URL + "/user/teamMember/login", requestOptions)
-      .then((response) => response.text())
-      .then((result) => {
-        var userId = result.split("Token: ")[0];
-        var token = result.split("Token: ")[1];
-
-        if (token && token.substring(0, 2) === "TM") {
-          localStorage.setItem("userType", "tm");
-          localStorage.setItem("userToken", token);
-          localStorage.setItem("userId", userId.substring(8));
-          navigate("/team-member");
-        } else {
-          alert(result);
-        }
-      })
-      .catch((error) => console.log("error", error));
-  };
 
   return (
     <Container
@@ -73,81 +54,126 @@ export const LoginPage = () => {
     >
       <TopBarHome />
       <Box sx={{ display: "flex", flexGrow: 1 }}>
-        <Box
-          sx={{
-            width: "50%",
-            height: "100%",
-            backgroundImage: `url(${yourImage})`,
-            backgroundSize: "cover",
-          }}
-        />
-        <Paper
-          elevation={0}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            padding: "20px",
-            width: "50%",
-          }}
-        >
+        <ImageBox></ImageBox>
+
+        <FormContainer>
           <Typography component="h1" variant="h5" sx={{ fontWeight: "bold" }}>
             Log In
           </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{ mt: 1, width: "100%" }}
-          >
-            <TextField
-              size="small"
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              size="small"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  value="remember"
-                  color="primary"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
+          <Box sx={{ mt: 1, width: "100%" }}>
+            <Form
+              keepDirtyOnReinitialize
+              validate={(values) =>
+                !(isFieldEmpty(values.email) && isFieldEmpty(values.password))
               }
-              label="Remember me"
-            />
-            <Button
-              type="submit"
-              disableElevation
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3 }}
-            >
-              Log In
-            </Button>
+              initialValues={{ password: "", email: "", rememberMe: false }}
+              onSubmit={(values) => {
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+
+                var raw = JSON.stringify({
+                  email: values.email,
+                  password: values.password,
+                });
+
+                var requestOptions = {
+                  method: "POST",
+                  headers: myHeaders,
+                  body: raw,
+                  redirect: "follow",
+                };
+
+                fetch(BASE_URL + "/user/teamMember/login", requestOptions)
+                  .then((response) => {
+                    if (response.ok) {
+                      response.text().then((result) => {
+                        var token = result;
+                        var user = jwtDecode(token);
+                        localStorage.setItem("userToken", token);
+                        if (token && user.userType === "TM") {
+                          navigate("/team-member");
+                        } else {
+                          alert(result);
+                        }
+                      });
+                    } else {
+                      response.text().then((result) => {
+                        alert(result);
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              }}
+              render={({ handleSubmit, invalid }) => (
+                <form onSubmit={handleSubmit}>
+                  <Box sx={{ mt: 1, width: "100%" }}>
+                    <Field
+                      name="email"
+                      validate={isFieldEmpty("Email must be entered.")}
+                    >
+                      {({ input, meta }) => (
+                        <TextField
+                          {...input}
+                          label="Email Address"
+                          size="small"
+                          margin="normal"
+                          fullWidth
+                          required
+                          error={meta.touched && meta.error ? true : false}
+                          variant="outlined"
+                          helperText={
+                            meta.touched && meta.error ? meta.error : ""
+                          }
+                        />
+                      )}
+                    </Field>
+                    <Field
+                      name="password"
+                      validate={isFieldEmpty("Password must be entered.")}
+                    >
+                      {({ input, meta }) => (
+                        <TextField
+                          {...input}
+                          size="small"
+                          margin="normal"
+                          required
+                          fullWidth
+                          type="password"
+                          label="Password"
+                          error={meta.touched && meta.error ? true : false}
+                          variant="outlined"
+                          helperText={
+                            meta.touched && meta.error ? meta.error : ""
+                          }
+                        />
+                      )}
+                    </Field>
+                    <Field name="rememberMe" type="checkbox">
+                      {({ input }) => (
+                        <FormControlLabel
+                          label="Remember Me"
+                          control={<Checkbox {...input}></Checkbox>}
+                        ></FormControlLabel>
+                      )}
+                    </Field>
+                    <Button
+                      type="submit"
+                      disableElevation
+                      disabled={invalid}
+                      fullWidth
+                      variant="contained"
+                      sx={{ mt: 1 }}
+                    >
+                      Log In
+                    </Button>
+                  </Box>
+                </form>
+              )}
+            ></Form>
           </Box>
-          <Grid justifyContent="center " marginTop="10px">
+          <Grid justifyContent="center " marginTop="18px">
             <Link href="/sign-up" variant="body2" underline="none">
               {"Don't have an account? Sign Up"}
             </Link>
@@ -162,7 +188,7 @@ export const LoginPage = () => {
               {"Forgot password?"}
             </Link>
           </Grid>
-        </Paper>
+        </FormContainer>
       </Box>
     </Container>
   );

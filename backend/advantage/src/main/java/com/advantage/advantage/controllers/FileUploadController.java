@@ -63,7 +63,7 @@ public class FileUploadController {
         }
     }
 
-
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:8080"})
     @GetMapping("/download")
     public ResponseEntity<?> downloadFile(@RequestParam("fileName")  @NotBlank @NotNull String fileName) throws FileDownloadException, IOException {
         Object response = fileService.downloadFile(fileName);

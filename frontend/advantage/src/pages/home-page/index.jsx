@@ -17,6 +17,10 @@ const Section1 = styled("div")({
   alignItems: `flex-start`,
   padding: `80px 80px 0px 80px`,
   boxSizing: `border-box`,
+
+  "@media (max-width: 1000px)": {
+    flexDirection: "column", // Change flexDirection to column below 1000px
+  },
 });
 
 const Content = styled("div")({
@@ -65,6 +69,11 @@ const Right = styled("div")({
   overflow: `hidden`,
   backgroundImage: `url(${yourImage})`, // Added background image
   backgroundSize: "cover", // Ensures the image covers the container
+
+  "@media (max-width: 1000px)": {
+    margin: "0px",
+    marginBottom: "50px",
+  },
 });
 
 export const HomePage = () => {
