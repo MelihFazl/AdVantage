@@ -15,6 +15,10 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter private Long teamId;
     @Getter @Setter private String teamName;
+    @Column(columnDefinition = "integer default 0")
+    @Getter @Setter private Integer usageLimit;
+    @Column(columnDefinition = "integer default 0")
+    @Getter @Setter private Integer monthlyAnalysisUsage;
   //  @Getter @Setter analysis reports
 
     @ManyToOne

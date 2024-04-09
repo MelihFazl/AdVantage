@@ -26,6 +26,9 @@ public class TextualAdvertisementController {
     private final UserAccountManagementService userAccountManagementService;
     private final JwtUtils jwtUtils;
 
+    @Autowired
+    TeamService teamService;
+
     public TextualAdvertisementController(UserAccountManagementService userAccountManagementService) {
         this.userAccountManagementService = userAccountManagementService;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
@@ -44,10 +47,12 @@ public class TextualAdvertisementController {
 
         long uploaderId = jwtUtils.getUserId(token);
         List<Team> userTeams = userAccountManagementService.getTeamMemberByID(uploaderId).get(0).getTeams();
+        Team userTeam = null;
 
         boolean isAuthorized = false;
         for(Team team : userTeams){
             if(Objects.equals(team.getTeamId(), teamId)) {
+                userTeam = team;
                 isAuthorized = true;
                 break;
             }
@@ -57,7 +62,13 @@ public class TextualAdvertisementController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
         }
 
+        if((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit ");
+        }
+
         TextualAdvertisement createdAdvertisement = textAdService.saveAdvertisement(category, uploaderId, uploadedAt, adText, teamId);
+        userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
+        teamService.updateTeam(userTeam);
 
         // Adjust the status code and add any additional headers if needed
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAdvertisement);

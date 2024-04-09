@@ -119,19 +119,25 @@ public class AnalysisReportController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
-        //Additional check mechanism might be required, who can delete the report not all team members can delete the report.
         long requesterId = jwtUtils.getUserId(token);
-        long requesterTeamId = userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeam().getTeamId();
+        List<Team> userTeams = userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeams();
+
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), requesterId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        }
 
         // Delete the report based on the report type
         switch (reportType) {
             case "MultipleAdAnalysisReport":
                 try {
-                    long reportTeamId = multipleAdService.getByReportId(reportId).get(0).getUploader().getTeam().getTeamId();
-                    if(requesterTeamId != reportTeamId) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You do not have permission to delete this report");
-                    }
-
                     multipleAdService.deleteReportByReportId(reportId);
                     break;
                 }catch(Exception e) {
@@ -140,10 +146,6 @@ public class AnalysisReportController {
             case "SingleAdAnalysisReport":
                 try{
                     List <SingleAdAnalysisReport> report = singleAdService.getByReportId(reportId);
-                    long reportTeamId = report.get(0).getUploader().getTeam().getTeamId();
-                    if(requesterTeamId != reportTeamId) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You do not have permission to delete this report");
-                    }
                     TextualAdvertisement ad = report.get(0).getAdvertisement();
                     singleAdService.deleteReportByReportId(reportId);
                     advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
