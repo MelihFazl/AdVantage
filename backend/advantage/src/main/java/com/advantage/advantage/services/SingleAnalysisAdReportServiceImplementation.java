@@ -2,10 +2,7 @@ package com.advantage.advantage.services;
 
 import com.advantage.advantage.helpers.IgnoredPropertyCreator;
 import com.advantage.advantage.models.*;
-import com.advantage.advantage.repositories.SingleAnalysisReportRepo;
-import com.advantage.advantage.repositories.TeamMemberRepo;
-import com.advantage.advantage.repositories.TeamRepo;
-import com.advantage.advantage.repositories.TextualAdvertisementRepo;
+import com.advantage.advantage.repositories.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -21,6 +18,8 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     TeamMemberRepo teamMemberRepo;
     @Autowired
     TextualAdvertisementRepo adRepo;
+    @Autowired
+    ShapleyValReportAssociationServiceImplementation shapleyValReportAssociationService;
 
     @Autowired
     TeamRepo teamRepo;
@@ -57,7 +56,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, TextualAdvertisement ad, Long teamId) {
+    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, List<Long> shapleyVal,TextualAdvertisement ad, Long teamId) {
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
         if (uploaders == null || uploaders.isEmpty()){
@@ -96,8 +95,17 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
         newReport.setSuccessPrediction(prediction);
         newReport.setAdvertisement(ad);
         newReport.setTeam(team);
+
+        if(shapleyVal.isEmpty()){
+            System.out.println("There is no shapley values");
+            return null;
+        }
+
         try {
             SingleAdAnalysisReport savedReport = reportRepo.save(newReport);
+            for(long val: shapleyVal){
+                shapleyValReportAssociationService.saveShapleyValReportAssociation(savedReport.getReportId(),val);
+            }
             return savedReport;
         } catch (DataAccessException e) {
             System.out.println( e.getMessage());
@@ -129,6 +137,12 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
         List<SingleAdAnalysisReport> reports = reportRepo.findByReportId(reportId);
         if(reports == null || reports.isEmpty()){
             return false;
+        }
+        List<ShapleyValReportAssociation> associations = shapleyValReportAssociationService.getByReportId(reportId);
+        if(!associations.isEmpty()){
+            for(ShapleyValReportAssociation assoc : associations){
+                shapleyValReportAssociationService.deleteAssociationById(assoc.getShapleyValId());
+            }
         }
         reportRepo.deleteByReportId(reportId);
         return true;

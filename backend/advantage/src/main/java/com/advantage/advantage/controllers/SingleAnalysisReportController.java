@@ -8,6 +8,8 @@ import com.advantage.advantage.services.UserAccountManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,10 +87,11 @@ public class SingleAnalysisReportController {
         }
 
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
-        //float prediction = modelService.getTextualPrediction(adText);
+        //float prediction = modelService.calculateCPI(adText);
+        //List<Long> shapleyVal = modelService.calculateShapVal(adText);
         float prediction = 0.5f;
-
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd, teamId) != null) {
+        List<Long> shapleyVal = new ArrayList<>();
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal,newAd, teamId) != null) {
             return ResponseEntity.status(HttpStatus.OK).body("Advertisement and report saved successfully!");
         }
 

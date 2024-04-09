@@ -10,6 +10,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -17,8 +19,9 @@ public class ModelServiceImplementation implements ModelService{
 
 
     @Override
-    public float getTextualPrediction(String adText) {
+    public TextModelAPIResponse getTextualPrediction(String adText) {
         float cpiValue = 0;
+        List<Long> shapVal = new ArrayList<>();
         // Define the URL of the external API
         String apiUrl = "http://localhost:8000/text_ad/predict";
         String requestBody = "{\"text_ad\": \"" + adText + "\"}";
@@ -43,18 +46,23 @@ public class ModelServiceImplementation implements ModelService{
             // Assuming the response is a JSON object with key-value pairs
             // Replace MyResponseClass with the appropriate class representing your response structure
             TextModelAPIResponse responseObject = new ObjectMapper().readValue(response, TextModelAPIResponse.class);
-
-            // Extract the value associated with the "cpi" key
-            cpiValue = responseObject.getCpi();
-
+            return responseObject;
             // Print the value associated with the "cpi" key
-            System.out.println("Value of 'cpi': " + cpiValue);
         } catch (Exception e) {
             e.printStackTrace();
         }
+      return null;
+    }
 
-        // Return the CPI value
-        return cpiValue;
+    @Override
+    public float calculateCPI(String adText){
+        TextModelAPIResponse responseObject = getTextualPrediction(adText);
+        return responseObject.getCpi();
+    }
+    @Override
+    public List<Long> calculateShapVal(String adText){
+        TextModelAPIResponse responseObject = getTextualPrediction(adText);
+        return responseObject.getShapleyVal();
     }
 }
 
