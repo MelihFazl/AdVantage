@@ -113,18 +113,18 @@ public class AnalysisReportController {
 
     @DeleteMapping ("/delete")
     @Transactional
-    public  ResponseEntity<?> deleteReport(@RequestParam String token, @RequestParam long reportId, @RequestParam String reportType) {
+    public  ResponseEntity<?> deleteReport(@RequestParam String token, @RequestParam Long teamId, @RequestParam long reportId, @RequestParam String reportType) {
         //Check if the token is available
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
-        long requesterId = jwtUtils.getUserId(token);
+        Long requesterId = jwtUtils.getUserId(token);
         List<Team> userTeams = userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeams();
 
         boolean isAuthorized = false;
         for(Team team : userTeams){
-            if(Objects.equals(team.getTeamId(), requesterId)) {
+            if(Objects.equals(team.getTeamId(), teamId)) {
                 isAuthorized = true;
                 break;
             }
