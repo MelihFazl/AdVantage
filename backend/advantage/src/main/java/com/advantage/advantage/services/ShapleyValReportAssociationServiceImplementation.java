@@ -22,12 +22,12 @@ public class ShapleyValReportAssociationServiceImplementation implements Shapley
 
     @Override
     public List<ShapleyValReportAssociation> getById(long id) {
-        return  assocRepo.findById(id);
+        return  assocRepo.findByShapleyValId(id);
     }
 
     @Override
     public List<ShapleyValReportAssociation> getByReportId(long reportId) {
-        return assocRepo.findByReportId(reportId);
+        return assocRepo.findByReport(singleReportRepo.findByReportId(reportId).get(0));
     }
 
     @Override

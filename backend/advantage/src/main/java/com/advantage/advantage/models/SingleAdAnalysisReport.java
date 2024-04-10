@@ -21,11 +21,6 @@ public class SingleAdAnalysisReport extends AnalysisReport{
     @Setter
     private float successPrediction;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter  Long id;
-
-
 
     @OneToOne(optional = false)
     @JoinColumn(name = "advertisement_id", referencedColumnName = "advertisementId")

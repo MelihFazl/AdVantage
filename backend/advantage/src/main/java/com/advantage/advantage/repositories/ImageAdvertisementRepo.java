@@ -18,6 +18,5 @@ public interface ImageAdvertisementRepo extends JpaRepository<ImageAdvertisement
     public List<ImageAdvertisement> findByUploader(TeamMember uploader);
     public List<ImageAdvertisement> findByCategory(AdCategory category);
     public List<ImageAdvertisement> findByUploadedAt(Date uploadedAt);
-    public List<ImageAdvertisement> findByAdText(String adText);
 
 }

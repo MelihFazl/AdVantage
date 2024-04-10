@@ -1,6 +1,7 @@
 package com.advantage.advantage.repositories;
 
 import com.advantage.advantage.models.ShapleyValReportAssociation;
+import com.advantage.advantage.models.SingleAdAnalysisReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Date;
@@ -10,7 +11,7 @@ public interface ShapleyValReportAssociationRepo extends JpaRepository<ShapleyVa
 
     public List<ShapleyValReportAssociation> findAll();
 
-    public List<ShapleyValReportAssociation> findById(long id);
+    public List<ShapleyValReportAssociation> findByShapleyValId(long id);
 
-    public List<ShapleyValReportAssociation> findByReportId(long reportId);
+    public List<ShapleyValReportAssociation> findByReport(SingleAdAnalysisReport report);
 }

@@ -12,8 +12,8 @@ public  class ShapleyValReportAssociation {
 
      @Getter @Setter long shapleyVal;
     @ManyToOne
-    @JoinColumn(name = "report_id")
+    @JoinColumn(name = "report_id", referencedColumnName = "reportId")
     @Getter
     @Setter
-    SingleAdAnalysisReport report;
+    private SingleAdAnalysisReport report;
 }

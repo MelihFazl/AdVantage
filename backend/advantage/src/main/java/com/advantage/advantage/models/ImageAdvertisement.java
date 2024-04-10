@@ -10,5 +10,5 @@ import lombok.Setter;
 public class ImageAdvertisement extends Advertisement{
     @Getter
     @Setter
-    long imageKey;
+    String imageKey;
 }

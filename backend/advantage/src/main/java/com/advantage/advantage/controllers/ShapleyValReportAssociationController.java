@@ -1,7 +1,6 @@
 package com.advantage.advantage.controllers;
 
 import com.advantage.advantage.models.ShapleyValReportAssociation;
-import com.advantage.advantage.models.SingleAdAnalysisReport;
 import com.advantage.advantage.services.ShapleyValReportAssociationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
