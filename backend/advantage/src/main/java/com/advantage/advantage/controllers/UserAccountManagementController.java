@@ -21,24 +21,29 @@ public class UserAccountManagementController {
 
     private final UserAccountManagementService userAccountManagementService;
     private final CompanyService companyService;
+    private final EmailService emailService;
     private final TokenRepository tokenRepository;
     private final CompanySubscriptionService subscriptionService ;
     private final JwtUtils jwtUtils;
+
 
     @Autowired
     public UserAccountManagementController(
             UserAccountManagementService userAccountManagementService,
             CompanyService companyService,
             CompanySubscriptionService subscriptionService,
-            TokenRepository tokenRepository) {
+            TokenRepository tokenRepository,
+            EmailService emailService) {
         this.userAccountManagementService = userAccountManagementService;
         this.companyService = companyService;
         this.tokenRepository = tokenRepository;
         this.subscriptionService = subscriptionService;
+        this.emailService = emailService;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
     }
 
     private PasswordHashHandler passwordHashHandler = PasswordHashHandler.getInstance();
+
 
     /**
      * Only an authorized company administrator can create a team member
@@ -46,8 +51,8 @@ public class UserAccountManagementController {
      * @param teamMember team member information to create
      * @return ResponseEntity with the result of the request
      */
-    @PostMapping("/teamMember/add")
-    public ResponseEntity<String> saveTeamMember(@RequestParam String token, @RequestBody TeamMember teamMember) {
+    @PostMapping("/teamMember/add/test")
+    public ResponseEntity<String> saveTeamMember_test(@RequestParam String token, @RequestBody TeamMember teamMember) {
         boolean tokenMatch = jwtUtils.validateToken(token, "CA");
 
         if (tokenMatch) {
@@ -60,6 +65,37 @@ public class UserAccountManagementController {
                 Company comp = teamMember.getCompanyAdministrator().getCompany();
                 comp.setNumberOfEmployees(comp.getNumberOfEmployees() + 1);
                 companyService.saveCompany(comp);
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body("Team Member with name (" + teamMember.getName() + ") and with id (" + teamMember.getId() + ") has been created.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("There is already an existing team member with the id" + teamMember.getId());
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized requesttttt.");
+        }
+    }
+
+    @PostMapping("/teamMember/add")
+    public ResponseEntity<String> saveTeamMember(@RequestParam String token, @RequestBody TeamMember teamMember) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            CompanyAdministrator ca = userAccountManagementService.getCompanyAdministratorByID(userId).get(0);
+            String randomPassword = RandomPasswordGenerator.generatePassword(12);
+            passwordHashHandler.setPassword(randomPassword);
+            teamMember.setHashedPassword(passwordHashHandler.hashPassword());
+            teamMember.setCompanyAdministrator(ca);
+            if (userAccountManagementService.saveTeamMember(teamMember) != null) {
+                Company comp = teamMember.getCompanyAdministrator().getCompany();
+                comp.setNumberOfEmployees(comp.getNumberOfEmployees() + 1);
+                companyService.saveCompany(comp);
+                String subject = "Your personal password for adVantage";
+                String text = "Welcome to advantage! \n This is your password to login to your personal account: "
+                        + randomPassword + " \n Feel free to change your password later";
+                emailService.sendSimpleMessage(teamMember.getEmail(), subject, text);
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body("Team Member with name (" + teamMember.getName() + ") and with id (" + teamMember.getId() + ") has been created.");
             } else {
