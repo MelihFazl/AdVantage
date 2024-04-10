@@ -247,44 +247,80 @@ public class UserAccountManagementController {
         return userAccountManagementService.getAllEmployee();
     }
 
-    @PostMapping("/teamMember/login")
-    public ResponseEntity<String> loginTeamMemberByEmail(@RequestBody Map<String, String> loginRequest) {
-        String email = loginRequest.get("email");
-        String password = loginRequest.get("password");
+        @PostMapping("/teamMember/login")
+        public ResponseEntity<String> loginTeamMemberByEmail(@RequestBody Map<String, String> loginRequest) {
+            String email = loginRequest.get("email");
+            String password = loginRequest.get("password");
 
-        passwordHashHandler = PasswordHashHandler.getInstance();
-        passwordHashHandler.setPassword(password);
+            passwordHashHandler = PasswordHashHandler.getInstance();
+            passwordHashHandler.setPassword(password);
 
-        List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
+            List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
 
-        if (teamMembers == null || teamMembers.isEmpty()) {
-            return new ResponseEntity<>("No team member was found with email " + email, HttpStatus.NOT_FOUND);
-        } else {
-            TeamMember teamMemberLoggingIn = teamMembers.get(0);
-            if (passwordHashHandler.hashPassword().equals(teamMemberLoggingIn.getHashedPassword())) {
-                Token token = new Token();
-                token.setInUse(true);
-                /*
-                token.setLastActive(LocalDateTime.now());
-                 */
-                String tokenStr = token.generateToken(teamMemberLoggingIn.getId(), "TM");
-                tokenRepository.save(token);
-                teamMemberLoggingIn.setToken(token);
-                userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
-
-                // Include userID in the response string
-                //String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
-                String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
-
-
-                return new ResponseEntity<>(tokenStr, HttpStatus.OK);
+            if (teamMembers == null || teamMembers.isEmpty()) {
+                return new ResponseEntity<>("No team member was found with email " + email, HttpStatus.NOT_FOUND);
             } else {
-                return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
+                TeamMember teamMemberLoggingIn = teamMembers.get(0);
+                if (passwordHashHandler.hashPassword().equals(teamMemberLoggingIn.getHashedPassword())) {
+                    Token token = new Token();
+                    token.setInUse(true);
+                    /*
+                    token.setLastActive(LocalDateTime.now());
+                     */
+                    String tokenStr = token.generateToken(teamMemberLoggingIn.getId(), "TM");
+                    tokenRepository.save(token);
+                    teamMemberLoggingIn.setToken(token);
+                    userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
+
+                    // Include userID in the response string
+                    //String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
+                    String responseString = "UserID: " + teamMemberLoggingIn.getId() + " Token: TM " + tokenStr ;
+
+
+                    return new ResponseEntity<>(tokenStr, HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
+                }
             }
         }
-    }
-    @PostMapping("/companyAdministrator/login")
-    public ResponseEntity<String> loginCompanyAdministratorByEmail(@RequestBody Map<String, String> loginRequest) {
+        @PostMapping("/companyAdministrator/login")
+        public ResponseEntity<String> loginCompanyAdministratorByEmail(@RequestBody Map<String, String> loginRequest) {
+
+            String email = loginRequest.get("email");
+            String password = loginRequest.get("password");
+
+            passwordHashHandler = PasswordHashHandler.getInstance();
+            passwordHashHandler.setPassword(password);
+
+            List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
+
+            if (companyAdministrators == null || companyAdministrators.isEmpty()) {
+                return new ResponseEntity<>("No company administrator was found with email " + email, HttpStatus.NOT_FOUND);
+            } else {
+                CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
+                if (passwordHashHandler.hashPassword().equals(companyAdministratorLoggingIn.getHashedPassword())) {
+                    Token token = new Token();
+                    token.setInUse(true);
+                    /*
+                    token.setLastActive(LocalDateTime.now());
+                     */
+                    String tokenStr = token.generateToken(companyAdministratorLoggingIn.getId(), "CA");
+                    tokenRepository.save(token);
+                    companyAdministratorLoggingIn.setToken(token);
+                    userAccountManagementService.updateCompanyAdministrator(companyAdministratorLoggingIn);
+
+                    // Include companyAdministratorId in the response string
+                    //String responseString = "CompanyAdministratorID: " + companyAdministratorLoggingIn.getId() + " Token: CA " + tokenStr;
+
+                    return new ResponseEntity<>(tokenStr, HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
+                }
+            }
+        }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginByEmail(@RequestBody Map<String, String> loginRequest) {
 
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
@@ -295,23 +331,32 @@ public class UserAccountManagementController {
         List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
 
         if (companyAdministrators == null || companyAdministrators.isEmpty()) {
-            return new ResponseEntity<>("No company administrator was found with email " + email, HttpStatus.NOT_FOUND);
+            List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
+            if (teamMembers == null || teamMembers.isEmpty()) {
+                return new ResponseEntity<>("No user was found with email " + email, HttpStatus.NOT_FOUND);
+            }else{
+                TeamMember teamMemberLoggingIn = teamMembers.get(0);
+                if (passwordHashHandler.hashPassword().equals(teamMemberLoggingIn.getHashedPassword())) {
+                    Token token = new Token();
+                    token.setInUse(true);
+                    String tokenStr = token.generateToken(teamMemberLoggingIn.getId(), "TM");
+                    tokenRepository.save(token);
+                    teamMemberLoggingIn.setToken(token);
+                    userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
+                    return new ResponseEntity<>(tokenStr, HttpStatus.OK);
+                }else {
+                    return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
+                }
+            }
         } else {
             CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
             if (passwordHashHandler.hashPassword().equals(companyAdministratorLoggingIn.getHashedPassword())) {
                 Token token = new Token();
                 token.setInUse(true);
-                /*
-                token.setLastActive(LocalDateTime.now());
-                 */
                 String tokenStr = token.generateToken(companyAdministratorLoggingIn.getId(), "CA");
                 tokenRepository.save(token);
                 companyAdministratorLoggingIn.setToken(token);
                 userAccountManagementService.updateCompanyAdministrator(companyAdministratorLoggingIn);
-
-                // Include companyAdministratorId in the response string
-                //String responseString = "CompanyAdministratorID: " + companyAdministratorLoggingIn.getId() + " Token: CA " + tokenStr;
-
                 return new ResponseEntity<>(tokenStr, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
