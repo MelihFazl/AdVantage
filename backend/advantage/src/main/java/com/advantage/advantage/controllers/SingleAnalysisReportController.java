@@ -89,6 +89,7 @@ public class SingleAnalysisReportController {
         //float prediction = modelService.getTextualPrediction(adText);
         float prediction = 0.5f;
 
+
         if((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
         }

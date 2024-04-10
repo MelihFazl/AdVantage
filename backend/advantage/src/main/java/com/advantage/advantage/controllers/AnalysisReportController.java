@@ -119,6 +119,7 @@ public class AnalysisReportController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
+
         Long requesterId = jwtUtils.getUserId(token);
         List<Team> userTeams = userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeams();
 
@@ -138,6 +139,8 @@ public class AnalysisReportController {
         switch (reportType) {
             case "MultipleAdAnalysisReport":
                 try {
+
+
                     multipleAdService.deleteReportByReportId(reportId);
                     break;
                 }catch(Exception e) {
@@ -146,6 +149,7 @@ public class AnalysisReportController {
             case "SingleAdAnalysisReport":
                 try{
                     List <SingleAdAnalysisReport> report = singleAdService.getByReportId(reportId);
+
                     TextualAdvertisement ad = report.get(0).getAdvertisement();
                     singleAdService.deleteReportByReportId(reportId);
                     advertisementService.deleteAdvertisementById(ad.getAdvertisementId());

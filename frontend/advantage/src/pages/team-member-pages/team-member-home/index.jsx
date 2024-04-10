@@ -7,6 +7,7 @@ import ReportListCard from "./report-list-card";
 import ReportDialog from "../report-dialog";
 import { useState } from "react";
 import { BASE_URL } from "../../../common/constans";
+import { jwtDecode } from "jwt-decode";
 import LinearProgress from "@mui/material/LinearProgress";
 
 const BannerText = styled(Typography)({
@@ -49,29 +50,16 @@ export const TeamMemberHomePage = () => {
       redirect: "follow",
     };
 
+    var token = localStorage.getItem("userToken");
+
     fetch(
-      BASE_URL + "/user/teamMember?userID=" + localStorage.getItem("userId"),
+      BASE_URL + "/analysisReport/getAllByTeamId?token=" + token,
       requestOptions
     )
       .then((response) => response.text())
       .then((result) => {
-        var requestOptions = {
-          method: "GET",
-          redirect: "follow",
-        };
-
-        fetch(
-          BASE_URL +
-            "/analysisReport/getAllByTeamId?teamId=" +
-            JSON.parse(result)[0].team.teamId,
-          requestOptions
-        )
-          .then((response) => response.text())
-          .then((result) => {
-            setReports(JSON.parse(result).reverse());
-            setIsReportsReceived(true);
-          })
-          .catch((error) => console.log("error", error));
+        setReports(JSON.parse(result).reverse());
+        setIsReportsReceived(true);
       })
       .catch((error) => console.log("error", error));
   }, []);
