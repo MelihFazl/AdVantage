@@ -24,6 +24,10 @@ public class MultipleAdAnalysisReportController {
     MultipleAdAnalysisReportService repService;
     @Autowired
     TextualAdvertisementService textAdService;
+
+    @Autowired
+    TeamService teamService;
+
     @Autowired
     MultipleAdAnalysisReportAssociationService adReportService;
     @Autowired
@@ -47,11 +51,13 @@ public class MultipleAdAnalysisReportController {
 
         long uploaderId = jwtUtils.getUserId(token);
         List<Team> userTeams = userAccountManagementService.getTeamMemberByID(uploaderId).get(0).getTeams();
+        Team userTeam = null;
 
         boolean isAuthorized = false;
         for(Team team : userTeams){
             if(Objects.equals(team.getTeamId(), teamId)) {
                 isAuthorized = true;
+                userTeam = team;
                 break;
             }
         }
@@ -76,9 +82,15 @@ public class MultipleAdAnalysisReportController {
         }
 
         String comparisons = "";
+        Integer usages = 0;
         for (String adRequest : adRequests) {
+            usages++;
             float comparison = (float) (Math.random() * 0.9999);
             comparisons += String.format("%.4f ", comparison);
+        }
+
+        if(usages > (userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
         }
 
         MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,comparisons.trim(), teamId);
@@ -95,6 +107,9 @@ public class MultipleAdAnalysisReportController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the association");
             }
         }
+
+        userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + usages);
+        teamService.updateTeam(userTeam);
 
         return ResponseEntity.status(HttpStatus.OK).body("Success");
     }

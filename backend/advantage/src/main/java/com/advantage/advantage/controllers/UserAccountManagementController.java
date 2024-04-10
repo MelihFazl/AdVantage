@@ -57,6 +57,9 @@ public class UserAccountManagementController {
             teamMember.setHashedPassword(passwordHashHandler.hashPassword());
             teamMember.setCompanyAdministrator(ca);
             if (userAccountManagementService.saveTeamMember(teamMember) != null) {
+                Company comp = teamMember.getCompanyAdministrator().getCompany();
+                comp.setNumberOfEmployees(comp.getNumberOfEmployees() + 1);
+                companyService.saveCompany(comp);
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body("Team Member with name (" + teamMember.getName() + ") and with id (" + teamMember.getId() + ") has been created.");
             } else {
@@ -112,6 +115,9 @@ public class UserAccountManagementController {
 
             try {
                 userAccountManagementService.deleteTeamMemberByID(teamMemberId);
+                Company comp = teamMember.getCompanyAdministrator().getCompany();
+                comp.setNumberOfEmployees(comp.getNumberOfEmployees() - 1);
+                companyService.saveCompany(comp);
                 return ResponseEntity.status(HttpStatus.OK)
                         .body("Team Member with name (" + teamMember.getName() + ") and with id (" + teamMember.getId() + ") has been deleted.");
             }catch(Exception e) {
@@ -143,7 +149,7 @@ public class UserAccountManagementController {
 
         newSubscription = subscriptionService.saveSubscription(PaymentPlanType.Free, PaymentPeriodType.Monthly, cd);
         company.setSubscription(newSubscription);
-
+        company.setAvailableLimit(newSubscription.getUsageLimit());
 
         // Set the CompanyAdministrator for the Company
         companyAdministrator.setCompany(company);
