@@ -2,9 +2,11 @@ package com.advantage.advantage.controllers;
 
 
 import com.advantage.advantage.helpers.JwtUtils;
+import com.advantage.advantage.models.Company;
 import com.advantage.advantage.models.CompanyAdministrator;
 import com.advantage.advantage.models.Team;
 import com.advantage.advantage.repositories.TokenRepository;
+import com.advantage.advantage.services.CompanyService;
 import com.advantage.advantage.services.TeamService;
 import com.advantage.advantage.services.UserAccountManagementService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/team")
@@ -22,6 +25,8 @@ public class TeamController {
     private final UserAccountManagementService userAccountManagementService;
 
     private final TeamService teamService;
+    private final CompanyService companyService;
+
     private final TokenRepository tokenRepository;
 
     private final JwtUtils jwtUtils;
@@ -30,11 +35,13 @@ public class TeamController {
     public TeamController(
             UserAccountManagementService userAccountManagementService,
             TeamService teamService,
-            TokenRepository tokenRepository) {
+            TokenRepository tokenRepository,
+            CompanyService companyService) {
         this.userAccountManagementService = userAccountManagementService;
         this.teamService = teamService;
         this.tokenRepository = tokenRepository;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
+        this.companyService = companyService;
     }
 
     /**
@@ -173,6 +180,7 @@ public class TeamController {
         if (tokenMatch) {
             Long userId = jwtUtils.getUserId(token);
             long caId = userAccountManagementService.getCompanyAdministratorByID(userId).get(0).getId();
+            Company comp = userAccountManagementService.getCompanyAdministratorByID(userId).get(0).getCompany();
 
             try{
                 List<Team> teams = teamService.getTeamById(teamId);
@@ -187,7 +195,23 @@ public class TeamController {
                             .body("Unauthorized request.");
                 }
 
+                Integer usageLimit = updatedTeam.getUsageLimit();
+                Integer oldLimit = comp.getAvailableLimit();
+                if (usageLimit != null) {
+                    // Validate the usage limit against the available limit
+                    if (usageLimit > oldLimit + teams.get(0).getUsageLimit()) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("You exceed the monthly usage limit!");
+                    }
+
+                    Integer newAvailableUsageLimit = comp.getAvailableLimit() + (teams.get(0).getUsageLimit() - updatedTeam.getUsageLimit());
+                    comp.setAvailableLimit(newAvailableUsageLimit);
+                }
+
                 teamService.patchTeam(updatedTeam, teamId);
+                if(!Objects.equals(oldLimit, comp.getAvailableLimit())) {
+                    companyService.saveCompany(comp);
+                }
 
                 return ResponseEntity.status(HttpStatus.OK)
                         .body("Team with the id " + teamId + " is successfully updated");

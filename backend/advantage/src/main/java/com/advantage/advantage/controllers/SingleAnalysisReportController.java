@@ -1,10 +1,7 @@
 package com.advantage.advantage.controllers;
 import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
-import com.advantage.advantage.services.ModelService;
-import com.advantage.advantage.services.SingleAnalysisAdReportService;
-import com.advantage.advantage.services.TextualAdvertisementService;
-import com.advantage.advantage.services.UserAccountManagementService;
+import com.advantage.advantage.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +24,8 @@ public class SingleAnalysisReportController {
 
     TextualAdvertisementService textAdService;
 
+    @Autowired
+    TeamService teamService;
 
     @Autowired
     ModelService modelService;
@@ -52,8 +51,10 @@ public class SingleAnalysisReportController {
         List<Team> userTeams = userAccountManagementService.getTeamMemberByID(uploaderId).get(0).getTeams();
 
         boolean isAuthorized = false;
+        Team userTeam = null;
         for(Team team : userTeams){
             if(Objects.equals(team.getTeamId(), teamId)) {
+                userTeam = team;
                 isAuthorized = true;
                 break;
             }
@@ -90,8 +91,17 @@ public class SingleAnalysisReportController {
         //float prediction = modelService.calculateCPI(adText);
         //List<Long> shapleyVal = modelService.calculateShapVal(adText);
         float prediction = 0.5f;
+
         List<Long> shapleyVal = new ArrayList<>();
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal,newAd, teamId) != null) {
+
+        if((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
+        }
+
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal,newAd, teamId) {
+            userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
+            teamService.updateTeam(userTeam);
+
             return ResponseEntity.status(HttpStatus.OK).body("Advertisement and report saved successfully!");
         }
 

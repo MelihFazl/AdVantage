@@ -113,30 +113,34 @@ public class AnalysisReportController {
 
     @DeleteMapping ("/delete")
     @Transactional
-    public  ResponseEntity<?> deleteReport(@RequestParam String token, @RequestParam long reportId, @RequestParam String reportType) {
+    public  ResponseEntity<?> deleteReport(@RequestParam String token, @RequestParam Long teamId, @RequestParam long reportId, @RequestParam String reportType) {
         //Check if the token is available
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
-        //Additional check mechanism might be required, who can delete the report not all team members can delete the report.
-        long requesterId = jwtUtils.getUserId(token);
-        List<Team> requesterTeams =  userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeams();
 
-        List<Long> requesterTeamIds = new ArrayList<>();
-        for (Team team: requesterTeams){
-            assert requesterTeamIds != null;
-            requesterTeamIds.add(team.getTeamId());
+        Long requesterId = jwtUtils.getUserId(token);
+        List<Team> userTeams = userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeams();
+
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
         }
 
         // Delete the report based on the report type
         switch (reportType) {
             case "MultipleAdAnalysisReport":
                 try {
-                    long reportTeamId = multipleAdService.getByReportId(reportId).get(0).getTeam().getTeamId();
-                    if(!requesterTeamIds.contains(reportTeamId)) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You do not have permission to delete this report");
-                    }
+
+
                     multipleAdService.deleteReportByReportId(reportId);
                     break;
                 }catch(Exception e) {
@@ -145,10 +149,7 @@ public class AnalysisReportController {
             case "SingleAdAnalysisReport":
                 try{
                     List <SingleAdAnalysisReport> report = singleAdService.getByReportId(reportId);
-                    long reportTeamId = report.get(0).getTeam().getTeamId();
-                    if(!requesterTeamIds.contains(reportTeamId)){
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You do not have permission to delete this report");
-                    }
+
                     TextualAdvertisement ad = report.get(0).getAdvertisement();
                     singleAdService.deleteReportByReportId(reportId);
                     advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
