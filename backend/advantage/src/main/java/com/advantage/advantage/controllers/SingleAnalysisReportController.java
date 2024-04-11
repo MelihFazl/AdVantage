@@ -5,6 +5,8 @@ import com.advantage.advantage.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,17 +88,20 @@ public class SingleAnalysisReportController {
         }
 
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
-        //float prediction = modelService.getTextualPrediction(adText);
+        //float prediction = modelService.calculateCPI(adText);
+        //List<Long> shapleyVal = modelService.calculateShapVal(adText);
         float prediction = 0.5f;
 
+        List<Long> shapleyVal = new ArrayList<>();
 
         if((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
         }
 
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, newAd, teamId) != null) {
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal,newAd, teamId) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
             teamService.updateTeam(userTeam);
+
             return ResponseEntity.status(HttpStatus.OK).body("Advertisement and report saved successfully!");
         }
 
