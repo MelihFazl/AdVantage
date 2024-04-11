@@ -84,7 +84,7 @@ public class ImageAdvertisementController {
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
 
     }
-    private boolean isValidFile(MultipartFile multipartFile){
+        private boolean isValidFile(MultipartFile multipartFile){
         if (Objects.isNull(multipartFile.getOriginalFilename())){
             return false;
         }
