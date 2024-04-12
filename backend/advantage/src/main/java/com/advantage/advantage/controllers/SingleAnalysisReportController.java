@@ -43,7 +43,7 @@ public class SingleAnalysisReportController {
     public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
                                                              @RequestParam AdCategory category, @RequestParam String adText, @RequestParam Long teamId) {
 
-        if(!jwtUtils.validateToken(token)) {
+        if (!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
@@ -52,15 +52,15 @@ public class SingleAnalysisReportController {
 
         boolean isAuthorized = false;
         Team userTeam = null;
-        for(Team team : userTeams){
-            if(Objects.equals(team.getTeamId(), teamId)) {
+        for (Team team : userTeams) {
+            if (Objects.equals(team.getTeamId(), teamId)) {
                 userTeam = team;
                 isAuthorized = true;
                 break;
             }
         }
 
-        if(!isAuthorized) {
+        if (!isAuthorized) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
         }
 
@@ -80,7 +80,7 @@ public class SingleAnalysisReportController {
         if (category == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify an advertisement category");
         }
-        if((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
+        if ((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
         }
         TextualAdvertisement newAd = textAdService.saveAdvertisement(category, uploaderId, createdAt, adText, teamId);
@@ -97,8 +97,7 @@ public class SingleAnalysisReportController {
         List<Long> shapleyVal = new ArrayList<>();
 
 
-
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal,newAd, teamId) != null) {
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal, newAd, teamId) != null) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
             teamService.updateTeam(userTeam);
 
@@ -109,14 +108,36 @@ public class SingleAnalysisReportController {
     }
 
     @GetMapping("/allreports")
-    public List<SingleAdAnalysisReport> getAllReports()
-    {
+    public List<SingleAdAnalysisReport> getAllReports() {
         return repService.getAllReports();
     }
 
     @GetMapping("/userreports")
-    public List<SingleAdAnalysisReport> getReportsById(@RequestParam long uploaderId)
-    {
-        return repService.getByUploaderId(uploaderId);
+    public ResponseEntity<? extends Object> getReportsById(@RequestParam String token) {
+        {
+            if (!jwtUtils.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+            }
+
+            Long userID = jwtUtils.getUserId(token);
+            List<Team> userTeams = userAccountManagementService.getTeamMemberByID(userID).get(0).getTeams();
+ /*
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        } */
+            List<SingleAdAnalysisReport> reports = repService.getByUploaderId(userID);
+
+            return ResponseEntity.ok(reports);
+        }
     }
 }
