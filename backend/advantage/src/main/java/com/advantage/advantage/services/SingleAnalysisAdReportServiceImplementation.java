@@ -56,7 +56,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt,  String pros, String cons, String overview, float prediction, List<Long> shapleyVal,TextualAdvertisement ad, Long teamId) {
+    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt, String pros, String cons, String overview, float prediction, List<Long> shapleyVal, TextualAdvertisement ad, Long teamId) {
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
         if (uploaders == null || uploaders.isEmpty()){
