@@ -1,47 +1,48 @@
 package com.advantage.advantage.controllers;
+
 import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
+import com.advantage.advantage.s3_exceptions.FileEmptyException;
+import com.advantage.advantage.s3_exceptions.FileUploadException;
 import com.advantage.advantage.services.*;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import java.util.List;
-import java.util.Objects;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.*;
 
 @RestController
-@RequestMapping("/singleanalysisreport")
+@RequestMapping("/imageanalysisreport")
 @CrossOrigin
-public class SingleAnalysisReportController {
+public class ImageAdAnalysisReportController {
     @Autowired
-    SingleAnalysisAdReportService repService;
+    ImageAdAnalysisReportService imageAdAnalysisReportService;
     @Autowired
 
-    TextualAdvertisementService textAdService;
+    ImageAdvertisementService imageAdService;
 
     @Autowired
     TeamService teamService;
 
     @Autowired
-    ModelService modelService;
+    FileService fileService;
 
     private final UserAccountManagementService userAccountManagementService;
     private final JwtUtils jwtUtils;
 
-    public SingleAnalysisReportController(UserAccountManagementService userAccountManagementService) {
+    public ImageAdAnalysisReportController(UserAccountManagementService userAccountManagementService) {
         this.userAccountManagementService = userAccountManagementService;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
     }
 
-
     @PostMapping("/create")
     public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
-                                                             @RequestParam AdCategory category, @RequestParam String adText, @RequestParam Long teamId) {
+                                                             @RequestParam AdCategory category, @RequestParam("file") MultipartFile multipartFile, @RequestParam Long teamId)  throws FileEmptyException, FileUploadException, IOException {
 
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
@@ -68,37 +69,40 @@ public class SingleAnalysisReportController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a valid title");
 
         }
+        if((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
+        }
 
         if (createdAt == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is not a valid date");
         }
-
-        if (adText.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a valid advertisement text");
-        }
-
         if (category == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify an advertisement category");
         }
-        if((userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage()) <= 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
+        if (multipartFile.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is empty. Cannot save an empty file");
         }
-        TextualAdvertisement newAd = textAdService.saveAdvertisement(category, uploaderId, createdAt, adText, teamId);
+        boolean isValidFile = isValidFile(multipartFile);
+        List<String> allowedFileExtensions = new ArrayList<>(Arrays.asList("png", "jpg", "jpeg"));
 
-        if (newAd == null) {
+        if (!isValidFile || !allowedFileExtensions.contains(FilenameUtils.getExtension(multipartFile.getOriginalFilename()))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File does not have the allowed extensions");
+        }
+        String fileName = fileService.uploadFile(multipartFile);
+        ImageAdvertisement createdAdvertisement = imageAdService.saveAdvertisement(category, uploaderId, createdAt, fileName, teamId);
+
+
+        if (createdAdvertisement== null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error saving the advertisement");
         }
 
-        SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         //float prediction = modelService.calculateCPI(adText);
         //List<Long> shapleyVal = modelService.calculateShapVal(adText);
         float prediction = 0.5f;
 
-        List<Long> shapleyVal = new ArrayList<>();
 
 
-
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal,newAd, teamId) != null) {
+        if (imageAdAnalysisReportService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, createdAdvertisement, teamId) != null) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
             teamService.updateTeam(userTeam);
 
@@ -109,14 +113,21 @@ public class SingleAnalysisReportController {
     }
 
     @GetMapping("/allreports")
-    public List<SingleAdAnalysisReport> getAllReports()
+    public List<ImageAdAnalysisReport> getAllReports()
     {
-        return repService.getAllReports();
+        return imageAdAnalysisReportService.getAllReports();
     }
 
     @GetMapping("/userreports")
-    public List<SingleAdAnalysisReport> getReportsById(@RequestParam long uploaderId)
+    public List<ImageAdAnalysisReport> getReportsById(@RequestParam long uploaderId)
     {
-        return repService.getByUploaderId(uploaderId);
+        return imageAdAnalysisReportService.getByUploaderId(uploaderId);
     }
+    private boolean isValidFile(MultipartFile multipartFile){
+        if (Objects.isNull(multipartFile.getOriginalFilename())){
+            return false;
+        }
+        return !multipartFile.getOriginalFilename().trim().equals("");
+    }
+
 }
