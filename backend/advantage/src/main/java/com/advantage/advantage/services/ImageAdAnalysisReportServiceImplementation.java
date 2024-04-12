@@ -51,6 +51,11 @@ public class ImageAdAnalysisReportServiceImplementation implements ImageAdAnalys
     }
 
     @Override
+    public List<ImageAdAnalysisReport> getByTeamId(long teamId) {
+        return imageAnalysisReportRepo.findByTeam_TeamId(teamId);
+    }
+
+    @Override
     public List<ImageAdAnalysisReport> getByAdvertisement(Advertisement ad) {
         return imageAnalysisReportRepo.findByAdvertisement(ad);
     }

@@ -67,6 +67,11 @@ public class MultipleAdAnalysisReportServiceImplementation implements MultipleAd
     }
 
     @Override
+    public List<MultipleAdAnalysisReport> getByTeamId(long teamId) {
+        return reportRepo.findByTeam_TeamId(teamId);
+    }
+
+    @Override
     public MultipleAdAnalysisReport saveAdAnalysisReport(String title, Date createdAt, long uploaderId, String comparison, Long teamId) {
         MultipleAdAnalysisReport newReport = new MultipleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
