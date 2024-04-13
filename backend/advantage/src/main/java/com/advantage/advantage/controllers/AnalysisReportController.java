@@ -23,6 +23,7 @@ public class AnalysisReportController {
 
     private final UserAccountManagementService userAccountManagementService;
     private final TextualAdvertisementService advertisementService;
+    private final ImageAdvertisementService imageAdvertisementService;
     private final JwtUtils jwtUtils;
 
     private final MultipleAdAnalysisReportService multipleAdService;
@@ -33,7 +34,8 @@ public class AnalysisReportController {
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
 
-    public AnalysisReportController( ImageAnalysisReportRepo imageAnalysisReportRepo,  ImageAdAnalysisReportService imageAdAnalysisReportService,TextualAdvertisementService advertisementService, MultipleAdAnalysisReportService multipleAdService, SingleAnalysisAdReportService singleAdService, MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+    public AnalysisReportController( ImageAdvertisementService imageAdvertisementService,ImageAnalysisReportRepo imageAnalysisReportRepo,  ImageAdAnalysisReportService imageAdAnalysisReportService,TextualAdvertisementService advertisementService, MultipleAdAnalysisReportService multipleAdService, SingleAnalysisAdReportService singleAdService, MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+        this.imageAdvertisementService = imageAdvertisementService;
         this.advertisementService = advertisementService;
         this.imageAdAnalysisReportService = imageAdAnalysisReportService;
         this.userAccountManagementService = userAccountManagementService;
@@ -168,6 +170,17 @@ public class AnalysisReportController {
                     TextualAdvertisement ad = report.get(0).getAdvertisement();
                     singleAdService.deleteReportByReportId(reportId);
                     advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+                    break;
+                }catch(Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+                }
+            case "ImageAdAnalysisReport":
+                try{
+                    List <ImageAdAnalysisReport> report = imageAdAnalysisReportService.getByReportId(reportId);
+
+                    ImageAdvertisement ad = report.get(0).getAdvertisement();
+                    imageAdAnalysisReportService.deleteReportByReportId(reportId);
+                    imageAdvertisementService.deleteAdvertisementById(ad.getAdvertisementId());
                     break;
                 }catch(Exception e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
