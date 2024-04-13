@@ -83,7 +83,7 @@ export const LoginPage = () => {
                   redirect: "follow",
                 };
 
-                fetch(BASE_URL + "/user/teamMember/login", requestOptions)
+                fetch(BASE_URL + "/user/login", requestOptions)
                   .then((response) => {
                     if (response.ok) {
                       response.text().then((result) => {
@@ -93,7 +93,7 @@ export const LoginPage = () => {
                         if (token && user.userType === "TM") {
                           navigate("/team-member");
                         } else {
-                          alert(result);
+                          navigate("/company/manageTeams");
                         }
                       });
                     } else {
