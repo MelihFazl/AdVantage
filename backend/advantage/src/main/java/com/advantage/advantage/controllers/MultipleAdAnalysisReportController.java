@@ -45,7 +45,7 @@ public class MultipleAdAnalysisReportController {
     public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam AdCategory category, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
                                                                @RequestBody AdRequestsWrapper adRequestsWrapper, @RequestParam Long teamId) {
 
-        if(!jwtUtils.validateToken(token)) {
+        if (!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
 
@@ -54,15 +54,15 @@ public class MultipleAdAnalysisReportController {
         Team userTeam = null;
 
         boolean isAuthorized = false;
-        for(Team team : userTeams){
-            if(Objects.equals(team.getTeamId(), teamId)) {
+        for (Team team : userTeams) {
+            if (Objects.equals(team.getTeamId(), teamId)) {
                 isAuthorized = true;
                 userTeam = team;
                 break;
             }
         }
 
-        if(!isAuthorized) {
+        if (!isAuthorized) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
         }
 
@@ -89,11 +89,11 @@ public class MultipleAdAnalysisReportController {
             comparisons += String.format("%.4f ", comparison);
         }
 
-        if(usages > (userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage())) {
+        if (usages > (userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
         }
 
-        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId,comparisons.trim(), teamId);
+        MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId, comparisons.trim(), teamId);
 
         if (newReport == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
@@ -115,15 +115,37 @@ public class MultipleAdAnalysisReportController {
     }
 
     @GetMapping("/allreports")
-    public List<MultipleAdAnalysisReport> getAllReports()
-    {
+    public List<MultipleAdAnalysisReport> getAllReports() {
         return repService.getAllReports();
     }
 
     @GetMapping("/userreports")
-    public List<MultipleAdAnalysisReport> getReportsByUploaderId(@RequestParam long uploaderId)
-    {
-        return repService.getByUploaderId(uploaderId);
+    public ResponseEntity<?> getReportsByUploaderId(@RequestParam String token) {
+        {
+            if (!jwtUtils.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+            }
+
+            Long userID = jwtUtils.getUserId(token);
+            List<Team> userTeams = userAccountManagementService.getTeamMemberByID(userID).get(0).getTeams();
+ /*
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        } */
+            List<MultipleAdAnalysisReport> reports = repService.getByUploaderId(userID);
+
+            return ResponseEntity.ok(reports);
+        }
     }
 }
 

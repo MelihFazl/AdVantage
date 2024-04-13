@@ -2,6 +2,7 @@ package com.advantage.advantage.controllers;
 
 import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
+import com.advantage.advantage.repositories.ImageAnalysisReportRepo;
 import com.advantage.advantage.repositories.MultipleAdAnalysisReportAssociationRepo;
 import com.advantage.advantage.services.*;
 import jakarta.transaction.Transactional;
@@ -22,22 +23,22 @@ public class AnalysisReportController {
 
     private final UserAccountManagementService userAccountManagementService;
     private final TextualAdvertisementService advertisementService;
+    private final ImageAdvertisementService imageAdvertisementService;
     private final JwtUtils jwtUtils;
 
     private final MultipleAdAnalysisReportService multipleAdService;
 
+    private final ImageAdAnalysisReportService imageAdAnalysisReportService;
     private final SingleAnalysisAdReportService singleAdService;
-    private final MultipleAnalysisReportRepo multipleAnalysisReportRepository;
-    private final SingleAnalysisReportRepo singleAnalysisReportRepository;
 
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
 
-    public AnalysisReportController( TextualAdvertisementService advertisementService, MultipleAdAnalysisReportService multipleAdService, SingleAnalysisAdReportService singleAdService, MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+    public AnalysisReportController( ImageAdvertisementService imageAdvertisementService,ImageAnalysisReportRepo imageAnalysisReportRepo,  ImageAdAnalysisReportService imageAdAnalysisReportService,TextualAdvertisementService advertisementService, MultipleAdAnalysisReportService multipleAdService, SingleAnalysisAdReportService singleAdService, MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+        this.imageAdvertisementService = imageAdvertisementService;
         this.advertisementService = advertisementService;
+        this.imageAdAnalysisReportService = imageAdAnalysisReportService;
         this.userAccountManagementService = userAccountManagementService;
-        this.multipleAnalysisReportRepository = multipleAnalysisReportRepository;
-        this.singleAnalysisReportRepository = singleAnalysisReportRepository;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
         this.multipleAdService = multipleAdService;
         this.singleAdService = singleAdService;
@@ -65,8 +66,9 @@ public class AnalysisReportController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
         }
 
-        List<SingleAdAnalysisReport> singleReports = singleAnalysisReportRepository.findByTeam_TeamId(teamId);
-        List<MultipleAdAnalysisReport> multiReports = multipleAnalysisReportRepository.findByTeam_TeamId(teamId);
+        List<SingleAdAnalysisReport> singleReports = singleAdService.getByTeamId(teamId);
+        List<MultipleAdAnalysisReport> multiReports = multipleAdService.getByTeamId(teamId);
+        List<ImageAdAnalysisReport> imageReports = imageAdAnalysisReportService.getByTeamId(teamId);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (SingleAdAnalysisReport singleReport : singleReports) {
@@ -103,6 +105,21 @@ public class AnalysisReportController {
 
             // Add the advertisement texts
             reportAndAds.put("advertisementTexts", advertisementTexts);
+
+            // Add the combined map to the result
+            result.add(reportAndAds);
+        }
+        for (ImageAdAnalysisReport report : imageReports) {
+            Map<String, Object> reportAndAds = new HashMap<>();
+
+            // Add the type identifier
+            reportAndAds.put("type", "ImageAdAnalysisReport");
+
+            // Add the AnalysisReport to the map
+            reportAndAds.put("report", report);
+
+            // Add the advertisement image
+            reportAndAds.put("advertisementImage", report.getAdvertisement().getImageKey());
 
             // Add the combined map to the result
             result.add(reportAndAds);
@@ -153,6 +170,17 @@ public class AnalysisReportController {
                     TextualAdvertisement ad = report.get(0).getAdvertisement();
                     singleAdService.deleteReportByReportId(reportId);
                     advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+                    break;
+                }catch(Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+                }
+            case "ImageAdAnalysisReport":
+                try{
+                    List <ImageAdAnalysisReport> report = imageAdAnalysisReportService.getByReportId(reportId);
+
+                    ImageAdvertisement ad = report.get(0).getAdvertisement();
+                    imageAdAnalysisReportService.deleteReportByReportId(reportId);
+                    imageAdvertisementService.deleteAdvertisementById(ad.getAdvertisementId());
                     break;
                 }catch(Exception e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

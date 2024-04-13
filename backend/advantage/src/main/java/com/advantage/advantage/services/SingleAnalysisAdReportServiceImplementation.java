@@ -51,6 +51,11 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
+    public List<SingleAdAnalysisReport> getByTeamId(long teamId) {
+        return reportRepo.findByTeam_TeamId(teamId);
+    }
+
+    @Override
     public List<SingleAdAnalysisReport> getByAdvertisement(Advertisement ad) {
         return reportRepo.findByAdvertisement(ad);
     }

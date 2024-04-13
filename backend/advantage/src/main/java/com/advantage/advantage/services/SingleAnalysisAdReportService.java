@@ -13,6 +13,9 @@ public interface SingleAnalysisAdReportService {
     public List<SingleAdAnalysisReport> getByCreatedAt(Date createdAt);
     public List<SingleAdAnalysisReport> getByTitle(String title);
 
+    public List<SingleAdAnalysisReport> getByTeamId(long teamId);
+
+
     public List<SingleAdAnalysisReport> getByAdvertisement(Advertisement ad);
 
     public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt, String pros, String cons, String overview, float prediction, List<Long> shapleyVal, TextualAdvertisement ad, Long teamId);

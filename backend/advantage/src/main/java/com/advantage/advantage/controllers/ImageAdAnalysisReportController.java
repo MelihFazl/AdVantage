@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 
+import static org.springframework.http.ResponseEntity.ok;
+
 @RestController
 @RequestMapping("/imageanalysisreport")
 @CrossOrigin
@@ -119,9 +121,31 @@ public class ImageAdAnalysisReportController {
     }
 
     @GetMapping("/userreports")
-    public List<ImageAdAnalysisReport> getReportsById(@RequestParam long uploaderId)
+    public ResponseEntity<?> getReportsByUploaderId(@RequestParam String token)
     {
-        return imageAdAnalysisReportService.getByUploaderId(uploaderId);
+        if(!jwtUtils.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
+        Long userID = jwtUtils.getUserId(token);
+        List<Team> userTeams = userAccountManagementService.getTeamMemberByID(userID).get(0).getTeams();
+ /*
+        boolean isAuthorized = false;
+        for(Team team : userTeams){
+            if(Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                break;
+            }
+        }
+
+
+
+        if(!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        } */
+        List<ImageAdAnalysisReport> reports = imageAdAnalysisReportService.getByUploaderId(userID);
+
+        return ResponseEntity.ok(reports);
     }
     private boolean isValidFile(MultipartFile multipartFile){
         if (Objects.isNull(multipartFile.getOriginalFilename())){

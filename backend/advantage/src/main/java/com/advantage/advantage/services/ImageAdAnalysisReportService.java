@@ -14,6 +14,8 @@ public interface ImageAdAnalysisReportService {
     public List<ImageAdAnalysisReport> getByUploaderId(long uploaderId);
     public List<ImageAdAnalysisReport> getByCreatedAt(Date createdAt);
     public List<ImageAdAnalysisReport> getByTitle(String title);
+    public List<ImageAdAnalysisReport> getByTeamId(long teamId);
+
 
     public List<ImageAdAnalysisReport> getByAdvertisement(Advertisement ad);
 
