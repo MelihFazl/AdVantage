@@ -12,7 +12,10 @@ public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter private Long companyId;
+
+    @Column(unique = true)
     @Getter @Setter private String companyName;
+
     @Getter @Setter private int numberOfEmployees;
     @Column(columnDefinition = "integer default 0")
     @Getter @Setter private Integer monthlyUsage;

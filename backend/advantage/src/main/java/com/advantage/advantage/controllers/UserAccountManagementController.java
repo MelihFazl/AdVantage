@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
@@ -124,6 +125,48 @@ public class UserAccountManagementController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(e.getMessage());
             }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized requesttttt.");
+        }
+    }
+
+    @PostMapping("/updatePassword")
+    public ResponseEntity<String> updatePassword(@RequestParam String token, @RequestParam String newPassword) {
+        boolean tokenMatch = jwtUtils.validateToken(token);
+
+        if (tokenMatch) {
+            passwordHashHandler.setPassword(newPassword);
+            String hashedPassword = passwordHashHandler.hashPassword();
+
+            if(Objects.equals(jwtUtils.getUserType(token), "CA")) {
+                try {
+                    CompanyAdministrator ca = userAccountManagementService.getCompanyAdministratorByID(jwtUtils.getUserId(token)).get(0);
+                    ca.setHashedPassword(hashedPassword);
+                    userAccountManagementService.updateCompanyAdministrator(ca);
+                }catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(e.getMessage());
+                }
+            } else if(Objects.equals(jwtUtils.getUserType(token), "TM")) {
+                try {
+                    TeamMember tm = userAccountManagementService.getTeamMemberByID(jwtUtils.getUserId(token)).get(0);
+                    tm.setHashedPassword(hashedPassword);
+                    userAccountManagementService.updateTeamMember(tm);
+                }catch (Exception e) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(e.getMessage());
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Unauthorized requesttttt.");
+            }
+
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Password of user with the id " + jwtUtils.getUserId(token) + " has been successfully updated");
+
 
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

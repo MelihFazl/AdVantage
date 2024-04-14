@@ -5,6 +5,7 @@ import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.Company;
 import com.advantage.advantage.models.CompanyAdministrator;
 import com.advantage.advantage.models.Team;
+import com.advantage.advantage.models.TeamMember;
 import com.advantage.advantage.repositories.TokenRepository;
 import com.advantage.advantage.services.CompanyService;
 import com.advantage.advantage.services.TeamService;
@@ -157,6 +158,31 @@ public class TeamController {
                             .body("Unauthorized request.");
                 }
 
+                ObjectMapper objectMapper = new ObjectMapper();
+                String teamsJson = objectMapper.writeValueAsString(teams);
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(teamsJson);
+
+            }catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(e.getMessage());
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized request.");
+        }
+    }
+
+    @PostMapping("/getAllMemberTeams")
+    public ResponseEntity<String> getAllMemberTeams(@RequestParam String token) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "TM");
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            TeamMember teamMember = userAccountManagementService.getTeamMemberByID(userId).get(0);
+
+            try{
+                List<Team> teams = teamMember.getTeams();
                 ObjectMapper objectMapper = new ObjectMapper();
                 String teamsJson = objectMapper.writeValueAsString(teams);
                 return ResponseEntity.status(HttpStatus.OK)
