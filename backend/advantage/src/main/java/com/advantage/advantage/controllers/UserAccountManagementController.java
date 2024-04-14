@@ -23,6 +23,9 @@ public class UserAccountManagementController {
     private final UserAccountManagementService userAccountManagementService;
     private final CompanyService companyService;
     private final EmailService emailService;
+
+    private  final TeamService teamService;
+
     private final TokenRepository tokenRepository;
     private final CompanySubscriptionService subscriptionService ;
     private final JwtUtils jwtUtils;
@@ -34,12 +37,13 @@ public class UserAccountManagementController {
             CompanyService companyService,
             CompanySubscriptionService subscriptionService,
             TokenRepository tokenRepository,
-            EmailService emailService) {
+            EmailService emailService, TeamService teamService) {
         this.userAccountManagementService = userAccountManagementService;
         this.companyService = companyService;
         this.tokenRepository = tokenRepository;
         this.subscriptionService = subscriptionService;
         this.emailService = emailService;
+        this.teamService = teamService;
         this.jwtUtils = new JwtUtils(userAccountManagementService);
     }
 
@@ -312,6 +316,29 @@ public class UserAccountManagementController {
     {
         return userAccountManagementService.getAllTeamMembers();
     }
+
+    @PostMapping("/teamMember/getAllByTeamId")
+    public ResponseEntity<List<Object[]>> getAllTeamMembersByTeamId(@RequestParam String token, @RequestParam long teamId) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            Team team = teamService.getTeamById(teamId).get(0);
+
+            if (team == null || team.getCompanyAdministrator().getId() != userId) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            }
+
+            List<Object[]> teamMembers = userAccountManagementService.getTeamMembersByTeamId(teamId);
+            if (teamMembers.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            return ResponseEntity.ok(teamMembers);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
 
     @GetMapping("/companyAdministrator")
     public List<CompanyAdministrator> getCompanyAdministrator(@RequestParam long companyAdministratorId)
