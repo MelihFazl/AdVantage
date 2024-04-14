@@ -13,9 +13,9 @@ public interface CompanySubscriptionService {
 
     public List<CompanySubscription> getBySubscriptionId(long subscriptionId);
 
-    public CompanySubscription saveSubscription(PaymentPlanType paymentPlanType, PaymentPeriodType paymentPeriodType, Date startingSubscriptionDate );
+    public CompanySubscription saveSubscription(PaymentPlanType paymentPlanType, PaymentPeriodType paymentPeriodType, Date startingSubscriptionDate);
 
-    public CompanySubscription updateCompanySubscription(CompanySubscription editedCompanySubscription, long subscriptionId);
+    public CompanySubscription updateCompanySubscription(PaymentPlanType paymentPlanType, PaymentPeriodType paymentPeriodType,Date createdAt,long subscriptionId);
 
     public CompanySubscription deleteCompanySubscriptionById(long subscriptionId);
 }

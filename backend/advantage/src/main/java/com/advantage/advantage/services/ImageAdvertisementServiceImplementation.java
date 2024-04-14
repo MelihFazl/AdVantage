@@ -36,6 +36,7 @@ public class ImageAdvertisementServiceImplementation implements ImageAdvertiseme
         return imageAdvertisementRepo.findByAdvertisementId(advertisementId);
     }
 
+
     @Override
     public List<ImageAdvertisement> getByUploader(TeamMember uploader) {
         return imageAdvertisementRepo.findByUploader(uploader);
