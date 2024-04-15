@@ -14,6 +14,7 @@ public abstract class Employee
     @Getter private long id;
     @Getter @Setter private String name;
     @Getter @Setter private String surname;
+    @Column(unique = true)
     @Getter @Setter private String email;
     @Getter @Setter private String hashedPassword;
 
