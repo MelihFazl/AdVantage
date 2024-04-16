@@ -9,8 +9,12 @@ import { ForgotPasswordPage } from "./pages/forgot-password-page";
 import { NoPage } from "./pages/no-page";
 import { TeamMemberHomePage } from "./pages/team-member-pages/team-member-home";
 import { TeamMemberTextualAnalysisPage } from "./pages/team-member-pages/team-member-textual-analysis";
-import { TeamMemberImageAnalysisPage} from "./pages/team-member-pages/team-member-image-analysis";
-import {PDFPage} from "./pages/save-pdf";
+import { TeamMemberImageAnalysisPage } from "./pages/team-member-pages/team-member-image-analysis";
+import { PDFPage } from "./pages/save-pdf";
+import { CompanyManageTeams } from "./pages/company-pages/company-manage-teams";
+import { CompanyCreateTeam } from "./pages/company-pages/company-create-team";
+import { CompanyCreateTeamMember } from "./pages/company-pages/company-create-team-member";
+import { CompanySubscription } from "./pages/company-pages/company-subscription";
 function App() {
   return (
     <BrowserRouter>
@@ -27,6 +31,22 @@ function App() {
           element={<TeamMemberHomePage></TeamMemberHomePage>}
         ></Route>
         <Route
+          path="/company/manageTeams"
+          element={<CompanyManageTeams></CompanyManageTeams>}
+        ></Route>
+        <Route
+          path="/company/createTeam"
+          element={<CompanyCreateTeam></CompanyCreateTeam>}
+        ></Route>
+        <Route
+          path="/company/createTeamMember"
+          element={<CompanyCreateTeamMember></CompanyCreateTeamMember>}
+        ></Route>
+        <Route
+          path="/company/subscription"
+          element={<CompanySubscription></CompanySubscription>}
+        ></Route>
+        <Route
           path="/team-member/text-analysis"
           element={
             <TeamMemberTextualAnalysisPage></TeamMemberTextualAnalysisPage>
@@ -37,7 +57,6 @@ function App() {
           element={<TeamMemberImageAnalysisPage></TeamMemberImageAnalysisPage>}
         ></Route>
         <Route path="*" element={<NoPage />} />
-       
       </Routes>
     </BrowserRouter>
   );
