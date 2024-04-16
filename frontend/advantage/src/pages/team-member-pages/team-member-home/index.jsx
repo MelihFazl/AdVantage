@@ -9,6 +9,10 @@ import { useState } from "react";
 import { BASE_URL } from "../../../common/constans";
 import { jwtDecode } from "jwt-decode";
 import LinearProgress from "@mui/material/LinearProgress";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -43,22 +47,39 @@ export const TeamMemberHomePage = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [reports, setReports] = useState([]);
   const [isReportsRecevied, setIsReportsReceived] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const [selectedTeam, setSelectedTeam] = useState({});
 
   useEffect(() => {
     var requestOptions = {
-      method: "GET",
+      method: "POST",
       redirect: "follow",
     };
 
     var token = localStorage.getItem("userToken");
-
-    fetch(
-      BASE_URL + "/analysisReport/getAllByTeamId?token=" + token,
-      requestOptions
-    )
-      .then((response) => response.text())
+    fetch(BASE_URL + "/team/getAllMemberTeams?token=" + token, requestOptions)
+      .then((response) => response.json())
       .then((result) => {
-        setReports(JSON.parse(result).reverse());
+        setTeams(result);
+        setSelectedTeam(result[0]);
+        var requestOptions = {
+          method: "GET",
+          redirect: "follow",
+        };
+        fetch(
+          BASE_URL +
+            "/analysisReport/getAllByTeamId?token=" +
+            token +
+            "&teamId=" +
+            result[0].teamId,
+          requestOptions
+        )
+          .then((response) => response.text())
+          .then((result) => {
+            setReports(JSON.parse(result).reverse());
+            setIsReportsReceived(true);
+          })
+          .catch((error) => console.log("error", error));
         setIsReportsReceived(true);
       })
       .catch((error) => console.log("error", error));
@@ -71,6 +92,31 @@ export const TeamMemberHomePage = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  const handleTeamChange = (event) => {
+    setSelectedTeam(event.target.value);
+    var token = localStorage.getItem("userToken");
+    setIsReportsReceived(false);
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+    };
+    fetch(
+      BASE_URL +
+        "/analysisReport/getAllByTeamId?token=" +
+        token +
+        "&teamId=" +
+        selectedTeam.teamId,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        setReports(JSON.parse(result).reverse());
+        setIsReportsReceived(true);
+      })
+      .catch((error) => console.log("error", error));
+    setIsReportsReceived(true);
   };
 
   return (
@@ -114,10 +160,51 @@ export const TeamMemberHomePage = () => {
           paddingBottom={"8px"}
           top={38}
         >
-          <TeamText>See team's previous reports</TeamText>
+          {!isReportsRecevied ? (
+            <TeamText>See team's previous reports</TeamText>
+          ) : (
+            <TeamText>See {selectedTeam.teamName}'s previous reports</TeamText>
+          )}
         </Box>
         {isReportsRecevied ? (
           <Box sx={{ width: 1 }}>
+            <Box
+              minWidth={"530px"}
+              display={"flex"}
+              flexGrow={"1"}
+              flexShrink={"1"}
+              flexBasis={"auto"}
+              justifyContent="center"
+              alignItems="center"
+              zIndex={10}
+              position={"sticky"}
+              backgroundColor={"#FFFFFF"}
+              paddingBottom={"8px"}
+              top={94}
+            >
+              <Box
+                minWidth={"400px"}
+                display={"flex"}
+                paddingRight={"15px"}
+                paddingLeft={"15px"}
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="selectTeam">Select team</InputLabel>
+                  <Select
+                    labelId="selectTeam"
+                    id="selectTeam"
+                    key="selectTeam"
+                    value={selectedTeam}
+                    label="selectTeam"
+                    onChange={handleTeamChange}
+                  >
+                    {teams.map((team) => (
+                      <MenuItem value={team}>{team.teamName}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
             <Box
               backgroundColor="#FFFFFF"
               display="grid"
@@ -129,10 +216,12 @@ export const TeamMemberHomePage = () => {
               <React.Fragment>
                 {reports.map((element) => {
                   return (
-                    <ReportListCard
-                      onReportCardClick={handleCardClick}
-                      report={element}
-                    ></ReportListCard>
+                    <React.Fragment key={`${element.report.reportId}`}>
+                      <ReportListCard
+                        onReportCardClick={handleCardClick}
+                        report={element}
+                      ></ReportListCard>
+                    </React.Fragment>
                   );
                 })}
 

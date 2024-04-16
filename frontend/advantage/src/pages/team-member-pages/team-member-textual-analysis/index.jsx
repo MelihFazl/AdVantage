@@ -12,6 +12,8 @@ import {
   MenuItem,
   Button,
   Collapse,
+  FormControl,
+  FormHelperText,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Form, Field } from "react-final-form";
@@ -40,6 +42,22 @@ const BannerText = styled(Typography)({
 export const TeamMemberTextualAnalysisPage = () => {
   const navigate = useNavigate();
   const matches = useMediaQuery("(min-width:897px)");
+  const [teams, setTeams] = useState([]);
+
+  useEffect(() => {
+    var requestOptions = {
+      method: "POST",
+      redirect: "follow",
+    };
+
+    var token = localStorage.getItem("userToken");
+    fetch(BASE_URL + "/team/getAllMemberTeams?token=" + token, requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        setTeams(result);
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
 
   return (
     <Stack direction={"row"}>
@@ -119,7 +137,7 @@ export const TeamMemberTextualAnalysisPage = () => {
                     "userToken"
                   )}&createdAt=${formattedCurrentDate}&adText=${
                     values.adContents[0]
-                  }&title=${values.reportTitle}`,
+                  }&title=${values.reportTitle}&teamId=${values.team}`,
                 requestOptions
               )
                 .then((response) => {
@@ -151,7 +169,7 @@ export const TeamMemberTextualAnalysisPage = () => {
                     "userToken"
                   )}&createdAt=${formattedCurrentDate}&title=${
                     values.reportTitle
-                  }`,
+                  }&teamId=${values.team}`,
                 requestOptions
               )
                 .then((response) => {
@@ -161,7 +179,7 @@ export const TeamMemberTextualAnalysisPage = () => {
                 })
                 .catch((error) => console.log("error", error));
             } else {
-              console.log("empyt");
+              console.log("empty");
             }
           }}
           initialValues={{ adCategory: "Political", adContents: [""] }}
@@ -228,6 +246,35 @@ export const TeamMemberTextualAnalysisPage = () => {
                           <Select {...input} size="small">
                             <MenuItem value={"Political"}>Political</MenuItem>
                           </Select>
+                        </Box>
+                      )}
+                    </Field>
+                    <Field
+                      name="team"
+                      validate={(value) => {
+                        return value ? undefined : "Team must be selected.";
+                      }}
+                    >
+                      {({ input, meta }) => (
+                        <Box
+                          display={"flex"}
+                          alignSelf={"stretch"}
+                          flexDirection={"column"}
+                          gap={"4px"}
+                        >
+                          <Typography>Team</Typography>
+                          <FormControl error={meta.touched && meta.error}>
+                            <Select {...input} size="small">
+                              {teams.map((team) => (
+                                <MenuItem value={team.teamId}>
+                                  {team.teamName}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                            <FormHelperText>
+                              {meta.touched && meta.error ? meta.error : ""}
+                            </FormHelperText>
+                          </FormControl>
                         </Box>
                       )}
                     </Field>
