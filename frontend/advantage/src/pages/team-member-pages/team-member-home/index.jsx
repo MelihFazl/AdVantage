@@ -13,6 +13,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import { useRef } from "react";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -107,7 +108,7 @@ export const TeamMemberHomePage = () => {
         "/analysisReport/getAllByTeamId?token=" +
         token +
         "&teamId=" +
-        selectedTeam.teamId,
+        event.target.value.teamId,
       requestOptions
     )
       .then((response) => response.text())
@@ -116,7 +117,6 @@ export const TeamMemberHomePage = () => {
         setIsReportsReceived(true);
       })
       .catch((error) => console.log("error", error));
-    setIsReportsReceived(true);
   };
 
   return (
@@ -158,30 +158,17 @@ export const TeamMemberHomePage = () => {
           position={"sticky"}
           backgroundColor={"#FFFFFF"}
           paddingBottom={"8px"}
+          flexDirection={"column"}
+          gap={"8px"}
           top={38}
         >
           {!isReportsRecevied ? (
             <TeamText>See team's previous reports</TeamText>
           ) : (
-            <TeamText>See {selectedTeam.teamName}'s previous reports</TeamText>
-          )}
-        </Box>
-        {isReportsRecevied ? (
-          <Box sx={{ width: 1 }}>
-            <Box
-              minWidth={"530px"}
-              display={"flex"}
-              flexGrow={"1"}
-              flexShrink={"1"}
-              flexBasis={"auto"}
-              justifyContent="center"
-              alignItems="center"
-              zIndex={10}
-              position={"sticky"}
-              backgroundColor={"#FFFFFF"}
-              paddingBottom={"8px"}
-              top={94}
-            >
+            <React.Fragment>
+              <TeamText>
+                See {selectedTeam.teamName}'s previous reports
+              </TeamText>
               <Box
                 minWidth={"400px"}
                 display={"flex"}
@@ -204,7 +191,11 @@ export const TeamMemberHomePage = () => {
                   </Select>
                 </FormControl>
               </Box>
-            </Box>
+            </React.Fragment>
+          )}
+        </Box>
+        {isReportsRecevied ? (
+          <Box sx={{ width: 1 }}>
             <Box
               backgroundColor="#FFFFFF"
               display="grid"
