@@ -8,7 +8,7 @@ export default function ReportListCard({ report, onReportCardClick }) {
   return (
     <Card
       variant="outlined"
-      sx={{ minWidth: 263.2, maxWidth: 540, height: 230, borderRadius: "8px" }}
+      sx={{ minWidth: 263.2, height: 230, borderRadius: "8px" }}
     >
       <CardActionArea
         onClick={() => {

@@ -10,13 +10,15 @@ import {
   Select,
   MenuItem,
   Button,
+  FormControl,
+  FormHelperText,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Form, Field } from "react-final-form";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { isFieldEmpty } from "../../../common/validator-functions/isFieldEmpty";
 import { BASE_URL } from "../../../common/constans";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const TeamText = styled(Typography)({
@@ -42,7 +44,34 @@ const DevelopmentText = styled(Typography)({
 });
 
 export const TeamMemberImageAnalysisPage = () => {
+  const navigate = useNavigate();
+  const matches = useMediaQuery("(min-width:897px)");
   const [imageSrc, setImageSrc] = useState("");
+  const [teams, setTeams] = useState([]);
+
+  function base64ToBlob(base64, mimeType) {
+    const bytes = atob(base64.split(",")[1]);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) {
+      arr[i] = bytes.charCodeAt(i);
+    }
+    return new Blob([arr], { type: mimeType });
+  }
+
+  useEffect(() => {
+    var requestOptions = {
+      method: "POST",
+      redirect: "follow",
+    };
+
+    var token = localStorage.getItem("userToken");
+    fetch(BASE_URL + "/team/getAllMemberTeams?token=" + token, requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        setTeams(result);
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -54,8 +83,6 @@ export const TeamMemberImageAnalysisPage = () => {
       reader.readAsDataURL(file);
     }
   };
-  const navigate = useNavigate();
-  const matches = useMediaQuery("(min-width:897px)");
   return (
     <Stack direction={"row"}>
       <LeftDrawer drawerItems={TeamMemberDrawerItems}></LeftDrawer>
@@ -121,23 +148,25 @@ export const TeamMemberImageAnalysisPage = () => {
               .toString()
               .padStart(2, "0")}`;
 
-            const requestOptions = {
-              method: "GET",
-              body: imageSrc,
-              redirect: "follow",
-            };
-
+            let formData = new FormData();
+            formData.append("file", base64ToBlob(imageSrc, "image/jpeg"));
             fetch(
               BASE_URL +
-                `/analysisReport/getAllByTeamId?token=${localStorage.getItem(
+                `/imageanalysisreport/create?token=${localStorage.getItem(
                   "userToken"
                 )}&createdAt=${formattedCurrentDate}&title=${
                   values.reportTitle
-                }`,
-              requestOptions
+                }&teamId=${values.team}&category=${values.adCategory}`,
+              {
+                method: "POST",
+                body: formData,
+              }
             )
-              .then((response) => response.text())
-              .then((result) => console.log(result))
+              .then((response) => {
+                if (response.ok) navigate("/team-member");
+                else;
+                //TODO
+              })
               .catch((error) => console.error(error));
           }}
           initialValues={{ adCategory: "Political", adContents: [""] }}
@@ -203,6 +232,35 @@ export const TeamMemberImageAnalysisPage = () => {
                           <Select {...input} size="small">
                             <MenuItem value={"Political"}>Political</MenuItem>
                           </Select>
+                        </Box>
+                      )}
+                    </Field>
+                    <Field
+                      name="team"
+                      validate={(value) => {
+                        return value ? undefined : "Team must be selected.";
+                      }}
+                    >
+                      {({ input, meta }) => (
+                        <Box
+                          display={"flex"}
+                          alignSelf={"stretch"}
+                          flexDirection={"column"}
+                          gap={"4px"}
+                        >
+                          <Typography>Team</Typography>
+                          <FormControl error={meta.touched && meta.error}>
+                            <Select {...input} size="small">
+                              {teams.map((team) => (
+                                <MenuItem value={team.teamId}>
+                                  {team.teamName}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                            <FormHelperText>
+                              {meta.touched && meta.error ? meta.error : ""}
+                            </FormHelperText>
+                          </FormControl>
                         </Box>
                       )}
                     </Field>
