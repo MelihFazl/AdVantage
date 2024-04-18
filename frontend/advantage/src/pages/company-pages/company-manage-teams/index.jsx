@@ -4,6 +4,10 @@ import { Paper, Box, Stack, Typography, TextField } from "@mui/material";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled } from "@mui/material/styles";
 import CreationTabs from "./creation-tabs";
+import TeamListCard from "./team-list-card";
+import { useState } from "react";
+import TeamDialog from "./team-dialog";
+import React from "react";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -38,6 +42,8 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export const CompanyManageTeams = () => {
   const matches = useMediaQuery("(min-width:1035px)");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState({});
   const teams = [
     "Oliver Hansen",
     "Van Henry",
@@ -50,9 +56,19 @@ export const CompanyManageTeams = () => {
     "Virginia Andrews",
     "Kelly Snyder",
   ];
+  const handleCardClick = (team) => {
+    setSelectedTeam(team);
+    setOpenDialog(true);
+  };
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
   return (
     <Stack direction={"row"}>
-      <LeftDrawer drawerItems={CompanyDrawerItems}></LeftDrawer>
+      <LeftDrawer
+        drawerItems={CompanyDrawerItems}
+        adaptWidth={1156}
+      ></LeftDrawer>
       <Stack
         direction="column"
         width="100%"
@@ -106,9 +122,9 @@ export const CompanyManageTeams = () => {
               display: "block",
               flexDirection: "row",
               alignItems: "center",
-              flexGrow: "4",
+              flexGrow: "2",
               minWidth: "300px",
-              maxWidth: matches ? "500px" : "%100",
+              maxWidth: matches ? "400px" : "%100",
               height: "fit-content",
               position: matches ? "sticky" : "relative",
               top: matches ? 94 : 0,
@@ -148,23 +164,45 @@ export const CompanyManageTeams = () => {
               flexGrow: "6",
               minWidth: "460px",
               height: "fit-content",
-              position: matches ? "sticky" : "relative",
-              top: matches ? 94 : 0,
             }}
           >
             <Stack direction={"column"} gap={"8px"}>
               <Paper
                 variant="outlined"
-                sx={{ borderRadius: "12px", padding: "8px 30px 8px 30px" }}
+                sx={{
+                  padding: "8px 30px 8px 30px",
+                  position: matches ? "sticky" : "relative",
+                  top: matches ? 94 : 0,
+                  zIndex: 9,
+                  width: "%100",
+                  backgroundColor: "#ffffff",
+                }}
               >
                 <BoxTitle>Teams</BoxTitle>
               </Paper>
-              <Paper
-                variant="outlined"
-                sx={{ borderRadius: "12px", padding: "8px 30px 8px 30px" }}
-              >
-                <Box></Box>
-              </Paper>
+              <React.Fragment>
+                {" "}
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamDialog
+                  open={openDialog}
+                  handleClose={handleCloseDialog}
+                  report={selectedTeam}
+                ></TeamDialog>
+              </React.Fragment>
             </Stack>
           </Paper>
         </Stack>

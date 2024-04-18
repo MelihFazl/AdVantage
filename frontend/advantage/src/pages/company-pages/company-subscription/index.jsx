@@ -29,7 +29,10 @@ const Item = styled(Paper)(({ theme }) => ({
 export const CompanySubscription = () => {
   return (
     <Stack direction={"row"}>
-      <LeftDrawer drawerItems={CompanyDrawerItems}></LeftDrawer>
+      <LeftDrawer
+        drawerItems={CompanyDrawerItems}
+        adaptWidth={1156}
+      ></LeftDrawer>
       <Stack
         direction="column"
         width="100%"

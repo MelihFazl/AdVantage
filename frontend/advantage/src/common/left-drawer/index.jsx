@@ -73,7 +73,7 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function LeftDrawer({ drawerItems }) {
+export default function LeftDrawer({ drawerItems, adaptWidth }) {
   const [windowSize, setWindowSize] = useState(getWindowSize());
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function LeftDrawer({ drawerItems }) {
     setOpen(false);
   };
 
-  if (open && windowSize.innerWidth < 1071) {
+  if (open && windowSize.innerWidth < adaptWidth) {
     setOpen(false);
   }
 
@@ -124,7 +124,7 @@ export default function LeftDrawer({ drawerItems }) {
               AdVantage
             </Typography>
           )}
-          {windowSize.innerWidth > 1071 && (
+          {windowSize.innerWidth > adaptWidth && (
             <IconButton onClick={!open ? handleDrawerOpen : handleDrawerClose}>
               {!open ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             </IconButton>
