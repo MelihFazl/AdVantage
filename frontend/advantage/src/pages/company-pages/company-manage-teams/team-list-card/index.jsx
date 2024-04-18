@@ -46,11 +46,18 @@ export default function TeamListCard({ team, onTeamCardClick }) {
               padding={"0 20px 0 20px"}
               gap={"8px"}
             >
-              <Button variant="outlined" disableElevation>
+              <Button
+                variant="outlined"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                disableElevation
+              >
                 Edit
               </Button>
               <Button
                 variant="outlined"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
                 style={{ borderColor: "#F44336", color: "#F44336" }}
                 disableElevation
               >
