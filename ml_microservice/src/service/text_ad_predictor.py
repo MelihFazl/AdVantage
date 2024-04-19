@@ -14,33 +14,37 @@ class TextAdPredictor:
         self.word2vec_model = word2vec_model
         self.stop_words = set(stopwords.words('english'))
 
-    def text_ad_preprocess(self):
-        """
-        Preprocess the input text by tokenization, removal of stop words, and vectorization.
-        """
-        tokens = self.tokenize_and_remove_stopwords(self.text, word_tokenize, self.stop_words)
-        self.doc_vector = self.generate_doc_vector(tokens, self.word2vec_model, 100)
-
     #For single text ad prediction
     def text_ad_predict(self):
         """
         Perform CPI prediction on the given text ad.
 
         Returns:
-            Tuple: A tuple containing JSON-formatted detection results and the base64 encoded image.
+            Dictionary: Containts the CPI value and SHAP value.
         """
         self.text_ad_preprocess()
         CPI_prediction = self.prediction_model.predict(self.doc_vector)
-        shap_values = self.apply_shap_analysis()
+        shap_values = self.apply_shap_analysis_keyword()
         analysis_values = dict()
         analysis_values["CPI_prediction"] = CPI_prediction
         analysis_values["shap_values"] = shap_values
         return analysis_values
     
+    def text_ad_preprocess(self):
+        """
+        Preprocess the input text by tokenization, removal of stop words, and vectorization.
+        """
+        tokens = self.tokenize_and_remove_stopwords(self.text, word_tokenize, self.stop_words)
+        self.doc_vector = self.generate_doc_vector(tokens, self.word2vec_model, 100)
+    
     def tokenize_and_remove_stopwords(self, text, word_tokenize, stop_words):
         tokens = word_tokenize(text)
         tokens = [word.lower() for word in tokens if word.isalpha() and word.lower() not in stop_words]
         return np.array(tokens)
+    
+    def generate_doc_vector(self, doc, model, num_features):
+        doc_vector = [self.average_word_vectors(doc, model, model.wv.index_to_key, num_features)]
+        return np.array(doc_vector)
 
     def average_word_vectors(self, words, model, vocabulary, num_features):
         feature_vector = np.zeros((num_features,), dtype="float64")
@@ -56,11 +60,7 @@ class TextAdPredictor:
 
         return feature_vector
     
-    def generate_doc_vector(self, doc, model, num_features):
-        doc_vector = [self.average_word_vectors(doc, model, model.wv.index_to_key, num_features)]
-        return np.array(doc_vector)
-    
-    def apply_shap_analysis(self):
+    def apply_shap_analysis_keyword(self):
         feature_names = self.tfidf_vectorizer.get_feature_names_out()
         tfidf_vectorized_text = self.tfidf_vectorizer.transform([self.text]).toarray()
         shap_analysis = self.shap_tree_explainer.shap_values(tfidf_vectorized_text)
@@ -93,5 +93,3 @@ class TextAdPredictor:
         # Convert back to dictionary if needed
         selected_dict = dict(selected_six)       
         return selected_dict
-
-
