@@ -55,7 +55,7 @@ def scrape_and_find(driver, ad_id, problematic_ids_writer):
         log_exception("scrape_and_find", e)
         problematic_ids_writer.writerow([ad_id])
     finally:
-        time.sleep(8)  # Wait for 1 second after each scraping operation
+        time.sleep(20)  # Wait for 1 second after each scraping operation
 
 def process_batch(driver, ad_ids, problematic_ids_writer):
     for ad_id in ad_ids:
