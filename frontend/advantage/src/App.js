@@ -10,7 +10,6 @@ import { NoPage } from "./pages/no-page";
 import { TeamMemberHomePage } from "./pages/team-member-pages/team-member-home";
 import { TeamMemberTextualAnalysisPage } from "./pages/team-member-pages/team-member-textual-analysis";
 import { TeamMemberImageAnalysisPage } from "./pages/team-member-pages/team-member-image-analysis";
-import { PDFPage } from "./pages/save-pdf";
 import { CompanyManageTeams } from "./pages/company-pages/company-manage-teams";
 import { CompanySubscription } from "./pages/company-pages/company-subscription";
 function App() {
@@ -23,7 +22,6 @@ function App() {
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/save-pdf" element={<PDFPage />} />
         <Route
           path="/team-member"
           element={<TeamMemberHomePage></TeamMemberHomePage>}
