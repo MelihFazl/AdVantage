@@ -8,6 +8,8 @@ import TeamListCard from "./team-list-card";
 import { useState } from "react";
 import TeamDialog from "./team-dialog";
 import React from "react";
+import EditDialog from "./edit-dialog";
+import AddMemberDialog from "./add-member-dialog";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -41,9 +43,11 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export const CompanyManageTeams = () => {
-  const matches = useMediaQuery("(min-width:1035px)");
+  const matches = useMediaQuery("(min-width:1060px)");
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState({});
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
   const teams = [
     "Oliver Hansen",
     "Van Henry",
@@ -63,11 +67,23 @@ export const CompanyManageTeams = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
+  const handleEditClick = () => {
+    setOpenEditDialog(true);
+  };
+  const handleCloseEditDialog = () => {
+    setOpenEditDialog(false);
+  };
+  const handleAddClick = () => {
+    setOpenAddDialog(true);
+  };
+  const handleCloseAddDialog = () => {
+    setOpenAddDialog(false);
+  };
   return (
     <Stack direction={"row"}>
       <LeftDrawer
         drawerItems={CompanyDrawerItems}
-        adaptWidth={1156}
+        adaptWidth={1232}
       ></LeftDrawer>
       <Stack
         direction="column"
@@ -112,7 +128,7 @@ export const CompanyManageTeams = () => {
         <Stack
           direction={"row"}
           flexWrap={"wrap"}
-          padding={"0px 20px 20px 20px"}
+          padding={"0px 20px 10px 20px"}
           gap={"16px"}
           position={"relative"}
         >
@@ -142,7 +158,7 @@ export const CompanyManageTeams = () => {
                     display: "flex",
                     flexDirection: "column",
                     gap: "8px",
-                    paddingBottom: "20px",
+                    paddingBottom: "16px",
                     paddingLeft: "20px",
                     paddingRight: "20px",
                   }}
@@ -182,26 +198,69 @@ export const CompanyManageTeams = () => {
               </Paper>
               <React.Fragment>
                 {" "}
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
-                <TeamListCard onTeamCardClick={handleCardClick}></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
                 <TeamDialog
                   open={openDialog}
                   handleClose={handleCloseDialog}
                   report={selectedTeam}
                 ></TeamDialog>
+                <EditDialog
+                  open={openEditDialog}
+                  handleClose={handleCloseEditDialog}
+                ></EditDialog>
+                <AddMemberDialog
+                  open={openAddDialog}
+                  handleClose={handleCloseAddDialog}
+                ></AddMemberDialog>
               </React.Fragment>
             </Stack>
           </Paper>

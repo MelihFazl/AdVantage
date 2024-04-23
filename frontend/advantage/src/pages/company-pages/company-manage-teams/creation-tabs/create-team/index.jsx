@@ -1,16 +1,23 @@
 import { Box, Stack, Typography, TextField, Button } from "@mui/material";
 import { Form, Field } from "react-final-form";
 import * as React from "react";
+import { isFieldEmpty } from "../../../../../common/validator-functions/isFieldEmpty";
+import { isValueNumerical } from "../../../../../common/validator-functions/isValueNumerical";
+import { composeValidators } from "../../../../../common/validator-functions/composeValidators";
 
-export default function CreateTeamForm() {
+export default function CreateTeamForm({ initialValues, isEdit }) {
   return (
     <Form
       keepDirtyOnReinitialize
+      initialValues={initialValues}
       onSubmit={(values) => {}}
       render={({ handleSubmit }) => (
         <form onSubmit={handleSubmit}>
           <Stack direction={"column"} gap={"8px"}>
-            <Field name="teamName">
+            <Field
+              name="teamName"
+              validate={isFieldEmpty("Team name must be entered.")}
+            >
               {({ input, meta }) => (
                 <Box
                   display={"flex"}
@@ -29,7 +36,13 @@ export default function CreateTeamForm() {
                 </Box>
               )}
             </Field>
-            <Field name="usageLimit">
+            <Field
+              name="usageLimit"
+              validate={composeValidators([
+                isFieldEmpty("Limit must be set."),
+                isValueNumerical("Value must be numerical."),
+              ])}
+            >
               {({ input, meta }) => (
                 <Box
                   display={"flex"}
@@ -48,11 +61,13 @@ export default function CreateTeamForm() {
                 </Box>
               )}
             </Field>
-            <Box alignSelf={"flex-end"} marginTop={"8px"}>
-              <Button variant="contained" disableElevation type="submit">
-                Create Team
-              </Button>
-            </Box>
+            {!isEdit && (
+              <Box alignSelf={"flex-end"} marginTop={"8px"}>
+                <Button variant="contained" disableElevation type="submit">
+                  Create Team
+                </Button>
+              </Box>
+            )}
           </Stack>
         </form>
       )}

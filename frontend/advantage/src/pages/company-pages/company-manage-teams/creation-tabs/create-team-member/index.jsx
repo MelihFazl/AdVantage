@@ -12,21 +12,13 @@ import { Form, Field } from "react-final-form";
 import { useTheme } from "@emotion/react";
 import { useState } from "react";
 import * as React from "react";
+import { isFieldEmpty } from "../../../../../common/validator-functions/isFieldEmpty";
+import { composeValidators } from "../../../../../common/validator-functions/composeValidators";
+import { isValidEmail } from "../../../../../common/validator-functions/isValidEmail";
 
 export default function CreateTeamMemberForm({ teams }) {
   const theme = useTheme();
   const [teamName, setTeamName] = useState([]);
-
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
-  };
 
   function getStyles(team, teamName, theme) {
     return {
@@ -61,7 +53,7 @@ export default function CreateTeamMemberForm({ teams }) {
               gap={"4px"}
               width={"%100"}
             >
-              <Field name="name">
+              <Field name="name" validate={isFieldEmpty("Required")}>
                 {({ input, meta }) => (
                   <Box
                     display={"flex"}
@@ -81,7 +73,7 @@ export default function CreateTeamMemberForm({ teams }) {
                   </Box>
                 )}
               </Field>
-              <Field name="surname">
+              <Field name="surname" validate={isFieldEmpty("Required")}>
                 {({ input, meta }) => (
                   <Box
                     display={"flex"}
@@ -102,7 +94,13 @@ export default function CreateTeamMemberForm({ teams }) {
                 )}
               </Field>
             </Box>
-            <Field name="email">
+            <Field
+              name="email"
+              validate={composeValidators([
+                isFieldEmpty("Email must be entered."),
+                isValidEmail("Email must be in valid format."),
+              ])}
+            >
               {({ input, meta }) => (
                 <Box
                   display={"flex"}
@@ -129,8 +127,9 @@ export default function CreateTeamMemberForm({ teams }) {
                   flexDirection={"column"}
                   gap={"4px"}
                 >
-                  <Typography>Select Team</Typography>
+                  <Typography>Select Team (Optional)</Typography>
                   <Select
+                    {...input}
                     id="team"
                     multiple
                     value={teamName}

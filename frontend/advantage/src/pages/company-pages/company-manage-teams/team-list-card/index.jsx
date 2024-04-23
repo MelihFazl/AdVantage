@@ -4,11 +4,16 @@ import CardContent from "@mui/material/CardContent";
 import { Box, Button, CardActionArea } from "@mui/material";
 import Typography from "@mui/material/Typography";
 
-export default function TeamListCard({ team, onTeamCardClick }) {
+export default function TeamListCard({
+  team,
+  onTeamCardClick,
+  onEditClick,
+  onAddClick,
+}) {
   return (
     <Card
       variant="outlined"
-      sx={{ minWidth: 263.2, height: 80, borderRadius: "8px" }}
+      sx={{ minWidth: 300, height: 80, borderRadius: "8px" }}
     >
       <CardActionArea
         onClick={() => {
@@ -27,13 +32,16 @@ export default function TeamListCard({ team, onTeamCardClick }) {
               display={"flex"}
               flexDirection={"column"}
               padding={"0 20px 0 20px"}
+              sx={{ flexShrink: 0 }}
             >
               <Typography sx={{ fontSize: 16 }} gutterBottom>
                 Team Name
               </Typography>
               <Typography
                 color="text.secondary"
-                sx={{ fontSize: 14 }}
+                sx={{
+                  fontSize: 14,
+                }}
                 gutterBottom
               >
                 Usage: 1234/5000
@@ -45,11 +53,26 @@ export default function TeamListCard({ team, onTeamCardClick }) {
               alignItems={"center"}
               padding={"0 20px 0 20px"}
               gap={"8px"}
+              sx={{ flexShrink: 0 }} // Prevent shrinking
             >
               <Button
                 variant="outlined"
                 onMouseDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddClick();
+                }}
+                disableElevation
+              >
+                Add Member
+              </Button>
+              <Button
+                variant="outlined"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditClick();
+                }}
                 disableElevation
               >
                 Edit

@@ -50,7 +50,7 @@ export default function PlanCard({ plan, onGetStartedButtonClick }) {
       sx={{
         minWidth: 360,
         maxHeight: 450,
-        borderRadius: "8px",
+        borderRadius: "12px",
       }}
     >
       <CardContent>
