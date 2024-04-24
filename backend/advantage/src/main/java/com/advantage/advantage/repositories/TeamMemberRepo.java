@@ -21,6 +21,9 @@ public interface TeamMemberRepo extends JpaRepository<TeamMember, Long>
 
     public List<TeamMember> findByEmail(String email);
 
+    @Query("SELECT tm FROM TeamMember tm JOIN tm.teams t WHERE t.teamId = :teamId")
+    List<TeamMember> findAllByTeamId(@Param("teamId") Long teamId);
+
     public TeamMember deleteById(long id);
     public List<TeamMember> findByName(String name);
 }

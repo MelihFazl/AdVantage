@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,6 +61,7 @@ public class TeamController {
             Long userId = jwtUtils.getUserId(token);
             CompanyAdministrator ca = userAccountManagementService.getCompanyAdministratorByID(userId).get(0);
             team.setCompanyAdministrator(ca);
+            team.setMonthlyAnalysisUsage(0);
 
             if (teamService.saveTeam(team) != null) {
                 return ResponseEntity.status(HttpStatus.CREATED)
@@ -91,8 +94,23 @@ public class TeamController {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                             .body("Unauthorized request.");
                 }
+                List<TeamMember> tms = userAccountManagementService.getAllTeamMembersByTeamId(teamId);
 
                 try {
+                    for(TeamMember tm : tms) {
+                        List<Team> userTeams = tm.getTeams();
+
+                        // Iterate over the userTeams list
+                        Iterator<Team> iterator = userTeams.iterator();
+                        while (iterator.hasNext()) {
+                            Team teamm = iterator.next();
+                            if (team.getTeamId().equals(teamId)) {
+                                iterator.remove(); // Remove the team with the specified teamIdToRemove
+                            }
+                        }
+                        tm.setTeams(userTeams);
+                        userAccountManagementService.patchTeamMember(tm, tm.getId());
+                    }
                     teamService.deleteTeamById(teamId);
                     return ResponseEntity.status(HttpStatus.OK)
                             .body("Team with name (" + team.getTeamName() + ") and with id (" + team.getTeamId() + ") has been deleted.");
