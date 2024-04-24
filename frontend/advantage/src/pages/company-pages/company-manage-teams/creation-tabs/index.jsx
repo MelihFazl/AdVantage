@@ -37,7 +37,7 @@ export default function CreationTabs({ teams }) {
             </TabList>
           </Box>
           <TabPanel value="1">
-            <CreateTeamForm initialValues={{}} isEdit={false}></CreateTeamForm>
+            <CreateTeamForm></CreateTeamForm>
           </TabPanel>
           <TabPanel value="2">
             {" "}

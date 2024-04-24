@@ -4,13 +4,34 @@ import * as React from "react";
 import { isFieldEmpty } from "../../../../../common/validator-functions/isFieldEmpty";
 import { isValueNumerical } from "../../../../../common/validator-functions/isValueNumerical";
 import { composeValidators } from "../../../../../common/validator-functions/composeValidators";
+import { BASE_URL } from "../../../../../common/constans";
 
-export default function CreateTeamForm({ initialValues, isEdit }) {
+export default function CreateTeamForm() {
   return (
     <Form
       keepDirtyOnReinitialize
-      initialValues={initialValues}
-      onSubmit={(values) => {}}
+      onSubmit={(values) => {
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+
+        const raw = JSON.stringify({
+          teamName: values.teamName,
+          usageLimit: values.usageLimit,
+        });
+
+        const requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: raw,
+          redirect: "follow",
+        };
+
+        var token = localStorage.getItem("userToken");
+        fetch(BASE_URL + "/team/addTeam?token=" + token, requestOptions)
+          .then((response) => response.text())
+          .then((result) => window.location.reload())
+          .catch((error) => console.error(error));
+      }}
       render={({ handleSubmit }) => (
         <form onSubmit={handleSubmit}>
           <Stack direction={"column"} gap={"8px"}>
@@ -61,13 +82,11 @@ export default function CreateTeamForm({ initialValues, isEdit }) {
                 </Box>
               )}
             </Field>
-            {!isEdit && (
-              <Box alignSelf={"flex-end"} marginTop={"8px"}>
-                <Button variant="contained" disableElevation type="submit">
-                  Create Team
-                </Button>
-              </Box>
-            )}
+            <Box alignSelf={"flex-end"} marginTop={"8px"}>
+              <Button variant="contained" disableElevation type="submit">
+                Create Team
+              </Button>
+            </Box>
           </Stack>
         </form>
       )}

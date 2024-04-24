@@ -9,6 +9,7 @@ export default function TeamListCard({
   onTeamCardClick,
   onEditClick,
   onAddClick,
+  onDeleteClick,
 }) {
   return (
     <Card
@@ -35,7 +36,7 @@ export default function TeamListCard({
               sx={{ flexShrink: 0 }}
             >
               <Typography sx={{ fontSize: 16 }} gutterBottom>
-                Team Name
+                {team.teamName}
               </Typography>
               <Typography
                 color="text.secondary"
@@ -44,7 +45,7 @@ export default function TeamListCard({
                 }}
                 gutterBottom
               >
-                Usage: 1234/5000
+                {`Usage: ${team.monthlyAnalysisUsage}/${team.usageLimit}`}
               </Typography>
             </Box>
             <Box
@@ -60,7 +61,7 @@ export default function TeamListCard({
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onAddClick();
+                  onAddClick(team);
                 }}
                 disableElevation
               >
@@ -71,7 +72,7 @@ export default function TeamListCard({
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEditClick();
+                  onEditClick(team);
                 }}
                 disableElevation
               >
@@ -80,7 +81,10 @@ export default function TeamListCard({
               <Button
                 variant="outlined"
                 onMouseDown={(e) => e.stopPropagation()}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteClick(team);
+                }}
                 style={{ borderColor: "#F44336", color: "#F44336" }}
                 disableElevation
               >

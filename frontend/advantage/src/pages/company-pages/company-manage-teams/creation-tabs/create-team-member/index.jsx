@@ -138,11 +138,11 @@ export default function CreateTeamMemberForm({ teams }) {
                   >
                     {teams.map((team) => (
                       <MenuItem
-                        key={team}
-                        value={team}
+                        key={team.teamName}
+                        value={team.teamId}
                         style={getStyles(team, teamName, theme)}
                       >
-                        {team}
+                        {team.teamName}
                       </MenuItem>
                     ))}
                   </Select>

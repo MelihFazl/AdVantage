@@ -5,11 +5,13 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled } from "@mui/material/styles";
 import CreationTabs from "./creation-tabs";
 import TeamListCard from "./team-list-card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TeamDialog from "./team-dialog";
 import React from "react";
 import EditDialog from "./edit-dialog";
 import AddMemberDialog from "./add-member-dialog";
+import { BASE_URL } from "../../../common/constans";
+import DeleteDialog from "./delete-dialog";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -48,18 +50,24 @@ export const CompanyManageTeams = () => {
   const [selectedTeam, setSelectedTeam] = useState({});
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const teams = [
-    "Oliver Hansen",
-    "Van Henry",
-    "April Tucker",
-    "Ralph Hubbard",
-    "Omar Alexander",
-    "Carlos Abbott",
-    "Miriam Wagner",
-    "Bradley Wilkerson",
-    "Virginia Andrews",
-    "Kelly Snyder",
-  ];
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [teams, setTeams] = useState([]);
+
+  useEffect(() => {
+    var requestOptions = {
+      method: "POST",
+      redirect: "follow",
+    };
+
+    var token = localStorage.getItem("userToken");
+    fetch(BASE_URL + "/team/getAllTeams?token=" + token, requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        setTeams(result);
+      })
+      .catch((error) => console.log("error", error));
+  }, []);
+
   const handleCardClick = (team) => {
     setSelectedTeam(team);
     setOpenDialog(true);
@@ -67,17 +75,26 @@ export const CompanyManageTeams = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
-  const handleEditClick = () => {
+  const handleEditClick = (team) => {
+    setSelectedTeam(team);
     setOpenEditDialog(true);
   };
   const handleCloseEditDialog = () => {
     setOpenEditDialog(false);
   };
-  const handleAddClick = () => {
+  const handleAddClick = (team) => {
+    setSelectedTeam(team);
     setOpenAddDialog(true);
   };
   const handleCloseAddDialog = () => {
     setOpenAddDialog(false);
+  };
+  const handleDeleteClick = (team) => {
+    setSelectedTeam(team);
+    setOpenDeleteDialog(true);
+  };
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
   };
   return (
     <Stack direction={"row"}>
@@ -197,57 +214,15 @@ export const CompanyManageTeams = () => {
                 <BoxTitle>Teams</BoxTitle>
               </Paper>
               <React.Fragment>
-                {" "}
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
+                {teams.map((team) => (
+                  <TeamListCard
+                    onTeamCardClick={handleCardClick}
+                    onEditClick={handleEditClick}
+                    onAddClick={handleAddClick}
+                    onDeleteClick={handleDeleteClick}
+                    team={team}
+                  ></TeamListCard>
+                ))}
                 <TeamDialog
                   open={openDialog}
                   handleClose={handleCloseDialog}
@@ -256,11 +231,17 @@ export const CompanyManageTeams = () => {
                 <EditDialog
                   open={openEditDialog}
                   handleClose={handleCloseEditDialog}
+                  team={selectedTeam}
                 ></EditDialog>
                 <AddMemberDialog
                   open={openAddDialog}
                   handleClose={handleCloseAddDialog}
                 ></AddMemberDialog>
+                <DeleteDialog
+                  open={openDeleteDialog}
+                  handleClose={handleCloseDeleteDialog}
+                  team={selectedTeam}
+                ></DeleteDialog>
               </React.Fragment>
             </Stack>
           </Paper>
