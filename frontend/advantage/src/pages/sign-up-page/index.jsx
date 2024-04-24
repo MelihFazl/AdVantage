@@ -12,6 +12,8 @@ import {
   Paper,
 } from "@mui/material";
 import registerImage from "../../assets/images/register.png";
+import { BASE_URL } from "../../common/constans";
+import { useNavigate } from "react-router-dom";
 
 const ImageBox = styled(Box)`
   width: 50%;
@@ -37,6 +39,7 @@ const FormContainer = styled(Paper)`
 `;
 
 export const SignUpPage = () => {
+  const navigate = useNavigate();
   return (
     <Container
       maxWidth="false"
@@ -73,7 +76,48 @@ export const SignUpPage = () => {
                 reEnterPassword: "",
               }}
               onSubmit={(values) => {
-                console.log(values);
+                if (values.password === values.reEnterPassword) {
+                  const myHeaders = new Headers();
+                  myHeaders.append("Content-Type", "application/json");
+
+                  const raw = JSON.stringify({
+                    name: values.firstName,
+                    surname: values.lastName,
+                    email: values.email,
+                    hashedPassword: values.password,
+                  });
+
+                  const requestOptions = {
+                    method: "POST",
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: "follow",
+                  };
+
+                  fetch(
+                    BASE_URL +
+                      "/user/companyAdministrator/add?companyName=" +
+                      values.companyName,
+                    requestOptions
+                  )
+                    .then((response) => {
+                      if (response.ok) {
+                        response.text().then((result) => {
+                          alert(result);
+                        });
+                        navigate("/login");
+                      } else {
+                        response.text().then((result) => {
+                          alert(result);
+                        });
+                      }
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                    });
+                } else {
+                  alert("Passwords must be same.");
+                }
               }}
               render={({ handleSubmit, invalid }) => (
                 <form onSubmit={handleSubmit}>
