@@ -1,7 +1,15 @@
 import LeftDrawer from "../../../common/left-drawer";
 import { CompanyDrawerItems } from "../company-drawer-items";
-import { Paper, Box, Stack, Typography } from "@mui/material";
+import { Paper, Box, Stack, Typography, TextField } from "@mui/material";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled } from "@mui/material/styles";
+import CreationTabs from "./creation-tabs";
+import TeamListCard from "./team-list-card";
+import { useState } from "react";
+import TeamDialog from "./team-dialog";
+import React from "react";
+import EditDialog from "./edit-dialog";
+import AddMemberDialog from "./add-member-dialog";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -18,6 +26,14 @@ const TeamText = styled(Typography)({
   marginRight: "50px",
 });
 
+const BoxTitle = styled(Typography)({
+  textAlign: "center",
+  fontWeight: "bold", // Added fontWeight: 'bold'
+  fontSize: "16px",
+  marginLeft: "50px",
+  marginRight: "50px",
+});
+
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: "#fff",
   ...theme.typography.body2,
@@ -27,9 +43,48 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 export const CompanyManageTeams = () => {
+  const matches = useMediaQuery("(min-width:1060px)");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState({});
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const teams = [
+    "Oliver Hansen",
+    "Van Henry",
+    "April Tucker",
+    "Ralph Hubbard",
+    "Omar Alexander",
+    "Carlos Abbott",
+    "Miriam Wagner",
+    "Bradley Wilkerson",
+    "Virginia Andrews",
+    "Kelly Snyder",
+  ];
+  const handleCardClick = (team) => {
+    setSelectedTeam(team);
+    setOpenDialog(true);
+  };
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+  const handleEditClick = () => {
+    setOpenEditDialog(true);
+  };
+  const handleCloseEditDialog = () => {
+    setOpenEditDialog(false);
+  };
+  const handleAddClick = () => {
+    setOpenAddDialog(true);
+  };
+  const handleCloseAddDialog = () => {
+    setOpenAddDialog(false);
+  };
   return (
     <Stack direction={"row"}>
-      <LeftDrawer drawerItems={CompanyDrawerItems}></LeftDrawer>
+      <LeftDrawer
+        drawerItems={CompanyDrawerItems}
+        adaptWidth={1232}
+      ></LeftDrawer>
       <Stack
         direction="column"
         width="100%"
@@ -70,6 +125,146 @@ export const CompanyManageTeams = () => {
         >
           <TeamText>Manage teams in your company</TeamText>
         </Box>
+        <Stack
+          direction={"row"}
+          flexWrap={"wrap"}
+          padding={"0px 20px 10px 20px"}
+          gap={"16px"}
+          position={"relative"}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              display: "block",
+              flexDirection: "row",
+              alignItems: "center",
+              flexGrow: "2",
+              minWidth: "300px",
+              maxWidth: matches ? "400px" : "%100",
+              height: "fit-content",
+              position: matches ? "sticky" : "relative",
+              top: matches ? 94 : 0,
+            }}
+          >
+            <Stack direction={"column"} gap={"16px"}>
+              <CreationTabs teams={teams}></CreationTabs>
+              <Paper
+                variant="outlined"
+                sx={{ borderRadius: "12px", padding: "10px 30px 0px 30px" }}
+              >
+                <Box
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                    paddingBottom: "16px",
+                    paddingLeft: "20px",
+                    paddingRight: "20px",
+                  }}
+                >
+                  <BoxTitle>Company Details</BoxTitle>
+                  <Typography>Allocated Limit: 123123</Typography>
+                  <Typography>Available Limit: 886877</Typography>
+                  <Typography>Number of Teams: 6</Typography>
+                </Box>
+              </Paper>
+            </Stack>
+          </Paper>
+          <Paper
+            elevation={0}
+            sx={{
+              display: "block",
+              flexDirection: "row",
+              alignItems: "center",
+              flexGrow: "6",
+              minWidth: "460px",
+              height: "fit-content",
+            }}
+          >
+            <Stack direction={"column"} gap={"8px"}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  padding: "8px 30px 8px 30px",
+                  position: matches ? "sticky" : "relative",
+                  top: matches ? 94 : 0,
+                  zIndex: 9,
+                  width: "%100",
+                  backgroundColor: "#ffffff",
+                }}
+              >
+                <BoxTitle>Teams</BoxTitle>
+              </Paper>
+              <React.Fragment>
+                {" "}
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamListCard
+                  onTeamCardClick={handleCardClick}
+                  onEditClick={handleEditClick}
+                  onAddClick={handleAddClick}
+                ></TeamListCard>
+                <TeamDialog
+                  open={openDialog}
+                  handleClose={handleCloseDialog}
+                  report={selectedTeam}
+                ></TeamDialog>
+                <EditDialog
+                  open={openEditDialog}
+                  handleClose={handleCloseEditDialog}
+                ></EditDialog>
+                <AddMemberDialog
+                  open={openAddDialog}
+                  handleClose={handleCloseAddDialog}
+                ></AddMemberDialog>
+              </React.Fragment>
+            </Stack>
+          </Paper>
+        </Stack>
       </Stack>
     </Stack>
   );

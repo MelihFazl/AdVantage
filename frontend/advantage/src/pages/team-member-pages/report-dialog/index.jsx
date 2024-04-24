@@ -6,6 +6,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Box, Typography, useMediaQuery } from "@mui/material";
+import { generatePDF } from "../../../common/generate-pdf";
 
 export default function ReportDialog({ open, handleClose, report }) {
   const fullScreen = useMediaQuery("(max-width:750px)");
@@ -100,9 +101,14 @@ export default function ReportDialog({ open, handleClose, report }) {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} autoFocus>
-          Close
+        <Button
+          onClick={() => {
+            generatePDF(report);
+          }}
+        >
+          Export as PDF
         </Button>
+        <Button onClick={handleClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );

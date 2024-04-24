@@ -121,7 +121,10 @@ export const TeamMemberHomePage = () => {
 
   return (
     <Stack direction={"row"}>
-      <LeftDrawer drawerItems={TeamMemberDrawerItems}></LeftDrawer>
+      <LeftDrawer
+        drawerItems={TeamMemberDrawerItems}
+        adaptWidth={1071}
+      ></LeftDrawer>
       <Stack
         direction="column"
         width="100%"
