@@ -10,7 +10,7 @@ import { isFieldEmpty } from "../../../../common/validator-functions/isFieldEmpt
 import { composeValidators } from "../../../../common/validator-functions/composeValidators";
 import { isValueNumerical } from "../../../../common/validator-functions/isValueNumerical";
 
-export default function EditDialog({ open, handleClose, team }) {
+export default function EditDialog({ open, handleClose, team, openSnack }) {
   return (
     <Form
       keepDirtyOnReinitialize
@@ -42,8 +42,21 @@ export default function EditDialog({ open, handleClose, team }) {
             team.teamId,
           requestOptions
         )
-          .then((response) => response.text())
-          .then((result) => window.location.reload())
+          .then((response) => {
+            if (response.ok) {
+              window.location.reload();
+              openSnack({
+                severity: "success",
+                text: "Team edited successfully",
+              });
+              return undefined;
+            } else return response.text();
+          })
+          .then((result) => {
+            if (result) {
+              openSnack({ severity: "error", text: result });
+            }
+          })
           .catch((error) => console.error(error));
       }}
       render={({ handleSubmit }) => (

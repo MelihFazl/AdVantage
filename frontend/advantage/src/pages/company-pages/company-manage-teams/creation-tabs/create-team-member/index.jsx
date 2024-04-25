@@ -16,7 +16,7 @@ import { isFieldEmpty } from "../../../../../common/validator-functions/isFieldE
 import { composeValidators } from "../../../../../common/validator-functions/composeValidators";
 import { isValidEmail } from "../../../../../common/validator-functions/isValidEmail";
 
-export default function CreateTeamMemberForm({ teams }) {
+export default function CreateTeamMemberForm({ teams, openSnack }) {
   const theme = useTheme();
   const [teamName, setTeamName] = useState([]);
 
@@ -42,7 +42,9 @@ export default function CreateTeamMemberForm({ teams }) {
   return (
     <Form
       keepDirtyOnReinitialize
-      onSubmit={(values) => {}}
+      onSubmit={(values) => {
+        openSnack({ severity: "success", text: "Bu bir denemedir." });
+      }}
       render={({ handleSubmit }) => (
         <form onSubmit={handleSubmit}>
           <Stack direction={"column"} gap={"8px"}>

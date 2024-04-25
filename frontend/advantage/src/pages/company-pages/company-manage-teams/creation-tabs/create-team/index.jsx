@@ -6,7 +6,7 @@ import { isValueNumerical } from "../../../../../common/validator-functions/isVa
 import { composeValidators } from "../../../../../common/validator-functions/composeValidators";
 import { BASE_URL } from "../../../../../common/constans";
 
-export default function CreateTeamForm() {
+export default function CreateTeamForm({ openSnack }) {
   return (
     <Form
       keepDirtyOnReinitialize
@@ -28,8 +28,21 @@ export default function CreateTeamForm() {
 
         var token = localStorage.getItem("userToken");
         fetch(BASE_URL + "/team/addTeam?token=" + token, requestOptions)
-          .then((response) => response.text())
-          .then((result) => window.location.reload())
+          .then((response) => {
+            if (response.ok) {
+              window.location.reload();
+              openSnack({
+                severity: "success",
+                text: "Team created successfully",
+              });
+              return undefined;
+            } else return response.text();
+          })
+          .then((result) => {
+            if (result) {
+              openSnack({ severity: "error", text: result });
+            }
+          })
           .catch((error) => console.error(error));
       }}
       render={({ handleSubmit }) => (

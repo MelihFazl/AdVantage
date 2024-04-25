@@ -14,19 +14,43 @@ import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
 import Avatar from "@mui/material/Avatar";
 import Person2RoundedIcon from "@mui/icons-material/Person2Rounded";
+import { useEffect } from "react";
+import { BASE_URL } from "../../../../common/constans";
 
 export default function TeamDialog({ open, handleClose, team }) {
   const fullScreen = useMediaQuery("(max-width:750px)");
   const [dense, setDense] = React.useState(false);
-  const [secondary, setSecondary] = React.useState(false);
+  const [members, setMembers] = React.useState([]);
 
-  function generate(element) {
-    return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((value) =>
-      React.cloneElement(element, {
-        key: value,
-      })
-    );
-  }
+  useEffect(() => {
+    if (open) {
+      var token = localStorage.getItem("userToken");
+      const requestOptions = {
+        method: "POST",
+        redirect: "follow",
+      };
+
+      fetch(
+        BASE_URL +
+          "/user/teamMember/getAllByTeamId?teamId=" +
+          team.teamId +
+          "&token=" +
+          token,
+        requestOptions
+      )
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else return [];
+        })
+        .then((result) => {
+          setMembers(result);
+        })
+        .catch((error) => console.log("error", error));
+    } else {
+      setMembers([]);
+    }
+  }, [open]);
 
   return (
     <Dialog
@@ -44,7 +68,7 @@ export default function TeamDialog({ open, handleClose, team }) {
       onClose={handleClose}
       aria-labelledby="responsive-dialog-title"
     >
-      <DialogTitle id="responsive-dialog-title">{"Team Name"}</DialogTitle>
+      <DialogTitle id="responsive-dialog-title">{team.teamName}</DialogTitle>
       <DialogContent>
         <DialogContentText>
           <Box
@@ -62,14 +86,41 @@ export default function TeamDialog({ open, handleClose, team }) {
               display={"flex"}
               flexDirection={"column"}
             >
-              <Typography>{`Usage: 1234/5000`}</Typography>
+              <Typography>{`Usage: ${team.monthlyAnalysisUsage}/${team.usageLimit}`}</Typography>
               <Typography sx={{ fontWeight: "bold" }}>Team Members</Typography>
             </Box>
-            <List dense={dense}>
-              {generate(
+            <List dense={false}>
+              {members?.map((member, index) => (
                 <ListItem
                   secondaryAction={
-                    <IconButton edge="end" aria-label="delete">
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => {
+                        var token = localStorage.getItem("userToken");
+                        const requestOptions = {
+                          method: "POST",
+                          redirect: "follow",
+                        };
+
+                        fetch(
+                          BASE_URL +
+                            "/user/teamMember/removeTeam?token=" +
+                            token +
+                            "&teamMemberId=" +
+                            member[0] +
+                            "&teamId=" +
+                            team.teamId,
+                          requestOptions
+                        )
+                          .then((response) => response.text())
+                          .then((result) => console.log(result))
+                          .catch((error) => console.error(error));
+                        setMembers(
+                          members.filter((_, index2) => index2 !== index)
+                        );
+                      }}
+                    >
                       <CloseRoundedIcon />
                     </IconButton>
                   }
@@ -79,9 +130,9 @@ export default function TeamDialog({ open, handleClose, team }) {
                       <Person2RoundedIcon />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary="Single-line item" />
+                  <ListItemText primary={member[1] + " " + member[2]} />
                 </ListItem>
-              )}
+              ))}
             </List>
           </Box>
         </DialogContentText>

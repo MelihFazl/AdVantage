@@ -6,8 +6,8 @@ import { Button } from "@mui/material";
 import { Typography } from "@mui/material";
 import { BASE_URL } from "../../../../common/constans";
 
-export default function DeleteDialog({ open, handleClose, team }) {
-  function handleYes(params) {
+export default function DeleteDialog({ open, handleClose, team, openSnack }) {
+  function handleYes() {
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
 
@@ -22,8 +22,21 @@ export default function DeleteDialog({ open, handleClose, team }) {
       BASE_URL + "/team/removeTeam?token=" + token + "&teamId=" + team.teamId,
       requestOptions
     )
-      .then((response) => response.text())
-      .then((result) => window.location.reload())
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload();
+          openSnack({
+            severity: "success",
+            text: "Team deleted successfully",
+          });
+          return undefined;
+        } else return response.text();
+      })
+      .then((result) => {
+        if (result) {
+          openSnack({ severity: "error", text: result });
+        }
+      })
       .catch((error) => console.error(error));
   }
   return (

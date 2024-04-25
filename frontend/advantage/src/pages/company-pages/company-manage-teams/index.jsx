@@ -12,6 +12,7 @@ import EditDialog from "./edit-dialog";
 import AddMemberDialog from "./add-member-dialog";
 import { BASE_URL } from "../../../common/constans";
 import DeleteDialog from "./delete-dialog";
+import AdvSnackbar from "../../../common/adv-snackbar";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -52,6 +53,11 @@ export const CompanyManageTeams = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [teams, setTeams] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [severity, setSeverity] = useState("");
+  const [text, setText] = useState("");
+
+  const SNACK_DURATION = 4000;
 
   useEffect(() => {
     var requestOptions = {
@@ -67,6 +73,12 @@ export const CompanyManageTeams = () => {
       })
       .catch((error) => console.log("error", error));
   }, []);
+
+  const openSnack = ({ severity, text }) => {
+    setSeverity(severity);
+    setText(text);
+    setOpen(true);
+  };
 
   const handleCardClick = (team) => {
     setSelectedTeam(team);
@@ -164,7 +176,7 @@ export const CompanyManageTeams = () => {
             }}
           >
             <Stack direction={"column"} gap={"16px"}>
-              <CreationTabs teams={teams}></CreationTabs>
+              <CreationTabs teams={teams} openSnack={openSnack}></CreationTabs>
               <Paper
                 variant="outlined"
                 sx={{ borderRadius: "12px", padding: "10px 30px 0px 30px" }}
@@ -226,27 +238,38 @@ export const CompanyManageTeams = () => {
                 <TeamDialog
                   open={openDialog}
                   handleClose={handleCloseDialog}
-                  report={selectedTeam}
+                  team={selectedTeam}
                 ></TeamDialog>
                 <EditDialog
                   open={openEditDialog}
                   handleClose={handleCloseEditDialog}
                   team={selectedTeam}
+                  openSnack={openSnack}
                 ></EditDialog>
                 <AddMemberDialog
                   open={openAddDialog}
                   handleClose={handleCloseAddDialog}
+                  team={selectedTeam}
+                  openSnack={openSnack}
                 ></AddMemberDialog>
                 <DeleteDialog
                   open={openDeleteDialog}
                   handleClose={handleCloseDeleteDialog}
                   team={selectedTeam}
+                  openSnack={openSnack}
                 ></DeleteDialog>
               </React.Fragment>
             </Stack>
           </Paper>
         </Stack>
       </Stack>
+      <AdvSnackbar
+        open={open}
+        setOpen={setOpen}
+        severity={severity}
+        duration={SNACK_DURATION}
+        text={text}
+      ></AdvSnackbar>
     </Stack>
   );
 };
