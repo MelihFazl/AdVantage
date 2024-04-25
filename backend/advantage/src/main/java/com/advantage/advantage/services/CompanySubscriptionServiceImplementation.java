@@ -181,7 +181,9 @@ public class CompanySubscriptionServiceImplementation implements CompanySubscrip
                         break;
                     default:break;
                 }
-
+            case Free:
+                price = 50;
+                break;
         }
         return price;
     }

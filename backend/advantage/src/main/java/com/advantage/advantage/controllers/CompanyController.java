@@ -70,6 +70,8 @@ public class CompanyController {
                 if( savedSubscription != null){
                     APIResponse apiResponse = APIResponse.builder().message("Subscription is updated")
                             .statusCode(200).build();
+                    admin.getCompany().setAvailableLimit(savedSubscription.getUsageLimit());
+                    userAccountManagementService.patchCompanyAdministrator(admin, admin.getId());
                     return new ResponseEntity<>(apiResponse, HttpStatus.OK);
                 }
                 case  "TM":
