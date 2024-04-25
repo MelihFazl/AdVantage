@@ -13,6 +13,9 @@ public interface TeamMemberRepo extends JpaRepository<TeamMember, Long>
 {
     public List<TeamMember> findById(long id);
 
+    @Query("SELECT tm.id, tm.name, tm.surname, tm.email, tm.teams FROM TeamMember tm WHERE tm.companyAdministrator.id = :id")
+    List<Object[]> findAllByCompanyAdministrator_Id(@Param("id") long id);
+
     @Query("SELECT tm.id, tm.name, tm.surname, tm.email, tm.teams FROM TeamMember tm JOIN tm.teams t WHERE t.teamId = :teamId")
     List<Object[]> findByTeamId(@Param("teamId") Long teamId);
 

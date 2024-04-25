@@ -112,6 +112,11 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     }
 
     @Override
+    public List<Object[]> getAllTeamMembersByCompany(long companyAdminId) {
+        return teamMemberRepository.findAllByCompanyAdministrator_Id(companyAdminId);
+    }
+
+    @Override
     public List<CompanyAdministrator> getCompanyAdministratorByID(long companyAdministratorID) {
         return companyAdministratorRepository.findById(companyAdministratorID);
     }

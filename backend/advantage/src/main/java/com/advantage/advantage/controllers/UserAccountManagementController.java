@@ -339,6 +339,22 @@ public class UserAccountManagementController {
         }
     }
 
+    @PostMapping("/teamMember/getAllByCompany")
+    public ResponseEntity<List<Object[]>> getAllTeamMembersByCompany(@RequestParam String token) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+
+            List<Object[]> teamMembers = userAccountManagementService.getAllTeamMembersByCompany(userId);
+            if (teamMembers == null || teamMembers.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            return ResponseEntity.ok(teamMembers);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
 
     @GetMapping("/companyAdministrator")
     public List<CompanyAdministrator> getCompanyAdministrator(@RequestParam long companyAdministratorId)
