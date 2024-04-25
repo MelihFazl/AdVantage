@@ -85,7 +85,7 @@ export const CompanyManageTeams = () => {
       redirect: "follow",
     };
 
-    fetch("http://localhost:8080/company/get?token=" + token, requestOptions2)
+    fetch(BASE_URL + "/company/get?token=" + token, requestOptions2)
       .then((response) => response.json())
       .then((result) => {
         setCompany(result);
