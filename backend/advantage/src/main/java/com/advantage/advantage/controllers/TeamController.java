@@ -104,7 +104,7 @@ public class TeamController {
                         Iterator<Team> iterator = userTeams.iterator();
                         while (iterator.hasNext()) {
                             Team teamm = iterator.next();
-                            if (team.getTeamId().equals(teamId)) {
+                            if (teamm.getTeamId().equals(teamId)) {
                                 iterator.remove(); // Remove the team with the specified teamIdToRemove
                             }
                         }
