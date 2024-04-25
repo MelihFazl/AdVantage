@@ -15,6 +15,7 @@ import * as React from "react";
 import { isFieldEmpty } from "../../../../../common/validator-functions/isFieldEmpty";
 import { composeValidators } from "../../../../../common/validator-functions/composeValidators";
 import { isValidEmail } from "../../../../../common/validator-functions/isValidEmail";
+import { BASE_URL } from "../../../../../common/constans";
 
 export default function CreateTeamMemberForm({ teams, openSnack }) {
   const theme = useTheme();
@@ -43,7 +44,43 @@ export default function CreateTeamMemberForm({ teams, openSnack }) {
     <Form
       keepDirtyOnReinitialize
       onSubmit={(values) => {
-        openSnack({ severity: "success", text: "Bu bir denemedir." });
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        var selectedTeams = teamName.map((id) => ({
+          teamId: id,
+        }));
+
+        const raw = JSON.stringify({
+          name: values.name,
+          surname: values.surname,
+          email: values.email,
+          teams: selectedTeams,
+        });
+
+        const requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: raw,
+          redirect: "follow",
+        };
+
+        var token = localStorage.getItem("userToken");
+        fetch(BASE_URL + "/user/teamMember/add?token=" + token, requestOptions)
+          .then((response) => {
+            if (response.ok) {
+              openSnack({
+                severity: "success",
+                text: "Member created successfully and email has sent to address.",
+              });
+              return undefined;
+            } else return response.text();
+          })
+          .then((result) => {
+            if (result) {
+              openSnack({ severity: "error", text: result });
+            }
+          })
+          .catch((error) => console.error(error));
       }}
       render={({ handleSubmit }) => (
         <form onSubmit={handleSubmit}>
