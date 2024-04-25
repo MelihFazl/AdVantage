@@ -120,6 +120,7 @@ public class CompanySubscriptionServiceImplementation implements CompanySubscrip
                         break;
                     default:break;
                 }
+            break;
             case Professional:
                 switch (paymentPeriodType){
                     case Monthly :
@@ -130,6 +131,7 @@ public class CompanySubscriptionServiceImplementation implements CompanySubscrip
                         break;
                     default:break;
                 }
+            break;
             case Agency:
                 switch (paymentPeriodType){
                     case Monthly :
@@ -140,7 +142,6 @@ public class CompanySubscriptionServiceImplementation implements CompanySubscrip
                         break;
                     default:break;
                 }
-
         }
         return price;
     }
@@ -161,6 +162,7 @@ public class CompanySubscriptionServiceImplementation implements CompanySubscrip
                         break;
                     default:break;
                 }
+                break;
             case Professional:
                 switch (paymentPeriodType){
                     case Monthly :
@@ -171,6 +173,7 @@ public class CompanySubscriptionServiceImplementation implements CompanySubscrip
                         break;
                     default:break;
                 }
+                break;
             case Agency:
                 switch (paymentPeriodType){
                     case Monthly :
@@ -181,6 +184,7 @@ public class CompanySubscriptionServiceImplementation implements CompanySubscrip
                         break;
                     default:break;
                 }
+                break;
             case Free:
                 price = 50;
                 break;
