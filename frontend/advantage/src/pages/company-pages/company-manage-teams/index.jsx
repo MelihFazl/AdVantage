@@ -56,6 +56,7 @@ export const CompanyManageTeams = () => {
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState("");
   const [text, setText] = useState("");
+  const [company, setCompany] = useState({});
 
   const SNACK_DURATION = 4000;
 
@@ -72,6 +73,18 @@ export const CompanyManageTeams = () => {
         setTeams(result);
       })
       .catch((error) => console.log("error", error));
+
+    const requestOptions2 = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    fetch("http://localhost:8080/company/get?token=" + token, requestOptions2)
+      .then((response) => response.json())
+      .then((result) => {
+        setCompany(result);
+      })
+      .catch((error) => console.error(error));
   }, []);
 
   const openSnack = ({ severity, text }) => {
@@ -193,9 +206,15 @@ export const CompanyManageTeams = () => {
                   }}
                 >
                   <BoxTitle>Company Details</BoxTitle>
-                  <Typography>Allocated Limit: 123123</Typography>
-                  <Typography>Available Limit: 886877</Typography>
-                  <Typography>Number of Teams: 6</Typography>
+                  <Typography>
+                    {"Allocated Limit: " +
+                      (company.subscription.usageLimit -
+                        company.availableLimit)}
+                  </Typography>
+                  <Typography>
+                    {"Available Limit: " + company.availableLimit}
+                  </Typography>
+                  <Typography>{"Number of Teams: " + teams.length}</Typography>
                 </Box>
               </Paper>
             </Stack>
