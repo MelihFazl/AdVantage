@@ -22,6 +22,10 @@ public interface UserAccountManagementService {
 
     public List<Object[]> getTeamMembersByTeamId(long teamId);
 
+    public List<TeamMember> getAllTeamMembersByTeamId(long teamId);
+
+    public List<Object[]> getAllTeamMembersByCompany(long companyAdminId);
+
     public List<CompanyAdministrator> getCompanyAdministratorByID(long companyAdministratorID);
 
     public List<CompanyAdministrator> secureGetCompanyAdministratorByID(long companyAdministratorID);

@@ -107,6 +107,16 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
     }
 
     @Override
+    public List<TeamMember> getAllTeamMembersByTeamId(long teamId) {
+        return teamMemberRepository.findAllByTeamId(teamId);
+    }
+
+    @Override
+    public List<Object[]> getAllTeamMembersByCompany(long companyAdminId) {
+        return teamMemberRepository.findAllByCompanyAdministrator_Id(companyAdminId);
+    }
+
+    @Override
     public List<CompanyAdministrator> getCompanyAdministratorByID(long companyAdministratorID) {
         return companyAdministratorRepository.findById(companyAdministratorID);
     }
@@ -128,8 +138,8 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
 
     @Override
     public TeamMember saveTeamMember(TeamMember teamMember) {
-        List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findById(teamMember.getId());
-        List<TeamMember> teamMembers = teamMemberRepository.findById(teamMember.getId());
+        List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findByEmail(teamMember.getEmail());
+        List<TeamMember> teamMembers = teamMemberRepository.findByEmail(teamMember.getEmail());
         if((companyAdministrators  == null || companyAdministrators.isEmpty()) && (teamMembers == null || teamMembers.isEmpty()))
             return teamMemberRepository.save(teamMember);
         return  null;
@@ -137,8 +147,8 @@ public class UserAccountManagementServiceImplementation implements UserAccountMa
 
     @Override
     public CompanyAdministrator saveCompanyAdministrator(CompanyAdministrator companyAdministrator) {
-        List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findById(companyAdministrator.getId());
-        List<TeamMember> teamMembers = teamMemberRepository.findById(companyAdministrator.getId());
+        List<CompanyAdministrator> companyAdministrators = companyAdministratorRepository.findByEmail(companyAdministrator.getEmail());
+        List<TeamMember> teamMembers = teamMemberRepository.findByEmail(companyAdministrator.getEmail());
         if((companyAdministrators  == null || companyAdministrators.isEmpty()) && (teamMembers == null || teamMembers.isEmpty()))
             return companyAdministratorRepository.save(companyAdministrator);
         return  null;

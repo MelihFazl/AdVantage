@@ -8,7 +8,7 @@ import CreateTeamForm from "./create-team";
 import CreateTeamMemberForm from "./create-team-member";
 import { Paper } from "@mui/material";
 
-export default function CreationTabs({ teams }) {
+export default function CreationTabs({ teams, openSnack }) {
   const [value, setValue] = React.useState("1");
 
   const handleChange = (event, newValue) => {
@@ -37,11 +37,14 @@ export default function CreationTabs({ teams }) {
             </TabList>
           </Box>
           <TabPanel value="1">
-            <CreateTeamForm initialValues={{}} isEdit={false}></CreateTeamForm>
+            <CreateTeamForm openSnack={openSnack}></CreateTeamForm>
           </TabPanel>
           <TabPanel value="2">
             {" "}
-            <CreateTeamMemberForm teams={teams}></CreateTeamMemberForm>
+            <CreateTeamMemberForm
+              teams={teams}
+              openSnack={openSnack}
+            ></CreateTeamMemberForm>
           </TabPanel>
         </TabContext>
       </Box>

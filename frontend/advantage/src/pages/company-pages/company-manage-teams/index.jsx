@@ -5,11 +5,15 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled } from "@mui/material/styles";
 import CreationTabs from "./creation-tabs";
 import TeamListCard from "./team-list-card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TeamDialog from "./team-dialog";
 import React from "react";
 import EditDialog from "./edit-dialog";
 import AddMemberDialog from "./add-member-dialog";
+import { BASE_URL } from "../../../common/constans";
+import DeleteDialog from "./delete-dialog";
+import AdvSnackbar from "../../../common/adv-snackbar";
+import { LinearProgress } from "@mui/material";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -48,18 +52,54 @@ export const CompanyManageTeams = () => {
   const [selectedTeam, setSelectedTeam] = useState({});
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const teams = [
-    "Oliver Hansen",
-    "Van Henry",
-    "April Tucker",
-    "Ralph Hubbard",
-    "Omar Alexander",
-    "Carlos Abbott",
-    "Miriam Wagner",
-    "Bradley Wilkerson",
-    "Virginia Andrews",
-    "Kelly Snyder",
-  ];
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [severity, setSeverity] = useState("");
+  const [text, setText] = useState("");
+  const [company, setCompany] = useState({});
+  const [isTeamsReceived, setIsTeamsReceived] = useState(false);
+  const [isCompanyReceived, setIsCompanyReceived] = useState(false);
+
+  var isReceived = isTeamsReceived && isCompanyReceived;
+
+  const SNACK_DURATION = 4000;
+
+  useEffect(() => {
+    var requestOptions = {
+      method: "POST",
+      redirect: "follow",
+    };
+
+    var token = localStorage.getItem("userToken");
+    fetch(BASE_URL + "/team/getAllTeams?token=" + token, requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        setTeams(result);
+        setIsTeamsReceived(true);
+      })
+      .catch((error) => console.log("error", error));
+
+    const requestOptions2 = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    fetch(BASE_URL + "/company/get?token=" + token, requestOptions2)
+      .then((response) => response.json())
+      .then((result) => {
+        setCompany(result);
+        setIsCompanyReceived(true);
+      })
+      .catch((error) => console.error(error));
+  }, []);
+
+  const openSnack = ({ severity, text }) => {
+    setSeverity(severity);
+    setText(text);
+    setOpen(true);
+  };
+
   const handleCardClick = (team) => {
     setSelectedTeam(team);
     setOpenDialog(true);
@@ -67,17 +107,26 @@ export const CompanyManageTeams = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
-  const handleEditClick = () => {
+  const handleEditClick = (team) => {
+    setSelectedTeam(team);
     setOpenEditDialog(true);
   };
   const handleCloseEditDialog = () => {
     setOpenEditDialog(false);
   };
-  const handleAddClick = () => {
+  const handleAddClick = (team) => {
+    setSelectedTeam(team);
     setOpenAddDialog(true);
   };
   const handleCloseAddDialog = () => {
     setOpenAddDialog(false);
+  };
+  const handleDeleteClick = (team) => {
+    setSelectedTeam(team);
+    setOpenDeleteDialog(true);
+  };
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
   };
   return (
     <Stack direction={"row"}>
@@ -125,147 +174,139 @@ export const CompanyManageTeams = () => {
         >
           <TeamText>Manage teams in your company</TeamText>
         </Box>
-        <Stack
-          direction={"row"}
-          flexWrap={"wrap"}
-          padding={"0px 20px 10px 20px"}
-          gap={"16px"}
-          position={"relative"}
-        >
-          <Paper
-            elevation={0}
-            sx={{
-              display: "block",
-              flexDirection: "row",
-              alignItems: "center",
-              flexGrow: "2",
-              minWidth: "300px",
-              maxWidth: matches ? "400px" : "%100",
-              height: "fit-content",
-              position: matches ? "sticky" : "relative",
-              top: matches ? 94 : 0,
-            }}
+        {isReceived ? (
+          <Stack
+            direction={"row"}
+            flexWrap={"wrap"}
+            padding={"0px 20px 10px 20px"}
+            gap={"16px"}
+            position={"relative"}
           >
-            <Stack direction={"column"} gap={"16px"}>
-              <CreationTabs teams={teams}></CreationTabs>
-              <Paper
-                variant="outlined"
-                sx={{ borderRadius: "12px", padding: "10px 30px 0px 30px" }}
-              >
-                <Box
+            <Paper
+              elevation={0}
+              sx={{
+                display: "block",
+                flexDirection: "row",
+                alignItems: "center",
+                flexGrow: "2",
+                minWidth: "300px",
+                maxWidth: matches ? "400px" : "%100",
+                height: "fit-content",
+                position: matches ? "sticky" : "relative",
+                top: matches ? 94 : 0,
+              }}
+            >
+              <Stack direction={"column"} gap={"16px"}>
+                <CreationTabs
+                  teams={teams}
+                  openSnack={openSnack}
+                ></CreationTabs>
+                <Paper
+                  variant="outlined"
+                  sx={{ borderRadius: "12px", padding: "10px 30px 0px 30px" }}
+                >
+                  <Box
+                    sx={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                      paddingBottom: "16px",
+                      paddingLeft: "20px",
+                      paddingRight: "20px",
+                    }}
+                  >
+                    <BoxTitle>Company Details</BoxTitle>
+                    <Typography>
+                      {"Allocated Limit: " +
+                        (company?.subscription?.usageLimit -
+                          company?.availableLimit)}
+                    </Typography>
+                    <Typography>
+                      {"Available Limit: " + company?.availableLimit}
+                    </Typography>
+                    <Typography>
+                      {"Number of Teams: " + teams.length}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Stack>
+            </Paper>
+            <Paper
+              elevation={0}
+              sx={{
+                display: "block",
+                flexDirection: "row",
+                alignItems: "center",
+                flexGrow: "6",
+                minWidth: "460px",
+                height: "fit-content",
+              }}
+            >
+              <Stack direction={"column"} gap={"8px"}>
+                <Paper
+                  variant="outlined"
                   sx={{
-                    width: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                    paddingBottom: "16px",
-                    paddingLeft: "20px",
-                    paddingRight: "20px",
+                    padding: "8px 30px 8px 30px",
+                    position: matches ? "sticky" : "relative",
+                    top: matches ? 94 : 0,
+                    zIndex: 9,
+                    width: "%100",
+                    backgroundColor: "#ffffff",
                   }}
                 >
-                  <BoxTitle>Company Details</BoxTitle>
-                  <Typography>Allocated Limit: 123123</Typography>
-                  <Typography>Available Limit: 886877</Typography>
-                  <Typography>Number of Teams: 6</Typography>
-                </Box>
-              </Paper>
-            </Stack>
-          </Paper>
-          <Paper
-            elevation={0}
-            sx={{
-              display: "block",
-              flexDirection: "row",
-              alignItems: "center",
-              flexGrow: "6",
-              minWidth: "460px",
-              height: "fit-content",
-            }}
-          >
-            <Stack direction={"column"} gap={"8px"}>
-              <Paper
-                variant="outlined"
-                sx={{
-                  padding: "8px 30px 8px 30px",
-                  position: matches ? "sticky" : "relative",
-                  top: matches ? 94 : 0,
-                  zIndex: 9,
-                  width: "%100",
-                  backgroundColor: "#ffffff",
-                }}
-              >
-                <BoxTitle>Teams</BoxTitle>
-              </Paper>
-              <React.Fragment>
-                {" "}
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamListCard
-                  onTeamCardClick={handleCardClick}
-                  onEditClick={handleEditClick}
-                  onAddClick={handleAddClick}
-                ></TeamListCard>
-                <TeamDialog
-                  open={openDialog}
-                  handleClose={handleCloseDialog}
-                  report={selectedTeam}
-                ></TeamDialog>
-                <EditDialog
-                  open={openEditDialog}
-                  handleClose={handleCloseEditDialog}
-                ></EditDialog>
-                <AddMemberDialog
-                  open={openAddDialog}
-                  handleClose={handleCloseAddDialog}
-                ></AddMemberDialog>
-              </React.Fragment>
-            </Stack>
-          </Paper>
-        </Stack>
+                  <BoxTitle>Teams</BoxTitle>
+                </Paper>
+                <React.Fragment>
+                  {teams.map((team) => (
+                    <TeamListCard
+                      onTeamCardClick={handleCardClick}
+                      onEditClick={handleEditClick}
+                      onAddClick={handleAddClick}
+                      onDeleteClick={handleDeleteClick}
+                      team={team}
+                    ></TeamListCard>
+                  ))}
+                  <TeamDialog
+                    open={openDialog}
+                    handleClose={handleCloseDialog}
+                    team={selectedTeam}
+                  ></TeamDialog>
+                  <EditDialog
+                    open={openEditDialog}
+                    handleClose={handleCloseEditDialog}
+                    team={selectedTeam}
+                    openSnack={openSnack}
+                  ></EditDialog>
+                  <AddMemberDialog
+                    open={openAddDialog}
+                    handleClose={handleCloseAddDialog}
+                    team={selectedTeam}
+                    openSnack={openSnack}
+                  ></AddMemberDialog>
+                  <DeleteDialog
+                    open={openDeleteDialog}
+                    handleClose={handleCloseDeleteDialog}
+                    team={selectedTeam}
+                    openSnack={openSnack}
+                  ></DeleteDialog>
+                </React.Fragment>
+              </Stack>
+            </Paper>
+          </Stack>
+        ) : (
+          <Box sx={{ width: "100%" }}>
+            <LinearProgress />
+          </Box>
+        )}
       </Stack>
+      <AdvSnackbar
+        open={open}
+        setOpen={setOpen}
+        severity={severity}
+        duration={SNACK_DURATION}
+        text={text}
+      ></AdvSnackbar>
     </Stack>
   );
 };

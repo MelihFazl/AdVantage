@@ -4,6 +4,7 @@ import CardContent from "@mui/material/CardContent";
 import { Box, Button, Typography, CardActionArea, Switch } from "@mui/material";
 import { FormControlLabel } from "@mui/material";
 import { styled } from "@mui/material";
+import { BASE_URL } from "../../../../common/constans";
 
 const BoxTitle = styled(Typography)({
   fontWeight: "bold", // Added fontWeight: 'bold'
@@ -38,7 +39,7 @@ const CustomSwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-export default function PlanCard({ plan, onGetStartedButtonClick }) {
+export default function PlanCard({ company, plan, openSnack }) {
   const [checked, setChecked] = React.useState(false);
 
   const handleChange = (event) => {
@@ -62,11 +63,13 @@ export default function PlanCard({ plan, onGetStartedButtonClick }) {
           alignItems="center"
           justifyContent="center"
         >
-          <BoxTitle>Freelancer</BoxTitle>
+          <BoxTitle>{plan[0].paymentPlanType}</BoxTitle>
           <Typography>{`Plan details:`}</Typography>
-          <Typography>{`-This`}</Typography>
-          <Typography>{`-This`}</Typography>
-          <Typography>{`-That`}</Typography>
+          <Typography>{`-${
+            checked ? plan[1].paymentPeriodType : plan[0].paymentPeriodType
+          } usable cretids: ${
+            checked ? plan[1].usageLimit : plan[0].usageLimit
+          }`}</Typography>
 
           <FormControlLabel
             control={<CustomSwitch checked={checked} onChange={handleChange} />}
@@ -83,7 +86,7 @@ export default function PlanCard({ plan, onGetStartedButtonClick }) {
               alignItems={"center"}
               marginBottom={"10px"}
             >
-              <MoneyTitle>100$</MoneyTitle>
+              <MoneyTitle>{`${plan[1].price}$`}</MoneyTitle>
               <BoxTitleNormal>/per year</BoxTitleNormal>
             </Box>
           ) : (
@@ -94,18 +97,82 @@ export default function PlanCard({ plan, onGetStartedButtonClick }) {
               alignItems={"center"}
               marginBottom={"10px"}
             >
-              <MoneyTitle>10$</MoneyTitle>
+              <MoneyTitle>{`${plan[0].price}$`}</MoneyTitle>
               <BoxTitleNormal>/per month</BoxTitleNormal>
             </Box>
           )}
-          <Button
-            disableElevation
-            variant="contained"
-            color="warning"
-            sx={{ borderRadius: "12px" }}
-          >
-            Get Started
-          </Button>
+          {company.subscription.paymentPlanType === plan[0].paymentPlanType &&
+          (checked
+            ? company.subscription.paymentPeriodType ===
+              plan[1].paymentPeriodType
+            : company.subscription.paymentPeriodType ===
+              plan[0].paymentPeriodType) ? (
+            <Typography>You are on this plan</Typography>
+          ) : (
+            <Button
+              disableElevation
+              variant="contained"
+              color="warning"
+              onClick={() => {
+                var token = localStorage.getItem("userToken");
+                const requestOptions = {
+                  method: "POST",
+                  redirect: "follow",
+                };
+                const currentDate = new Date();
+                const formattedCurrentDate = `${currentDate.getFullYear()}-${(
+                  currentDate.getMonth() + 1
+                )
+                  .toString()
+                  .padStart(2, "0")}-${currentDate
+                  .getDate()
+                  .toString()
+                  .padStart(2, "0")} ${currentDate
+                  .getHours()
+                  .toString()
+                  .padStart(2, "0")}:${currentDate
+                  .getMinutes()
+                  .toString()
+                  .padStart(2, "0")}:${currentDate
+                  .getSeconds()
+                  .toString()
+                  .padStart(2, "0")}`;
+                fetch(
+                  BASE_URL +
+                    "/company/updateSubscription?token=" +
+                    token +
+                    "&paymentPlanType=" +
+                    plan[0].paymentPlanType +
+                    "&paymentPeriodType=" +
+                    (checked
+                      ? plan[1].paymentPeriodType
+                      : plan[0].paymentPeriodType) +
+                    "&createdAt=" +
+                    formattedCurrentDate,
+                  requestOptions
+                )
+                  .then((response) => {
+                    if (response.ok) {
+                      window.location.reload();
+                      openSnack({
+                        severity: "success",
+                        text: "Subscription plan has changed successfully.",
+                      });
+                      return undefined;
+                    } else return response.text();
+                  })
+                  .then((result) => {
+                    if (result) {
+                      openSnack({ severity: "error", text: result });
+                    }
+                  })
+                  .catch((error) => console.error(error));
+              }}
+              sx={{ borderRadius: "12px" }}
+            >
+              Get Started
+            </Button>
+          )}
         </Box>
       </CardContent>
     </Card>

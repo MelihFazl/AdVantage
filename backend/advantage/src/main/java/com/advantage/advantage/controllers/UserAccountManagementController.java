@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/user")
@@ -125,6 +122,98 @@ public class UserAccountManagementController {
                 userAccountManagementService.patchTeamMember(updatedTeamMember, teamMemberId);
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body("Team Member with id " + (teamMemberId) + " has been successfully updated.");
+            }catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(e.getMessage());
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized requesttttt.");
+        }
+    }
+
+    @PostMapping("/teamMember/removeTeam")
+    public ResponseEntity<String> removeTeam(@RequestParam String token, @RequestParam Long teamMemberId, @RequestParam Long teamId) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            CompanyAdministrator ca = userAccountManagementService.getCompanyAdministratorByID(userId).get(0);
+
+            try{
+                TeamMember tm = userAccountManagementService.getTeamMemberByID(teamMemberId).get(0);
+
+                if(tm == null) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Team member with id " + teamId + " does not exist");
+                }
+
+                if(tm.getCompanyAdministrator().getId() != userId) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Unauthorized requesttttt.");
+                }
+
+                List<Team> userTeams = tm.getTeams();
+
+                // Iterate over the userTeams list
+                Iterator<Team> iterator = userTeams.iterator();
+                while (iterator.hasNext()) {
+                    Team team = iterator.next();
+                    if (team.getTeamId().equals(teamId)) {
+                        iterator.remove(); // Remove the team with the specified teamIdToRemove
+                    }
+                }
+                tm.setTeams(userTeams);
+
+                userAccountManagementService.patchTeamMember(tm, teamMemberId);
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body("Team Member with id " + (teamMemberId) + " has been successfully removed from team with the id " + teamId + ".");
+            }catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(e.getMessage());
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Unauthorized requesttttt.");
+        }
+    }
+
+    @PostMapping("/teamMember/assignTeam")
+    public ResponseEntity<String> assignTeam(@RequestParam String token, @RequestParam Long teamMemberId, @RequestParam Long teamId) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+            CompanyAdministrator ca = userAccountManagementService.getCompanyAdministratorByID(userId).get(0);
+
+            try{
+                TeamMember tm = userAccountManagementService.getTeamMemberByID(teamMemberId).get(0);
+                Team assignedTeam = teamService.getTeamById(teamId).get(0);
+
+                if(assignedTeam == null) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Team with id " + teamId + " does not exist");
+                }
+
+                if(tm == null) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Team member with id " + teamMemberId + " does not exist");
+                }
+
+                if(tm.getCompanyAdministrator().getId() != userId) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Unauthorized requesttttt.");
+                }
+
+                List<Team> userTeams = tm.getTeams();
+                userTeams.add(assignedTeam);
+                tm.setTeams(userTeams);
+
+                userAccountManagementService.patchTeamMember(tm, teamMemberId);
+                return ResponseEntity.status(HttpStatus.CREATED)
+                        .body("Team Member with id " + (teamMemberId) + " has been successfully assigned to team with the id " + teamId + ".");
             }catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(e.getMessage());
@@ -339,6 +428,22 @@ public class UserAccountManagementController {
         }
     }
 
+    @PostMapping("/teamMember/getAllByCompany")
+    public ResponseEntity<List<Object[]>> getAllTeamMembersByCompany(@RequestParam String token) {
+        boolean tokenMatch = jwtUtils.validateToken(token, "CA");
+        if (tokenMatch) {
+            Long userId = jwtUtils.getUserId(token);
+
+            List<Object[]> teamMembers = userAccountManagementService.getAllTeamMembersByCompany(userId);
+            if (teamMembers == null || teamMembers.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            return ResponseEntity.ok(teamMembers);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
 
     @GetMapping("/companyAdministrator")
     public List<CompanyAdministrator> getCompanyAdministrator(@RequestParam long companyAdministratorId)
