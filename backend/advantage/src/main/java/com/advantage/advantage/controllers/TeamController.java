@@ -111,6 +111,9 @@ public class TeamController {
                         tm.setTeams(userTeams);
                         userAccountManagementService.patchTeamMember(tm, tm.getId());
                     }
+                    int releasedUsageLimit = team.getUsageLimit() - team.getMonthlyAnalysisUsage();
+                    ca.getCompany().setAvailableLimit(ca.getCompany().getAvailableLimit() + releasedUsageLimit);
+                    userAccountManagementService.patchCompanyAdministrator(ca, ca.getId());
                     teamService.deleteTeamById(teamId);
                     return ResponseEntity.status(HttpStatus.OK)
                             .body("Team with name (" + team.getTeamName() + ") and with id (" + team.getTeamId() + ") has been deleted.");
