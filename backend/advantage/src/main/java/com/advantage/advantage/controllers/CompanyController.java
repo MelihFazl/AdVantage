@@ -66,14 +66,22 @@ public class CompanyController {
                 CompanyAdministrator admin = userAccountManagementService.getCompanyAdministratorByID(userID).get(0);
                 CompanySubscription oldSubscription = admin.getCompany().getSubscription();
 
-                CompanySubscription savedSubscription = subscriptionService.updateCompanySubscription(paymentPlanType,paymentPeriodType,createdAt, oldSubscription.getSubscriptionId());
-                if( savedSubscription != null){
-                    APIResponse apiResponse = APIResponse.builder().message("Subscription is updated")
-                            .statusCode(200).build();
-                    admin.getCompany().setAvailableLimit(savedSubscription.getUsageLimit());
-                    userAccountManagementService.patchCompanyAdministrator(admin, admin.getId());
-                    return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+                try{
+                    CompanySubscription savedSubscription = subscriptionService.updateCompanySubscription(paymentPlanType,paymentPeriodType,createdAt, oldSubscription.getSubscriptionId());
+                    if( savedSubscription != null){
+                        APIResponse apiResponse = APIResponse.builder().message("Subscription is updated")
+                                .statusCode(200).build();
+                        admin.getCompany().setAvailableLimit(savedSubscription.getUsageLimit());
+                        userAccountManagementService.patchCompanyAdministrator(admin, admin.getId());
+                        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+                    }
+                }catch(Exception e) {
+                    APIResponse apiResponse = APIResponse.builder().message(e.getMessage())
+                            .statusCode(500).build();
+                    return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
                 }
+
                 case  "TM":
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Team Member is not authorized for this process");
         }
