@@ -67,5 +67,11 @@ public class ModelServiceImplementation implements ModelService{
         return responseObject.getGenderDistribution();
     }
 
+    @Override
+    public String calculateTextRecommendation(TextModelAPIResponse response)
+    {
+        return response.getTextRecommendation();
+    }
+
 }
 
