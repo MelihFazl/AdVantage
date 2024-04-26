@@ -39,17 +39,29 @@ export default function ReportListCard({ report, onReportCardClick }) {
             white-space="nowrap"
             overflow="hidden"
           >
-            {" "}
-            <Typography variant="body2" color={"#000"}>
-              Content of report's ad:
-            </Typography>
-            <Typography sx={{ mb: 1.2 }} color="text.secondary">
-              {report.type === "SingleAdAnalysisReport"
-                ? report.advertisementText
-                : "This report contains more than one add that is analyzed. Click to card to see details about all " +
-                  report.advertisementTexts.length +
-                  " advertisements"}
-            </Typography>
+            {report.type === "ImageAdAnalysisReport" ? (
+              <React.Fragment>
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  {
+                    "This is an image ad analysis report. Click to card to see details of advertisement."
+                  }
+                </Typography>
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                {" "}
+                <Typography variant="body2" color={"#000"}>
+                  Content of report's ad:
+                </Typography>
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  {report.type === "SingleAdAnalysisReport"
+                    ? report.advertisementText
+                    : "This report contains more than one add that is analyzed. Click to card to see details about all " +
+                      report.advertisementTexts.length +
+                      " advertisements"}
+                </Typography>
+              </React.Fragment>
+            )}
           </Box>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
             <Typography sx={{ fontSize: 14 }} gutterBottom>

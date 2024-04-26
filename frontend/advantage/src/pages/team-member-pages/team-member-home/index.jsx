@@ -22,6 +22,12 @@ const BannerText = styled(Typography)({
   fontSize: "20px",
 });
 
+const NoText = styled(Typography)({
+  textAlign: "center",
+  fontWeight: "bold", // Added fontWeight: 'bold'
+  fontSize: "20px",
+});
+
 const TeamText = styled(Typography)({
   textAlign: "center",
   fontWeight: "bold", // Added fontWeight: 'bold'
@@ -81,7 +87,6 @@ export const TeamMemberHomePage = () => {
             setIsReportsReceived(true);
           })
           .catch((error) => console.log("error", error));
-        setIsReportsReceived(true);
       })
       .catch((error) => console.log("error", error));
   }, []);
@@ -208,16 +213,20 @@ export const TeamMemberHomePage = () => {
               flexWrap={"wrap"}
             >
               <React.Fragment>
-                {reports.map((element) => {
-                  return (
-                    <React.Fragment key={`${element.report.reportId}`}>
-                      <ReportListCard
-                        onReportCardClick={handleCardClick}
-                        report={element}
-                      ></ReportListCard>
-                    </React.Fragment>
-                  );
-                })}
+                {reports.length === 0 ? (
+                  <NoText>This team doesn't have any reports yet.</NoText>
+                ) : (
+                  reports.map((element) => {
+                    return (
+                      <React.Fragment key={`${element.report.reportId}`}>
+                        <ReportListCard
+                          onReportCardClick={handleCardClick}
+                          report={element}
+                        ></ReportListCard>
+                      </React.Fragment>
+                    );
+                  })
+                )}
 
                 <ReportDialog
                   open={openDialog}

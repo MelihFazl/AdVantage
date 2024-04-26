@@ -13,7 +13,6 @@ import { isValueNumerical } from "../../../../common/validator-functions/isValue
 export default function EditDialog({ open, handleClose, team, openSnack }) {
   return (
     <Form
-      keepDirtyOnReinitialize
       initialValues={{
         teamName: team.teamName,
         usageLimit: String(team.usageLimit),

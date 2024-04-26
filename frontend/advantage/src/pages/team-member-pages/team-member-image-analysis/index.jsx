@@ -20,6 +20,7 @@ import { isFieldEmpty } from "../../../common/validator-functions/isFieldEmpty";
 import { BASE_URL } from "../../../common/constans";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import AdvSnackbar from "../../../common/adv-snackbar";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -48,6 +49,16 @@ export const TeamMemberImageAnalysisPage = () => {
   const matches = useMediaQuery("(min-width:897px)");
   const [imageSrc, setImageSrc] = useState("");
   const [teams, setTeams] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [severity, setSeverity] = useState("");
+  const [text, setText] = useState("");
+  const SNACK_DURATION = 4000;
+
+  const openSnack = ({ severity, text }) => {
+    setSeverity(severity);
+    setText(text);
+    setOpen(true);
+  };
 
   function base64ToBlob(base64, mimeType) {
     const bytes = atob(base64.split(",")[1]);
@@ -152,7 +163,12 @@ export const TeamMemberImageAnalysisPage = () => {
               .padStart(2, "0")}`;
 
             let formData = new FormData();
-            formData.append("file", base64ToBlob(imageSrc, "image/jpeg"));
+            const fileExtension = imageSrc.split(";")[0].split("/")[1];
+            const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
+            const file = new File([blob], `image.${fileExtension}`, {
+              type: `image/${fileExtension}`,
+            });
+            formData.append("file", file);
             fetch(
               BASE_URL +
                 `/imageanalysisreport/create?token=${localStorage.getItem(
@@ -166,9 +182,19 @@ export const TeamMemberImageAnalysisPage = () => {
               }
             )
               .then((response) => {
-                if (response.ok) navigate("/team-member");
-                else;
-                //TODO
+                if (response.ok) {
+                  openSnack({
+                    severity: "success",
+                    text: "Image is analyzed successfully.",
+                  });
+                  navigate("/team-member");
+                  return undefined;
+                } else return response.text();
+              })
+              .then((result) => {
+                if (result) {
+                  openSnack({ severity: "error", text: result });
+                }
               })
               .catch((error) => console.error(error));
           }}
@@ -379,6 +405,13 @@ export const TeamMemberImageAnalysisPage = () => {
           )}
         ></Form>
       </Stack>
+      <AdvSnackbar
+        open={open}
+        setOpen={setOpen}
+        severity={severity}
+        duration={SNACK_DURATION}
+        text={text}
+      ></AdvSnackbar>
     </Stack>
   );
 };

@@ -23,6 +23,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { isFieldEmpty } from "../../../common/validator-functions/isFieldEmpty";
 import { BASE_URL } from "../../../common/constans";
 import { useNavigate } from "react-router-dom";
+import { composeValidators } from "../../../common/validator-functions/composeValidators";
+import { isValueNumerical } from "../../../common/validator-functions/isValueNumerical";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -140,7 +142,9 @@ export const TeamMemberTextualAnalysisPage = () => {
                     "userToken"
                   )}&createdAt=${formattedCurrentDate}&adText=${
                     values.adContents[0]
-                  }&title=${values.reportTitle}&teamId=${values.team}`,
+                  }&title=${values.reportTitle}&teamId=${values.team}&spend=${
+                    values.spend
+                  }&tone=${values.tone}`,
                 requestOptions
               )
                 .then((response) => {
@@ -185,7 +189,11 @@ export const TeamMemberTextualAnalysisPage = () => {
               console.log("empty");
             }
           }}
-          initialValues={{ adCategory: "Political", adContents: [""] }}
+          initialValues={{
+            adCategory: "Political",
+            adContents: [""],
+            tone: "",
+          }}
           mutators={{ ...arrayMutators }}
           render={({ handleSubmit }) => (
             <form onSubmit={handleSubmit}>
@@ -281,33 +289,51 @@ export const TeamMemberTextualAnalysisPage = () => {
                         </Box>
                       )}
                     </Field>
-                    <Field name="targetLocation">
-                      {({ input }) => (
+                    <Field
+                      name="spend"
+                      validate={composeValidators([
+                        isFieldEmpty("Budget must be entered."),
+                        isValueNumerical("Enter a numerical value."),
+                      ])}
+                    >
+                      {({ input, meta }) => (
                         <Box
                           display={"flex"}
                           alignSelf={"stretch"}
                           flexDirection={"column"}
                           gap={"4px"}
                         >
-                          <Typography color={"text.secondary"}>
-                            Target Location (Coming soon...)
-                          </Typography>
-                          <Select {...input} size="small" disabled></Select>
+                          <Typography>Budget</Typography>
+                          <TextField
+                            {...input}
+                            error={meta.touched && meta.error ? true : false}
+                            variant="outlined"
+                            helperText={
+                              meta.touched && meta.error ? meta.error : ""
+                            }
+                            size="small"
+                          />
                         </Box>
                       )}
                     </Field>
-                    <Field name="targetAge">
-                      {({ input }) => (
+                    <Field name="tone">
+                      {({ input, meta }) => (
                         <Box
                           display={"flex"}
                           alignSelf={"stretch"}
                           flexDirection={"column"}
                           gap={"4px"}
                         >
-                          <Typography color={"text.secondary"}>
-                            Target Age (Coming soon...)
-                          </Typography>
-                          <Select {...input} size="small" disabled></Select>
+                          <Typography>Tone of Advertisement</Typography>
+                          <TextField
+                            {...input}
+                            error={meta.touched && meta.error ? true : false}
+                            variant="outlined"
+                            helperText={
+                              meta.touched && meta.error ? meta.error : ""
+                            }
+                            size="small"
+                          />
                         </Box>
                       )}
                     </Field>
