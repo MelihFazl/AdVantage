@@ -5,6 +5,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { BarChart } from "@mui/x-charts/BarChart";
 import {
   Box,
   CircularProgress,
@@ -70,9 +72,74 @@ export default function ReportDialog({ open, handleClose, report }) {
           </Typography>
           {report?.type !== "ImageAdAnalysisReport" &&
             (report?.type === "SingleAdAnalysisReport" ? (
-              <Typography sx={{ mb: 1.2 }} color="text.secondary">
-                CPI of Ad: {report?.report?.successPrediction}
-              </Typography>
+              <Box display={"flex"} flexDirection={"column"} gap={"3px"}>
+                {" "}
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  Impression of Ad: {report?.report?.successPrediction}
+                </Typography>
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  Gender Distribution Plot:
+                </Typography>
+                <PieChart
+                  series={[
+                    {
+                      data: [
+                        {
+                          id: 0,
+                          value: report?.report?.genderM,
+                          label: "Male",
+                          color: "orange",
+                        },
+                        {
+                          id: 1,
+                          value: report?.report?.genderF,
+                          label: "Female",
+                          color: "purple",
+                        },
+                      ],
+                    },
+                  ]}
+                  width={400}
+                  height={200}
+                />
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  Age Distribution Plot:
+                </Typography>
+                <BarChart
+                  xAxis={[
+                    {
+                      scaleType: "band",
+                      data: [
+                        "13-17",
+                        "18-24",
+                        "25-34",
+                        "35-44",
+                        "45-54",
+                        "55-64",
+                        "65+",
+                      ],
+                    },
+                  ]}
+                  series={[
+                    {
+                      data: [
+                        report.report.age1317,
+                        report.report.age1824,
+                        report.report.age2534,
+                        report.report.age3544,
+                        report.report.age4554,
+                        report.report.age5564,
+                        report.report.age65,
+                      ],
+                    },
+                  ]}
+                  width={500}
+                  height={300}
+                />
+                <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  Overview: {report?.report?.overview}
+                </Typography>
+              </Box>
             ) : (
               report?.report?.comparison?.split(" ")?.map((element, index) => {
                 return (
