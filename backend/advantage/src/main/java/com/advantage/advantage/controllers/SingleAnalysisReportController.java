@@ -1,5 +1,6 @@
 package com.advantage.advantage.controllers;
 import com.advantage.advantage.helpers.JwtUtils;
+import com.advantage.advantage.helpers.TextModelAPIResponse;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class SingleAnalysisReportController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
-                                                             @RequestParam AdCategory category, @RequestParam String adText, @RequestParam Long teamId) {
+                                                             @RequestParam AdCategory category, @RequestParam String adText,  @RequestParam float spend,  @RequestParam String tone, @RequestParam Long teamId) {
 
         if (!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
@@ -90,14 +91,24 @@ public class SingleAnalysisReportController {
         }
 
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
-        //float prediction = modelService.calculateCPI(adText);
-        //List<Long> shapleyVal = modelService.calculateShapVal(adText);
-        float prediction = 0.5f;
+        TextModelAPIResponse response = modelService.getTextualPrediction(adText, spend, tone);
+        float prediction = modelService.calculateCPI(response);
+        List <Float> ageDistribution = modelService.calculateAgeDistribution(response);
+        List <Float> genderDistribution = modelService.calculateGenderDistribution(response);
+        String textRecommendation = modelService.calculateTextRecommendation(response);
+        float genderM = genderDistribution.get(0);
+        float genderF = genderDistribution.get(1);
+        float age1317 = ageDistribution.get(0);
+        float age1824 = ageDistribution.get(1);
+        float age2534 = ageDistribution.get(2);
+        float age3544 = ageDistribution.get(3);
+        float age4554 = ageDistribution.get(4);
+        float age5564 = ageDistribution.get(5);
+        float age65 = ageDistribution.get(6);
 
-        List<Long> shapleyVal = new ArrayList<>();
 
 
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, "", "", "", prediction, shapleyVal, newAd, teamId) != null) {
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, textRecommendation, spend, tone,  genderM, genderF, age1317, age1824, age2534,age3544,age4554,age5564,age65, newAd, teamId) != null) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
             teamService.updateTeam(userTeam);
 

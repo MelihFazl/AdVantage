@@ -5,10 +5,14 @@ import com.advantage.advantage.helpers.TextModelAPIResponse;
 import java.util.List;
 
 public interface ModelService {
-    TextModelAPIResponse getTextualPrediction(String adText);
+    TextModelAPIResponse getTextualPrediction(String adText, float cost, String tone);
 
-    float calculateCPI(String adText);
+    float calculateCPI(TextModelAPIResponse responseObject);
 
-    List<Long> calculateShapVal(String adText);
+    List<Float> calculateAgeDistribution(TextModelAPIResponse responseObject);
 
+    List<Float> calculateGenderDistribution(TextModelAPIResponse responseObject);
+
+
+    String calculateTextRecommendation(TextModelAPIResponse response);
 }

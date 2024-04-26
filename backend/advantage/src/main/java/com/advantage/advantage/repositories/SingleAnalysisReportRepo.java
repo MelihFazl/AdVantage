@@ -18,9 +18,6 @@ public interface SingleAnalysisReportRepo  extends JpaRepository<SingleAdAnalysi
         public List<SingleAdAnalysisReport> findByCreatedAt(Date createdAt);
         public List<SingleAdAnalysisReport> findByAdvertisement(Advertisement advertisement);
         public Long deleteByReportId(long reportId);
-
-        public List<SingleAdAnalysisReport> findByPros(String pros);
-        public List<SingleAdAnalysisReport> findByCons(String cons);
         public List<SingleAdAnalysisReport> findByOverview(String overview);
         public List<SingleAdAnalysisReport> findBySuccessPrediction(float pred);
 

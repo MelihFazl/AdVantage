@@ -19,13 +19,10 @@ public class ModelServiceImplementation implements ModelService{
 
 
     @Override
-    public TextModelAPIResponse getTextualPrediction(String adText) {
-        float cpiValue = 0;
-        List<Long> shapVal = new ArrayList<>();
+    public TextModelAPIResponse getTextualPrediction(String adText, float cost, String tone) {
         // Define the URL of the external API
         String apiUrl = "http://localhost:8000/text_ad/predict";
-        String requestBody = "{\"text_ad\": \"" + adText + "\"}";
-
+        String requestBody = "{\"text_ad\": \"" + adText + "\", \"spend\": " + cost + ", \"tone\": \"" + tone + "\"}";
         // Create a WebClient instance
         WebClient webClient = WebClient.create();
 
@@ -55,14 +52,26 @@ public class ModelServiceImplementation implements ModelService{
     }
 
     @Override
-    public float calculateCPI(String adText){
-        TextModelAPIResponse responseObject = getTextualPrediction(adText);
+    public float calculateCPI(TextModelAPIResponse responseObject) {
         return responseObject.getCpi();
     }
+
+
     @Override
-    public List<Long> calculateShapVal(String adText){
-        TextModelAPIResponse responseObject = getTextualPrediction(adText);
-        return responseObject.getShapleyVal();
+    public List<Float> calculateAgeDistribution( TextModelAPIResponse responseObject) {
+        return responseObject.getAgeDistribution();
     }
+
+    @Override
+    public List<Float> calculateGenderDistribution( TextModelAPIResponse responseObject) {
+        return responseObject.getGenderDistribution();
+    }
+
+    @Override
+    public String calculateTextRecommendation(TextModelAPIResponse response)
+    {
+        return response.getTextRecommendation();
+    }
+
 }
 

@@ -7,9 +7,30 @@ import torch
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from src.service.text_ad_predictor_bert import TextAdPredictorBert
-
+import requests
 import torch.nn as nn
 from transformers import DistilBertModel
+import json
+
+def get_api_key_from_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            return file.readline().strip()
+    except FileNotFoundError:
+        print("Error: The file was not found.")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    
+# Specify the path to your file containing the API key
+api_key_path = './src/api/DO_NOT_COMMIT_ENV.txt'
+API_KEY = get_api_key_from_file(api_key_path)
+url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={API_KEY}"
+
+headers = {
+    'Content-Type': 'application/json'
+}
 
 class DistilBertRegressor(nn.Module):
 
@@ -135,8 +156,33 @@ async def text_prediction(request: Request):
             data = await request.json()
             text_ad = data.get('text_ad')
             spend = data.get('spend')
+            tone = data.get('tone')
 
-            if (text_ad or spend) is None:
+            data = {
+                "contents": [
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "text": f"Give me 2 different paragraphs with {tone} tone of the following ad text to improve its impressions. Do not change context and only keep the paragraphs in your response: {text_ad}"
+                            }
+                        ]
+                    }
+                ]
+            }
+
+            response = requests.post(url, json=data, headers=headers)
+
+            # Parse the JSON string into a Python dictionary
+            response_data = json.loads(response.text)
+            print(response.text)
+            # Navigate through the dictionary to extract the desired text
+            if 'candidates' in response_data and response_data['candidates'] and 'content' in response_data['candidates'][0] and 'parts' in response_data['candidates'][0]['content']:
+                paragraphs_text = response_data['candidates'][0]['content']['parts'][0].get('text', "No text available.")
+            else:
+                paragraphs_text = "Gemini API does not work currently."
+
+            if (text_ad or spend or tone) is None:
                 return JSONResponse({"message": "text_ad, tone and spend is required in the request body",
                                      "errors": "error"}, 
                                     status_code=400,
@@ -146,8 +192,9 @@ async def text_prediction(request: Request):
             prediction_result = predictor.text_ad_predict()
             logger.info("Detection results: %s", prediction_result)
             return JSONResponse({"impression": float(prediction_result["impression"]),
-                                 "age_distribution": prediction_result["age_distribution"],
-                                 "gender_distribution": prediction_result["gender_distribution"],
+                                 "age_distribution": prediction_result["age_distribution"][0],
+                                 "gender_distribution": prediction_result["gender_distribution"][0],
+                                 "text_recommendation": paragraphs_text,
                                 "message": "object detected successfully",
                                 "errors": None},
                                 status_code=200)
