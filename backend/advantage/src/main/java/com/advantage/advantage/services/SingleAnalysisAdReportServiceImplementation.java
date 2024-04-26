@@ -61,7 +61,7 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
     }
 
     @Override
-    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt, String pros, String cons, String overview, float prediction, List<Long> shapleyVal, TextualAdvertisement ad, Long teamId) {
+    public SingleAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt, float prediction, String overview, float spend,String tone, float genderM, float genderF, float age1317, float age1824, float age2534, float age3544,float age4554,float age5564,float age65, TextualAdvertisement ad, Long teamId) {
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
         if (uploaders == null || uploaders.isEmpty()){
@@ -94,26 +94,27 @@ public class SingleAnalysisAdReportServiceImplementation implements SingleAnalys
         newReport.setTitle(title);
         newReport.setUploader(uploader);
         newReport.setCreatedAt(createdAt);
-        newReport.setPros(pros);
-        newReport.setCons(cons);
+        newReport.setSpend(spend);
+        newReport.setTone(tone);
+        newReport.setAge1317(age1317);
+        newReport.setAge1824(age1824);
+        newReport.setAge2534(age2534);
+        newReport.setAge3544(age3544);
+        newReport.setAge4554(age4554);
+        newReport.setAge5564(age5564);
+        newReport.setAge65(age65);
+        newReport.setGenderF(genderF);
+        newReport.setGenderM(genderM);
         newReport.setOverview(overview);
         newReport.setSuccessPrediction(prediction);
         newReport.setAdvertisement(ad);
         newReport.setTeam(team);
 
-        if(shapleyVal.isEmpty()){
-            System.out.println("There is no shapley values");
-            return null;
-        }
-
         try {
             SingleAdAnalysisReport savedReport = reportRepo.save(newReport);
-            for(long val: shapleyVal){
-                shapleyValReportAssociationService.saveShapleyValReportAssociation(savedReport.getReportId(),val);
-            }
             return savedReport;
         } catch (DataAccessException e) {
-            System.out.println( e.getMessage());
+            System.out.println(e.getMessage());
             return null;
         }
     }
