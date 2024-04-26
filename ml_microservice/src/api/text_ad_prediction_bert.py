@@ -192,15 +192,8 @@ async def text_prediction(request: Request):
             prediction_result = predictor.text_ad_predict()
             logger.info("Detection results: %s", prediction_result)
             return JSONResponse({"impression": float(prediction_result["impression"]),
-                                 "age_13_17": prediction_result["age_distribution"][0][0],
-                                 "age_18_24": prediction_result["age_distribution"][0][1],
-                                 "age_25_34": prediction_result["age_distribution"][0][2],
-                                 "age_35_44": prediction_result["age_distribution"][0][3],
-                                 "age_45_54": prediction_result["age_distribution"][0][4],
-                                 "age_55_64": prediction_result["age_distribution"][0][5],
-                                 "age_65+": prediction_result["age_distribution"][0][6],
-                                 "gender_male": prediction_result["gender_distribution"][0][0],
-                                 "gender_female": prediction_result["gender_distribution"][0][1],
+                                 "age_distribution": prediction_result["age_distribution"],
+                                 "gender_distribution": prediction_result["gender_distribution"],
                                  "text_recommendation": paragraphs_text,
                                 "message": "object detected successfully",
                                 "errors": None},
