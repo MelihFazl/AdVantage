@@ -36,7 +36,11 @@ export default function AddMemberDialog({
         BASE_URL + "/user/teamMember/getAllByCompany?token=" + token,
         requestOptions
       )
-        .then((response) => response.json())
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else return [];
+        })
         .then((result) => {
           var allMembers = result;
           const requestOptions = {

@@ -54,16 +54,15 @@ export const CompanyManageTeams = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [teams, setTeams] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [severity, setSeverity] = useState("");
-  const [text, setText] = useState("");
   const [company, setCompany] = useState({});
   const [isTeamsReceived, setIsTeamsReceived] = useState(false);
   const [isCompanyReceived, setIsCompanyReceived] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [severity, setSeverity] = useState("");
+  const [text, setText] = useState("");
+  const SNACK_DURATION = 4000;
 
   var isReceived = isTeamsReceived && isCompanyReceived;
-
-  const SNACK_DURATION = 4000;
 
   useEffect(() => {
     var requestOptions = {

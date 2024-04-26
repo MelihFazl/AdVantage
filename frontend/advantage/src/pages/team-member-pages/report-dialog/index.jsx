@@ -5,11 +5,18 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Box, Typography, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { generatePDF } from "../../../common/generate-pdf";
+import { useAdImageFetch } from "../../../common/use-ad-image-fetch";
 
 export default function ReportDialog({ open, handleClose, report }) {
   const fullScreen = useMediaQuery("(max-width:750px)");
+  const image = useAdImageFetch(report?.advertisementImage, open);
 
   return (
     <Dialog
@@ -61,21 +68,45 @@ export default function ReportDialog({ open, handleClose, report }) {
           <Typography variant="body2" color={"#000"}>
             Results:
           </Typography>
-          {report?.type === "SingleAdAnalysisReport" ? (
-            <Typography sx={{ mb: 1.2 }} color="text.secondary">
-              CPI of Ad: {report?.report?.successPrediction}
-            </Typography>
-          ) : (
-            report?.report?.comparison?.split(" ")?.map((element, index) => {
-              return (
-                <Typography sx={{ mb: 1.2 }} color="text.secondary">
-                  CPI of Ad{index + 1}: {element}
-                </Typography>
-              );
-            })
-          )}
+          {report?.type !== "ImageAdAnalysisReport" &&
+            (report?.type === "SingleAdAnalysisReport" ? (
+              <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                CPI of Ad: {report?.report?.successPrediction}
+              </Typography>
+            ) : (
+              report?.report?.comparison?.split(" ")?.map((element, index) => {
+                return (
+                  <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                    CPI of Ad{index + 1}: {element}
+                  </Typography>
+                );
+              })
+            ))}
 
-          {report?.type === "SingleAdAnalysisReport" ? (
+          {report?.type === "ImageAdAnalysisReport" ? (
+            <React.Fragment>
+              <Typography variant="body2" color={"#000"}>
+                Analyzed Image:
+              </Typography>
+              {image.image === "" ? (
+                <Box style={{ maxWidth: "500px" }}>
+                  <CircularProgress></CircularProgress>
+                </Box>
+              ) : (
+                <Box style={{ maxWidth: "500px" }}>
+                  <img
+                    src={image.image}
+                    alt="Analyzed Image"
+                    style={{
+                      height: "100%",
+                      width: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              )}
+            </React.Fragment>
+          ) : report?.type === "SingleAdAnalysisReport" ? (
             <React.Fragment>
               <Typography variant="body2" color={"#000"}>
                 Content of Ad:
