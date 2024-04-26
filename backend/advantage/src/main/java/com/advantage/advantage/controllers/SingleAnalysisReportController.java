@@ -95,6 +95,7 @@ public class SingleAnalysisReportController {
         float prediction = modelService.calculateCPI(response);
         List <Float> ageDistribution = modelService.calculateAgeDistribution(response);
         List <Float> genderDistribution = modelService.calculateGenderDistribution(response);
+        String textRecommendation = modelService.calculateTextRecommendation(response);
         float genderM = genderDistribution.get(0);
         float genderF = genderDistribution.get(1);
         float age1317 = ageDistribution.get(0);
@@ -107,7 +108,7 @@ public class SingleAnalysisReportController {
 
 
 
-        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, "", spend, tone,  genderM, genderF, age1317, age1824, age2534,age3544,age4554,age5564,age65, newAd, teamId) != null) {
+        if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, textRecommendation, spend, tone,  genderM, genderF, age1317, age1824, age2534,age3544,age4554,age5564,age65, newAd, teamId) != null) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
             teamService.updateTeam(userTeam);
 

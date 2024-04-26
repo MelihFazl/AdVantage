@@ -11,9 +11,9 @@ public class TextModelAPIResponse {
 
     private List<Float> age_distribution;
     private List<Float> gender_distribution;
+    private String text_recommendation;
 
-
-    @JsonProperty("cpi")
+    @JsonProperty("impression")
     public float getCpi() {
         return cpi;
     }
@@ -21,6 +21,16 @@ public class TextModelAPIResponse {
     public void setCpi(float cpi) {
         this.cpi = cpi;
     }
+
+    @JsonProperty("text_recommendation")
+    public String getTextRecommendation() {
+        return text_recommendation;
+    }
+
+    public void setText_recommendation(String recommendation) {
+        this.text_recommendation = recommendation;
+    }
+
     @JsonProperty("age_distribution")
     public List<Float> getAgeDistribution() {
         return age_distribution;
@@ -29,8 +39,8 @@ public class TextModelAPIResponse {
         this.age_distribution = age_distribution;
     }
 
-    public void setGender_distribution(List<Float> age_distribution) {
-        this.age_distribution = age_distribution;
+    public void setGender_distribution(List<Float> gender_distribution) {
+        this.gender_distribution = gender_distribution;
     }
 
     @JsonProperty("gender_distribution")

@@ -175,7 +175,7 @@ async def text_prediction(request: Request):
 
             # Parse the JSON string into a Python dictionary
             response_data = json.loads(response.text)
-
+            print(response.text)
             # Navigate through the dictionary to extract the desired text
             if 'candidates' in response_data and response_data['candidates'] and 'content' in response_data['candidates'][0] and 'parts' in response_data['candidates'][0]['content']:
                 paragraphs_text = response_data['candidates'][0]['content']['parts'][0].get('text', "No text available.")

@@ -14,4 +14,5 @@ public interface ModelService {
     List<Float> calculateGenderDistribution(TextModelAPIResponse responseObject);
 
 
+    String calculateTextRecommendation(TextModelAPIResponse response);
 }
