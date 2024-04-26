@@ -10,13 +10,57 @@ import lombok.Setter;
 public class SingleAdAnalysisReport extends AnalysisReport{
     @Getter
     @Setter
-    private String pros;
+    private String tone;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
     @Getter
     @Setter
-    private String cons;
+    private float genderM;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float spend;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float genderF;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age1317;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+
+    @Getter
+    @Setter
+    private float age1824;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+
+    @Getter
+    @Setter
+    private float age2534;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+
+    @Getter
+    @Setter
+    private float age3544;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+
+    @Getter
+    @Setter
+    private float age4554;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age5564;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age65;
+
     @Getter
     @Setter
     private String overview;
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
     @Getter
     @Setter
     private float successPrediction;
