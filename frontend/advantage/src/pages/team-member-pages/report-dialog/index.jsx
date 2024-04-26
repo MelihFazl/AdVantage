@@ -89,11 +89,21 @@ export default function ReportDialog({ open, handleClose, report }) {
                 Analyzed Image:
               </Typography>
               {image.image === "" ? (
-                <Box style={{ maxWidth: "500px" }}>
+                <Box
+                  style={{
+                    display: "flex",
+                    aligItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <CircularProgress></CircularProgress>
                 </Box>
               ) : (
-                <Box style={{ maxWidth: "500px" }}>
+                <Box
+                  style={{
+                    maxWidth: "%100",
+                  }}
+                >
                   <img
                     src={image.image}
                     alt="Analyzed Image"
