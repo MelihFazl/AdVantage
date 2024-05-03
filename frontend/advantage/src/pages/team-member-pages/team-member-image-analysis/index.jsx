@@ -1,6 +1,7 @@
 import LeftDrawer from "../../../common/left-drawer";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import { TeamMemberDrawerItems } from "../team-member-drawer-items";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import {
   Paper,
   Box,
@@ -9,11 +10,13 @@ import {
   TextField,
   Select,
   MenuItem,
+  Collapse,
   Button,
   FormControl,
   FormHelperText,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import arrayMutators from "final-form-arrays";
 import { Form, Field } from "react-final-form";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { isFieldEmpty } from "../../../common/validator-functions/isFieldEmpty";
@@ -21,6 +24,7 @@ import { BASE_URL } from "../../../common/constans";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdvSnackbar from "../../../common/adv-snackbar";
+import { FieldArray } from "react-final-form-arrays";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -47,7 +51,7 @@ const DevelopmentText = styled(Typography)({
 export const TeamMemberImageAnalysisPage = () => {
   const navigate = useNavigate();
   const matches = useMediaQuery("(min-width:897px)");
-  const [imageSrc, setImageSrc] = useState("");
+  const [imageSrcs, setImageSrcs] = useState([]);
   const [teams, setTeams] = useState([]);
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState("");
@@ -84,14 +88,23 @@ export const TeamMemberImageAnalysisPage = () => {
       .catch((error) => console.log("error", error));
   }, []);
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
+  const handleRemoveImage = (index) => {
+    const newImageSrcs = [...imageSrcs];
+    newImageSrcs.splice(index, 1);
+    setImageSrcs(newImageSrcs);
+  };
+
+  const handleImageChange = (event, index) => {
+    const files = event.target.files;
+    const newImageSrcs = [...imageSrcs];
+
+    if (files.length > 0) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImageSrc(e.target.result);
+        newImageSrcs[index] = e.target.result;
+        setImageSrcs(newImageSrcs);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(files[0]);
     }
   };
   return (
@@ -162,43 +175,46 @@ export const TeamMemberImageAnalysisPage = () => {
               .toString()
               .padStart(2, "0")}`;
 
-            let formData = new FormData();
-            const fileExtension = imageSrc.split(";")[0].split("/")[1];
-            const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
-            const file = new File([blob], `image.${fileExtension}`, {
-              type: `image/${fileExtension}`,
-            });
-            formData.append("file", file);
-            fetch(
-              BASE_URL +
-                `/imageanalysisreport/create?token=${localStorage.getItem(
-                  "userToken"
-                )}&createdAt=${formattedCurrentDate}&title=${
-                  values.reportTitle
-                }&teamId=${values.team}&category=${values.adCategory}`,
-              {
-                method: "POST",
-                body: formData,
-              }
-            )
-              .then((response) => {
-                if (response.ok) {
-                  openSnack({
-                    severity: "success",
-                    text: "Image is analyzed successfully.",
-                  });
-                  navigate("/team-member");
-                  return undefined;
-                } else return response.text();
-              })
-              .then((result) => {
-                if (result) {
-                  openSnack({ severity: "error", text: result });
-                }
-              })
-              .catch((error) => console.error(error));
+            console.log(values);
+
+            // let formData = new FormData();
+            // const fileExtension = imageSrc.split(";")[0].split("/")[1];
+            // const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
+            // const file = new File([blob], `image.${fileExtension}`, {
+            //   type: `image/${fileExtension}`,
+            // });
+            // formData.append("file", file);
+            // fetch(
+            //   BASE_URL +
+            //     `/imageanalysisreport/create?token=${localStorage.getItem(
+            //       "userToken"
+            //     )}&createdAt=${formattedCurrentDate}&title=${
+            //       values.reportTitle
+            //     }&teamId=${values.team}&category=${values.adCategory}`,
+            //   {
+            //     method: "POST",
+            //     body: formData,
+            //   }
+            // )
+            //   .then((response) => {
+            //     if (response.ok) {
+            //       openSnack({
+            //         severity: "success",
+            //         text: "Image is analyzed successfully.",
+            //       });
+            //       navigate("/team-member");
+            //       return undefined;
+            //     } else return response.text();
+            //   })
+            //   .then((result) => {
+            //     if (result) {
+            //       openSnack({ severity: "error", text: result });
+            //     }
+            //   })
+            //   .catch((error) => console.error(error));
           }}
-          initialValues={{ adCategory: "Political", adContents: [""] }}
+          initialValues={{ adCategory: "Political", imageSrcs: [""] }}
+          mutators={{ ...arrayMutators }}
           render={({ handleSubmit }) => (
             <form onSubmit={handleSubmit}>
               <Stack
@@ -345,55 +361,144 @@ export const TeamMemberImageAnalysisPage = () => {
                       gap={"12px"}
                       alignItems={"center"}
                     >
-                      <Field
-                        name="imageContent"
-                        validate={isFieldEmpty("Image must be uploaded.")}
-                      >
-                        {({ input: { onChange, ...input }, meta }) => (
-                          <label htmlFor="file-input">
-                            <Box
+                      <FieldArray name="imageSrcs">
+                        {({ fields }) => (
+                          <Stack direction={"column"} gap={"12px"}>
+                            {fields.map((element, index) => (
+                              <Field
+                                name={element}
+                                key={index}
+                                validate={(value) => {
+                                  return imageSrcs[index]
+                                    ? undefined
+                                    : "Image must be uploaded.";
+                                }}
+                              >
+                                {({ input: { onChange, ...input }, meta }) => (
+                                  <Box
+                                    display={"flex"}
+                                    alignSelf={"stretch"}
+                                    flexDirection={"column"}
+                                    gap={"4px"}
+                                  >
+                                    <Typography>
+                                      Image of Advertisement{" "}
+                                      {fields.length
+                                        ? fields.length < 2
+                                          ? ""
+                                          : index + 1
+                                        : ""}
+                                    </Typography>
+                                    <Box
+                                      display={"flex"}
+                                      flexDirection={"row"}
+                                      alignSelf={"stretch"}
+                                      gap={"4px"}
+                                    >
+                                      <label htmlFor={`file-input-${index}`}>
+                                        <Box
+                                          sx={{
+                                            height: 248,
+                                            width: 410,
+                                            position: "relative",
+                                            backgroundColor: "#f0f0f0", // Light gray background
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            cursor: "pointer",
+                                          }}
+                                        >
+                                          {imageSrcs[index] ? (
+                                            <img
+                                              src={imageSrcs[index]}
+                                              alt={`Uploaded ${index}`}
+                                              style={{
+                                                height: "100%",
+                                                width: "100%",
+                                                objectFit: "cover",
+                                              }}
+                                            />
+                                          ) : (
+                                            <AddPhotoAlternateRoundedIcon
+                                              style={{
+                                                fontSize: "100px",
+                                                color: "gray",
+                                              }}
+                                            />
+                                          )}
+                                          <input
+                                            {...input}
+                                            type="file"
+                                            id={`file-input-${index}`}
+                                            style={{ display: "none" }}
+                                            accept="image/*"
+                                            onChange={(event) =>
+                                              handleImageChange(event, index)
+                                            }
+                                          />
+                                          {meta.touched && meta.error
+                                            ? meta.error
+                                            : ""}
+                                        </Box>
+                                      </label>
+                                      <Collapse
+                                        orientation="horizontal"
+                                        in={
+                                          fields.length
+                                            ? !(fields.length < 2)
+                                            : false
+                                        }
+                                      >
+                                        {" "}
+                                        <Button
+                                          disabled={
+                                            fields.length
+                                              ? fields.length < 2
+                                              : true
+                                          }
+                                          type="button"
+                                          sx={{
+                                            maxWidth: "32px",
+                                            minWidth: "0",
+                                            flexGrow: "0",
+                                            width: "32px",
+                                            height: "32px",
+                                          }}
+                                          onClick={() => {
+                                            fields.remove(index);
+                                            handleRemoveImage(index);
+                                          }}
+                                        >
+                                          <CloseRoundedIcon></CloseRoundedIcon>
+                                        </Button>
+                                      </Collapse>
+                                    </Box>
+                                  </Box>
+                                )}
+                              </Field>
+                            ))}
+                            <Button
+                              variant="outlined"
+                              disableElevation
+                              size="small"
+                              type="button"
+                              onClick={() => {
+                                fields.push("");
+                              }}
+                              disabled={
+                                fields.length ? fields.length > 2 : true
+                              }
                               sx={{
-                                height: 248,
-                                width: 410,
-                                position: "relative",
-                                backgroundColor: "#f0f0f0", // Light gray background
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                cursor: "pointer",
+                                width: "fit-content",
+                                alignSelf: "flex-end",
                               }}
                             >
-                              {imageSrc ? (
-                                <img
-                                  src={imageSrc}
-                                  alt="Uploaded"
-                                  style={{
-                                    height: "100%",
-                                    width: "100%",
-                                    objectFit: "cover",
-                                  }}
-                                />
-                              ) : (
-                                <AddPhotoAlternateRoundedIcon
-                                  style={{ fontSize: "100px", color: "gray" }}
-                                />
-                              )}
-                              <input
-                                type="file"
-                                id="file-input"
-                                style={{ display: "none" }}
-                                accept="image/*"
-                                onChange={(event) => {
-                                  handleImageChange(event);
-                                  onChange(event); // Updates the form state
-                                }}
-                              />
-                              {meta.touched && meta.error ? meta.error : ""}
-                            </Box>
-                          </label>
+                              Add another ad
+                            </Button>
+                          </Stack>
                         )}
-                      </Field>
+                      </FieldArray>
                     </Stack>
                     <Button variant="contained" disableElevation type="submit">
                       Analyze
