@@ -24,6 +24,13 @@ import static org.springframework.http.ResponseEntity.ok;
 public class ImageAdAnalysisReportController {
     @Autowired
     ImageAdAnalysisReportService imageAdAnalysisReportService;
+
+    @Autowired
+    MultipleImageAdAnalysisReportService multipleImageAdAnalysisReportService;
+
+    @Autowired
+    MultipleImgAdAnalysisReportAssociationService multipleImgAdAnalysisReportAssociationService;
+
     @Autowired
 
     ImageAdvertisementService imageAdService;
@@ -113,6 +120,106 @@ public class ImageAdAnalysisReportController {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
     }
+
+    @PostMapping("/createMultiple")
+    public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String token,
+                                                               @RequestParam String title,
+                                                               @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
+                                                               @RequestParam AdCategory category,
+                                                               @RequestParam("files") MultipartFile[] files,
+                                                               @RequestParam Long teamId) throws FileEmptyException, FileUploadException, IOException {
+
+        if (!jwtUtils.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
+
+        long uploaderId = jwtUtils.getUserId(token);
+        List<Team> userTeams = userAccountManagementService.getTeamMemberByID(uploaderId).get(0).getTeams();
+        Team userTeam = null;
+
+        boolean isAuthorized = false;
+        for (Team team : userTeams) {
+            if (Objects.equals(team.getTeamId(), teamId)) {
+                isAuthorized = true;
+                userTeam = team;
+                break;
+            }
+        }
+
+        if (!isAuthorized) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized request");
+        }
+
+        if (createdAt == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is not a valid date");
+        }
+
+        if (title.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a title");
+        }
+
+        if (category == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please specify a category");
+        }
+
+
+        // Loop through each file and process it
+        List<ImageAdvertisement> createdAdvertisements = new ArrayList<>();
+        try{
+            for (MultipartFile file : files) {
+
+                if (file.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is empty. Cannot save an empty file");
+                }
+
+                boolean isValidFile = isValidFile(file);
+                List<String> allowedFileExtensions = new ArrayList<>(Arrays.asList("png", "jpg", "jpeg"));
+
+                if (!isValidFile || !allowedFileExtensions.contains(FilenameUtils.getExtension(file.getOriginalFilename()))) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File does not have the allowed extensions");
+                }
+            }
+
+        }catch(Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+        // Calculate prediction... (model)
+        float prediction = 0.5f;
+
+        String comparisons = "";
+        Integer usages = 0;
+        for (MultipartFile file : files) {
+            usages++;
+            float comparison = (float) (Math.random() * 0.9999);
+            comparisons += String.format("%.4f ", comparison);
+        }
+
+        MultipleImageAdAnalysisReport newReport = multipleImageAdAnalysisReportService.saveAdAnalysisReport(title, createdAt, uploaderId, comparisons.trim(), teamId);
+
+        // Save analysis report
+        if (newReport != null) {
+            userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + files.length);
+            teamService.updateTeam(userTeam);
+
+            for (MultipartFile file : files) {
+                String fileName = fileService.uploadFile(file);
+                ImageAdvertisement createdAdvertisement = imageAdService.saveAdvertisement(category, uploaderId, createdAt, fileName, teamId);
+                ImageAdvertisementReportAssociation newAssociation = multipleImgAdAnalysisReportAssociationService.saveAdvertisementReportAssociation(createdAdvertisement, newReport,  0);
+
+                if (newAssociation == null) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the association");
+                }
+            }
+
+
+            return ResponseEntity.status(HttpStatus.OK).body("Advertisements and report saved successfully!");
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the report");
+    }
+
+
 
     @GetMapping("/allreports")
     public List<ImageAdAnalysisReport> getAllReports()
