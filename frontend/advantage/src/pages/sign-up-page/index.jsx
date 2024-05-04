@@ -62,6 +62,7 @@ export const SignUpPage = () => {
               flexGrow: "4",
               minWidth: "300px",
               maxWidth: "480px",
+              maxHeight: "510px",
               height: "fit-content",
             }}
           >

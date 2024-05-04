@@ -15,6 +15,8 @@ import { CompanySubscription } from "./pages/company-pages/company-subscription"
 import { PricingPage } from "./pages/pricing-page";
 import { ForbiddenPage } from "./pages/forbidden-page";
 import { ExpiredPage } from "./pages/expired-page";
+import { MemberSettingsPage } from "./pages/team-member-pages/settings-page";
+import { AdminSettingsPage } from "./pages/company-pages/company-manage-teams/settings-page";
 function App() {
   return (
     <BrowserRouter>
@@ -47,6 +49,14 @@ function App() {
         <Route
           path="/team-member/image-analysis"
           element={<TeamMemberImageAnalysisPage></TeamMemberImageAnalysisPage>}
+        ></Route>
+        <Route
+          path="/team-member/settings"
+          element={<MemberSettingsPage></MemberSettingsPage>}
+        ></Route>
+        <Route
+          path="/company/settings"
+          element={<AdminSettingsPage></AdminSettingsPage>}
         ></Route>
         <Route
           path="/forbidden"
