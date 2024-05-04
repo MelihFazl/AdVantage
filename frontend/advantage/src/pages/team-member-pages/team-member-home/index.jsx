@@ -7,13 +7,14 @@ import ReportListCard from "./report-list-card";
 import ReportDialog from "../report-dialog";
 import { useState } from "react";
 import { BASE_URL } from "../../../common/constans";
-import { jwtDecode } from "jwt-decode";
 import LinearProgress from "@mui/material/LinearProgress";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -56,6 +57,7 @@ export const TeamMemberHomePage = () => {
   const [isReportsRecevied, setIsReportsReceived] = useState(false);
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     var requestOptions = {
@@ -64,6 +66,16 @@ export const TeamMemberHomePage = () => {
     };
 
     var token = localStorage.getItem("userToken");
+    var user = jwtDecode(token);
+    const unixTimestamp = user.exp * 1000;
+    const date = new Date(unixTimestamp);
+    const currentDate = new Date();
+    if (date < currentDate) {
+      navigate("/session-expired");
+    }
+    if (user.userType !== "TM") {
+      navigate("/forbidden");
+    }
     fetch(BASE_URL + "/team/getAllMemberTeams?token=" + token, requestOptions)
       .then((response) => response.json())
       .then((result) => {

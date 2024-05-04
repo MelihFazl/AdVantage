@@ -14,6 +14,8 @@ import { BASE_URL } from "../../../common/constans";
 import DeleteDialog from "./delete-dialog";
 import AdvSnackbar from "../../../common/adv-snackbar";
 import { LinearProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -61,6 +63,7 @@ export const CompanyManageTeams = () => {
   const [severity, setSeverity] = useState("");
   const [text, setText] = useState("");
   const SNACK_DURATION = 4000;
+  const navigate = useNavigate();
 
   var isReceived = isTeamsReceived && isCompanyReceived;
 
@@ -71,6 +74,17 @@ export const CompanyManageTeams = () => {
     };
 
     var token = localStorage.getItem("userToken");
+    var user = jwtDecode(token);
+    const unixTimestamp = user.exp * 1000;
+    const date = new Date(unixTimestamp);
+    const currentDate = new Date();
+    if (date < currentDate) {
+      navigate("/session-expired");
+    }
+    if (user.userType !== "CA") {
+      navigate("/forbidden");
+    }
+
     fetch(BASE_URL + "/team/getAllTeams?token=" + token, requestOptions)
       .then((response) => response.json())
       .then((result) => {

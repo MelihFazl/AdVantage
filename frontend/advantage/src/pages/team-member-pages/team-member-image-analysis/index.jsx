@@ -25,6 +25,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdvSnackbar from "../../../common/adv-snackbar";
 import { FieldArray } from "react-final-form-arrays";
+import { jwtDecode } from "jwt-decode";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -78,8 +79,18 @@ export const TeamMemberImageAnalysisPage = () => {
       method: "POST",
       redirect: "follow",
     };
-
     var token = localStorage.getItem("userToken");
+    var user = jwtDecode(token);
+    const unixTimestamp = user.exp * 1000;
+    const date = new Date(unixTimestamp);
+    const currentDate = new Date();
+    if (date < currentDate) {
+      navigate("/session-expired");
+    }
+    if (user.userType !== "TM") {
+      navigate("/forbidden");
+    }
+
     fetch(BASE_URL + "/team/getAllMemberTeams?token=" + token, requestOptions)
       .then((response) => response.json())
       .then((result) => {

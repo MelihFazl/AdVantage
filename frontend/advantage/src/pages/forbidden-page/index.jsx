@@ -1,6 +1,6 @@
 import { Stack, Box, Typography, Link } from "@mui/material";
 
-export const NoPage = () => {
+export const ForbiddenPage = () => {
   return (
     <Stack
       width={"100vw"}
@@ -26,7 +26,7 @@ export const NoPage = () => {
       </Typography>
       <Box width={"400px"}>
         <img
-          src="https://imgur.com/oCkEbrA.png"
+          src="https://imgur.com/flHudHE.png"
           alt="Lost in the Wind"
           style={{ maxWidth: "400px", height: "auto" }}
         />
@@ -35,16 +35,16 @@ export const NoPage = () => {
         variant="h5"
         sx={{ color: "black", fontWeight: 700, fontFamily: "monospace" }}
       >
-        404: This Page is Lost in the Wind
+        403: You don't have keys for this page
       </Typography>
       <Typography variant="h6" sx={{ color: "black", fontFamily: "monospace" }}>
-        The page you are looking for is not available on our website.
+        The page you are looking for is forbidden for your account type.
       </Typography>
       <Link
         href="/"
         variant="h6"
         underline="none"
-        sx={{ display: "block", mt: 2, fontWeight: 700, color: "white" }}
+        sx={{ display: "block", mt: 2, fontWeight: 700, color: "#1733d1" }}
       >
         {"Return home"}
       </Link>

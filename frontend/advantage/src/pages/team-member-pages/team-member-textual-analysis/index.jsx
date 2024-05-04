@@ -25,6 +25,7 @@ import { BASE_URL } from "../../../common/constans";
 import { useNavigate } from "react-router-dom";
 import { composeValidators } from "../../../common/validator-functions/composeValidators";
 import { isValueNumerical } from "../../../common/validator-functions/isValueNumerical";
+import { jwtDecode } from "jwt-decode";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -53,6 +54,17 @@ export const TeamMemberTextualAnalysisPage = () => {
     };
 
     var token = localStorage.getItem("userToken");
+    var user = jwtDecode(token);
+    const unixTimestamp = user.exp * 1000;
+    const date = new Date(unixTimestamp);
+    const currentDate = new Date();
+    if (date < currentDate) {
+      navigate("/session-expired");
+    }
+    if (user.userType !== "TM") {
+      navigate("/forbidden");
+    }
+
     fetch(BASE_URL + "/team/getAllMemberTeams?token=" + token, requestOptions)
       .then((response) => response.json())
       .then((result) => {

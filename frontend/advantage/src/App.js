@@ -13,6 +13,8 @@ import { TeamMemberImageAnalysisPage } from "./pages/team-member-pages/team-memb
 import { CompanyManageTeams } from "./pages/company-pages/company-manage-teams";
 import { CompanySubscription } from "./pages/company-pages/company-subscription";
 import { PricingPage } from "./pages/pricing-page";
+import { ForbiddenPage } from "./pages/forbidden-page";
+import { ExpiredPage } from "./pages/expired-page";
 function App() {
   return (
     <BrowserRouter>
@@ -45,6 +47,14 @@ function App() {
         <Route
           path="/team-member/image-analysis"
           element={<TeamMemberImageAnalysisPage></TeamMemberImageAnalysisPage>}
+        ></Route>
+        <Route
+          path="/forbidden"
+          element={<ForbiddenPage></ForbiddenPage>}
+        ></Route>
+        <Route
+          path="/session-expired"
+          element={<ExpiredPage></ExpiredPage>}
         ></Route>
         <Route path="*" element={<NoPage />} />
       </Routes>
