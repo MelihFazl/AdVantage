@@ -12,7 +12,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { Stack } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
-const pages = ["Home", "About", "FAQ"];
+const pages = ["Home", "About", "Pricing", "FAQ"];
 
 export function TopBarHome() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);

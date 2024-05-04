@@ -12,6 +12,7 @@ import { TeamMemberTextualAnalysisPage } from "./pages/team-member-pages/team-me
 import { TeamMemberImageAnalysisPage } from "./pages/team-member-pages/team-member-image-analysis";
 import { CompanyManageTeams } from "./pages/company-pages/company-manage-teams";
 import { CompanySubscription } from "./pages/company-pages/company-subscription";
+import { PricingPage } from "./pages/pricing-page";
 function App() {
   return (
     <BrowserRouter>
@@ -20,6 +21,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/about-us" element={<AboutUsPage />} />
         <Route path="/faq" element={<FaqPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route

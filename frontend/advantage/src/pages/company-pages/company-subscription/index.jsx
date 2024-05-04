@@ -31,6 +31,13 @@ const BoxTitle = styled(Typography)({
   color: "#FFFFFF",
 });
 
+const CreditText = styled(Typography)({
+  textAlign: "center",
+  color: "#000000", // Black color
+  fontSize: "1rem",
+  marginBottom: "8px",
+});
+
 export const CompanySubscription = () => {
   const matches = useMediaQuery("(min-width:1035px)");
   const [company, setCompany] = useState({});
@@ -148,7 +155,7 @@ export const CompanySubscription = () => {
                 borderRadius: "12px",
                 minWidth: "500px",
                 padding: "10px 30px 10px 30px",
-                margin: "0px 50px 30px 50px",
+                margin: "0px 50px 8px 50px",
               }}
               style={{
                 background: "#7979f2",
@@ -278,6 +285,9 @@ export const CompanySubscription = () => {
                 )}
               </Box>
             </Paper>
+            <CreditText>
+              *One credit corresponds to one analysis of an advertisement.
+            </CreditText>
             <Box
               backgroundColor="#FFFFFF"
               display="grid"
