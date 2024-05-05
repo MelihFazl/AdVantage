@@ -5,6 +5,7 @@ import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.ImageAnalysisReportRepo;
 import com.advantage.advantage.repositories.MultipleAdAnalysisReportAssociationRepo;
 import com.advantage.advantage.services.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +30,17 @@ public class AnalysisReportController {
     private final MultipleAdAnalysisReportService multipleAdService;
 
     private final ImageAdAnalysisReportService imageAdAnalysisReportService;
+
+    private final MultipleImageAdAnalysisReportService multipleImageAdAnalysisReportService;
+
+    private final MultipleImgAdAnalysisReportAssociationService imageAssociationService;
+
     private final SingleAnalysisAdReportService singleAdService;
 
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
 
-    public AnalysisReportController( ImageAdvertisementService imageAdvertisementService,ImageAnalysisReportRepo imageAnalysisReportRepo,  ImageAdAnalysisReportService imageAdAnalysisReportService,TextualAdvertisementService advertisementService, MultipleAdAnalysisReportService multipleAdService, SingleAnalysisAdReportService singleAdService, MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService) {
+    public AnalysisReportController( ImageAdvertisementService imageAdvertisementService,ImageAnalysisReportRepo imageAnalysisReportRepo,  ImageAdAnalysisReportService imageAdAnalysisReportService,TextualAdvertisementService advertisementService, MultipleAdAnalysisReportService multipleAdService, SingleAnalysisAdReportService singleAdService, MultipleAnalysisReportRepo multipleAnalysisReportRepository, SingleAnalysisReportRepo singleAnalysisReportRepository, UserAccountManagementService userAccountManagementService, MultipleImageAdAnalysisReportService multipleImageAdAnalysisReportService, MultipleImgAdAnalysisReportAssociationService imageAssociationService) {
         this.imageAdvertisementService = imageAdvertisementService;
         this.advertisementService = advertisementService;
         this.imageAdAnalysisReportService = imageAdAnalysisReportService;
@@ -42,6 +48,8 @@ public class AnalysisReportController {
         this.jwtUtils = new JwtUtils(userAccountManagementService);
         this.multipleAdService = multipleAdService;
         this.singleAdService = singleAdService;
+        this.multipleImageAdAnalysisReportService = multipleImageAdAnalysisReportService;
+        this.imageAssociationService = imageAssociationService;
     }
 
     @GetMapping("/getAllByTeamId")
@@ -69,6 +77,7 @@ public class AnalysisReportController {
         List<SingleAdAnalysisReport> singleReports = singleAdService.getByTeamId(teamId);
         List<MultipleAdAnalysisReport> multiReports = multipleAdService.getByTeamId(teamId);
         List<ImageAdAnalysisReport> imageReports = imageAdAnalysisReportService.getByTeamId(teamId);
+        List<MultipleImageAdAnalysisReport> multiImageReports = multipleImageAdAnalysisReportService.getByTeamId(teamId);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (SingleAdAnalysisReport singleReport : singleReports) {
@@ -109,6 +118,7 @@ public class AnalysisReportController {
             // Add the combined map to the result
             result.add(reportAndAds);
         }
+
         for (ImageAdAnalysisReport report : imageReports) {
             Map<String, Object> reportAndAds = new HashMap<>();
 
@@ -125,7 +135,38 @@ public class AnalysisReportController {
             result.add(reportAndAds);
         }
 
-        return ResponseEntity.ok(result);
+        for (MultipleImageAdAnalysisReport report : multiImageReports) {
+            Map<String, Object> reportAndAds = new HashMap<>();
+
+            // Add the type identifier
+            reportAndAds.put("type", "MultipleImageAdAnalysisReport");
+
+            // Add the AnalysisReport to the map
+            reportAndAds.put("report", report);
+
+            // Fetch TextualAdvertisements associated with the AnalysisReport
+            List<ImageAdvertisementReportAssociation> adsAssoc = imageAssociationService.getByReport(report);
+
+            List<String> advertisementImageKeys = adsAssoc.stream()
+                    .map(adsA -> adsA.getAdvertisement().getImageKey())
+                    .collect(Collectors.toList());
+
+            // Add the advertisement image
+            reportAndAds.put("advertisementImage", advertisementImageKeys);
+
+            // Add the combined map to the result
+            result.add(reportAndAds);
+        }
+
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            String resultJson = objectMapper.writeValueAsString(result);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(resultJson);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
     }
 
     @DeleteMapping ("/delete")
@@ -135,7 +176,6 @@ public class AnalysisReportController {
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
         }
-
 
         Long requesterId = jwtUtils.getUserId(token);
         List<Team> userTeams = userAccountManagementService.getTeamMemberByID(requesterId).get(0).getTeams();
@@ -156,7 +196,12 @@ public class AnalysisReportController {
         switch (reportType) {
             case "MultipleAdAnalysisReport":
                 try {
-
+                    List <MultipleAdAnalysisReport> report = multipleAdService.getByReportId(reportId);
+                    List<AdvertisementReportAssociation> associations = associationService.getByReport(report.get(0));
+                    for(AdvertisementReportAssociation association : associations) {
+                        TextualAdvertisement ad = advertisementService.getByAdvertisementId(association.getAdvertisement().getAdvertisementId()).get(0);
+                        advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+                    }
 
                     multipleAdService.deleteReportByReportId(reportId);
                     break;
@@ -181,6 +226,20 @@ public class AnalysisReportController {
                     ImageAdvertisement ad = report.get(0).getAdvertisement();
                     imageAdAnalysisReportService.deleteReportByReportId(reportId);
                     imageAdvertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+                    break;
+                }catch(Exception e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+                }
+            case "MultipleImageAdAnalysisReport":
+                try{
+                    List <MultipleImageAdAnalysisReport> report = multipleImageAdAnalysisReportService.getByReportId(reportId);
+                    List<ImageAdvertisementReportAssociation> associations = imageAssociationService.getByReport(report.get(0));
+                    for(ImageAdvertisementReportAssociation association : associations) {
+                        ImageAdvertisement ad = imageAdvertisementService.getByAdvertisementId(association.getAdvertisement().getAdvertisementId()).get(0);
+                        imageAdvertisementService.deleteAdvertisementById(ad.getAdvertisementId());
+                    }
+
+                    multipleImageAdAnalysisReportService.deleteReportByReportId(reportId);
                     break;
                 }catch(Exception e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

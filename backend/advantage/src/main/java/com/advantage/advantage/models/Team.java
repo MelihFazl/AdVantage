@@ -19,7 +19,7 @@ public class Team {
     @Getter @Setter private Integer usageLimit;
     @Column(columnDefinition = "integer default 0")
     @Getter @Setter private Integer monthlyAnalysisUsage;
-  //  @Getter @Setter analysis reports
+    //  @Getter @Setter analysis reports
 
     @ManyToOne
     @JsonIgnore

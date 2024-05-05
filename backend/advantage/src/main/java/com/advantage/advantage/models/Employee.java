@@ -1,5 +1,6 @@
 package com.advantage.advantage.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,8 +17,11 @@ public abstract class Employee
     @Getter @Setter private String surname;
     @Column(unique = true)
     @Getter @Setter private String email;
+
+    @JsonIgnore
     @Getter @Setter private String hashedPassword;
 
+    @JsonIgnore
     @OneToOne
     @Getter @Setter private Token token;
 }
