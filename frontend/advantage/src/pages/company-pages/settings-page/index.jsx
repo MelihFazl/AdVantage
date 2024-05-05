@@ -1,12 +1,13 @@
-import LeftDrawer from "../../../../common/left-drawer";
+import LeftDrawer from "../../../common/left-drawer";
 import React, { useEffect, useState } from "react";
-import { CompanyDrawerItems } from "../../company-drawer-items";
+import { CompanyDrawerItems } from "../company-drawer-items";
 import { Paper, Box, Stack, Typography, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { BASE_URL } from "../../../../common/constans";
+import { BASE_URL } from "../../../common/constans";
 import PasswordDialog from "./password-dialog";
+import AdvSnackbar from "../../../common/adv-snackbar";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -35,6 +36,16 @@ export const AdminSettingsPage = () => {
   const navigate = useNavigate();
   const [member, setMember] = useState(undefined);
   const [openDialog, setOpenDialog] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [severity, setSeverity] = useState("");
+  const [text, setText] = useState("");
+  const SNACK_DURATION = 4000;
+
+  const openSnack = ({ severity, text }) => {
+    setSeverity(severity);
+    setText(text);
+    setOpen(true);
+  };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -202,7 +213,16 @@ export const AdminSettingsPage = () => {
       <PasswordDialog
         open={openDialog}
         handleClose={handleCloseDialog}
+        openSnack={openSnack}
+        user={member}
       ></PasswordDialog>
+      <AdvSnackbar
+        open={open}
+        setOpen={setOpen}
+        severity={severity}
+        duration={SNACK_DURATION}
+        text={text}
+      ></AdvSnackbar>
     </React.Fragment>
   );
 };

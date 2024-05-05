@@ -14,6 +14,9 @@ import {
 import registerImage from "../../assets/images/register.png";
 import { BASE_URL } from "../../common/constans";
 import { useNavigate } from "react-router-dom";
+import { composeValidators } from "../../common/validator-functions/composeValidators";
+import { isValidPassword } from "../../common/validator-functions/isValidPassword";
+import { isValidEmail } from "../../common/validator-functions/isValidEmail";
 
 const ImageBox = styled(Box)`
   width: 50%;
@@ -62,7 +65,7 @@ export const SignUpPage = () => {
               flexGrow: "4",
               minWidth: "300px",
               maxWidth: "480px",
-              maxHeight: "510px",
+              maxHeight: "600px",
               height: "fit-content",
             }}
           >
@@ -235,9 +238,10 @@ export const SignUpPage = () => {
                       </Box>
                       <Field
                         name="email"
-                        validate={isFieldEmpty(
-                          "Email address must be entered."
-                        )}
+                        validate={composeValidators([
+                          isFieldEmpty("Email must be entered."),
+                          isValidEmail("Enter a valid email address."),
+                        ])}
                       >
                         {({ input, meta }) => (
                           <TextField
@@ -257,9 +261,10 @@ export const SignUpPage = () => {
                       </Field>
                       <Field
                         name="password"
-                        validate={isFieldEmpty(
-                          "Password name must be entered."
-                        )}
+                        validate={composeValidators([
+                          isFieldEmpty("Password must be entered."),
+                          isValidPassword,
+                        ])}
                       >
                         {({ input, meta }) => (
                           <TextField
@@ -280,7 +285,10 @@ export const SignUpPage = () => {
                       </Field>
                       <Field
                         name="reEnterPassword"
-                        validate={isFieldEmpty("Re-enter your Password.")}
+                        validate={composeValidators([
+                          isFieldEmpty("Re-enter your password."),
+                          isValidPassword,
+                        ])}
                       >
                         {({ input, meta }) => (
                           <TextField

@@ -16,7 +16,8 @@ import { PricingPage } from "./pages/pricing-page";
 import { ForbiddenPage } from "./pages/forbidden-page";
 import { ExpiredPage } from "./pages/expired-page";
 import { MemberSettingsPage } from "./pages/team-member-pages/settings-page";
-import { AdminSettingsPage } from "./pages/company-pages/company-manage-teams/settings-page";
+import { AdminSettingsPage } from "./pages/company-pages/settings-page";
+import ReserPasswordPage from "./pages/reset-password";
 function App() {
   return (
     <BrowserRouter>
@@ -65,6 +66,10 @@ function App() {
         <Route
           path="/session-expired"
           element={<ExpiredPage></ExpiredPage>}
+        ></Route>
+        <Route
+          path="/reset-password"
+          element={<ReserPasswordPage></ReserPasswordPage>}
         ></Route>
         <Route path="*" element={<NoPage />} />
       </Routes>
