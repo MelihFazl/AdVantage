@@ -285,7 +285,7 @@ public class UserAccountManagementController {
                 userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
                 String subject = "Your Forget Password request";
                 String text = "Hello " +  teamMemberLoggingIn.getName() + ", \nWe received a request to reset the password " +
-                        "associated with your account. To proceed with resetting your password, please click the link below: {url}?token="
+                        "associated with your account. To proceed with resetting your password, please click the link below: http://localhost:3000/reset-password" +  "?token="
                         + tokenStr + " \nIf you didn't initiate this request or believe it was sent to you in error, please ignore this email. " +
                         "Your password will remain unchanged."  + "\nFor security reasons, this link will expire in 15 minutes. " +
                         "If you don't reset your password within this time frame, you'll need to request a new link."
