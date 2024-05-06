@@ -10,8 +10,8 @@ class ImageAdAgeGenderPredictor:
     def __init__(self, cpi_model_path, age_model_path, gender_model_path):
         # Load the custom model with custom objects
         self.cpi_model = load_model(cpi_model_path, custom_objects={'AdamW': tfa.optimizers.AdamW})
-        self.age_model = load_model(age_model_path)
-        self.gender_model = load_model(gender_model_path)
+        self.age_model = load_model(age_model_path, custom_objects={'AdamW': tfa.optimizers.AdamW})
+        self.gender_model = load_model(gender_model_path , custom_objects={'AdamW': tfa.optimizers.AdamW})
         print("Models loaded successfully.")
 
     def predict(self, image_data):
