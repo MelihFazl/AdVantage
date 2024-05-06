@@ -1,5 +1,6 @@
 package com.advantage.advantage.controllers;
 
+import com.advantage.advantage.helpers.ImageModelAPIResponse;
 import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.s3_exceptions.FileEmptyException;
@@ -34,6 +35,9 @@ public class ImageAdAnalysisReportController {
     @Autowired
 
     ImageAdvertisementService imageAdService;
+
+    @Autowired
+    ModelService modelService;
 
     @Autowired
     TeamService teamService;
@@ -107,9 +111,8 @@ public class ImageAdAnalysisReportController {
 
         //float prediction = modelService.calculateCPI(adText);
         //List<Long> shapleyVal = modelService.calculateShapVal(adText);
-        float prediction = 0.5f;
-
-
+        ImageModelAPIResponse response = modelService.getImagePrediction(multipartFile);
+        float prediction = modelService.calculateImageCPI(response);
 
         if (imageAdAnalysisReportService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, createdAdvertisement, teamId) != null) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
@@ -211,7 +214,6 @@ public class ImageAdAnalysisReportController {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("There is an error creating the association");
                 }
             }
-
 
             return ResponseEntity.status(HttpStatus.OK).body("Advertisements and report saved successfully!");
         }

@@ -1,11 +1,14 @@
 package com.advantage.advantage.services;
+import com.advantage.advantage.helpers.ImageModelAPIResponse;
 import com.advantage.advantage.helpers.TextModelAPIResponse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,7 +19,6 @@ import java.util.List;
 
 @Service
 public class ModelServiceImplementation implements ModelService{
-
 
     @Override
     public TextModelAPIResponse getTextualPrediction(String adText, float cost, String tone) {
@@ -71,6 +73,58 @@ public class ModelServiceImplementation implements ModelService{
     public String calculateTextRecommendation(TextModelAPIResponse response)
     {
         return response.getTextRecommendation();
+    }
+
+    @Override
+    public ImageModelAPIResponse getImagePrediction(MultipartFile multipartFile) {
+        // Define the URL of the external API
+        String apiUrl = "http://localhost:8000/image_ad/predict";
+
+        // Create a MultipartBodyBuilder to build the multipart request
+        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+        bodyBuilder.part("file", multipartFile);
+
+        // Create a WebClient instance
+        WebClient webClient = WebClient.create();
+
+        // Make the POST request with WebClient
+        Mono<String> responseMono = webClient.post()
+                .uri(apiUrl)
+                .contentType(MediaType.MULTIPART_FORM_DATA) // Set content type to multipart/form-data
+                .body(BodyInserters.fromMultipartData(bodyBuilder.build())) // Use BodyInserters.fromMultipartData with the built multipart body
+                .retrieve()
+                .bodyToMono(String.class);
+
+        // Process the response
+        String response = responseMono.block(); // Block and wait for response
+
+        // Parse the response JSON to extract the value associated with the "cpi" key
+        try {
+            // Parse the response JSON
+            // Assuming the response is a JSON object with key-value pairs
+            // Replace ImageModelAPIResponse with the appropriate class representing your response structure
+            ImageModelAPIResponse responseObject = new ObjectMapper().readValue(response, ImageModelAPIResponse.class);
+            return responseObject;
+            // Print the value associated with the "cpi" key
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public float calculateImageCPI(ImageModelAPIResponse responseObject) {
+        return responseObject.getCpi();
+    }
+
+    @Override
+    public List<Float> calculateImageAgeDistribution(ImageModelAPIResponse responseObject) {
+        return responseObject.getAgeDistribution();
+    }
+
+    @Override
+    public List<Float> calculateImageGenderDistribution(ImageModelAPIResponse responseObject) {
+        return responseObject.getGenderDistribution();
     }
 
 }
