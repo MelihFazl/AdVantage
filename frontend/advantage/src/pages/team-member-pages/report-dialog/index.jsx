@@ -20,11 +20,12 @@ import { useNavigate } from "react-router-dom";
 
 export default function ReportDialog({ open, handleClose, report }) {
   const fullScreen = useMediaQuery("(max-width:960px)");
-  const toColumn = useMediaQuery("(max-width:900px)");
+  const toColumn = useMediaQuery("(max-width:1060px)");
   const image = useAdImageFetch(report?.advertisementImage, open);
   const navigate = useNavigate();
   var textComparisions = [""];
   var series = [];
+  var series2 = [];
 
   if (report?.type === "MultipleAdAnalysisReport") {
     textComparisions = JSON.parse(report?.report?.comparison);
@@ -39,6 +40,11 @@ export default function ReportDialog({ open, handleClose, report }) {
           element.age5564,
           element.age65,
         ],
+        label: "Advertisement " + (index + 1),
+      });
+      series2.push({
+        data: [element.genderM, element.genderF],
+        label: "Advertisement " + (index + 1),
       });
     });
     console.log(textComparisions);
@@ -52,11 +58,11 @@ export default function ReportDialog({ open, handleClose, report }) {
           "& .MuiPaper-root": {
             width: "100%",
             height: "100%",
-            maxWidth: "960px",
+            maxWidth: "1060px",
           },
         },
       }}
-      maxWidth="960px"
+      maxWidth="1100px"
       fullScreen={fullScreen}
       open={open}
       onClose={handleClose}
@@ -296,36 +302,82 @@ export default function ReportDialog({ open, handleClose, report }) {
                     </Box>
                   ))}
                 </Box>
-                <Box>
-                  <Typography
-                    sx={{ fontSize: 15 }}
-                    variant="body2"
-                    color={"#000"}
-                  >
-                    Age Distribution Plot:
-                  </Typography>
-                  <div name="PlotBox">
-                    <BarChart
-                      xAxis={[
-                        {
-                          scaleType: "band",
-                          data: [
-                            "13-17",
-                            "18-24",
-                            "25-34",
-                            "35-44",
-                            "45-54",
-                            "55-64",
-                            "65+",
-                          ],
-                        },
-                      ]}
-                      series={series}
-                      width={450}
-                      height={300}
-                    />
-                  </div>
+                <Box
+                  display={"flex"}
+                  flexDirection={toColumn ? "column" : "row"}
+                  gap={toColumn ? "10px" : "20px"}
+                >
+                  <Box>
+                    <Typography
+                      sx={{ fontSize: 15 }}
+                      variant="body2"
+                      color={"#000"}
+                    >
+                      Age Distribution Plot:
+                    </Typography>
+                    <div name="AgeBox">
+                      <BarChart
+                        xAxis={[
+                          {
+                            scaleType: "band",
+                            data: [
+                              "13-17",
+                              "18-24",
+                              "25-34",
+                              "35-44",
+                              "45-54",
+                              "55-64",
+                              "65+",
+                            ],
+                          },
+                        ]}
+                        series={series}
+                        width={500}
+                        height={300}
+                      />
+                    </div>
+                  </Box>
+                  <Box>
+                    <Typography
+                      sx={{ fontSize: 15 }}
+                      variant="body2"
+                      color={"#000"}
+                    >
+                      Age Distribution Plot:
+                    </Typography>
+                    <div name="GenderBox">
+                      <BarChart
+                        xAxis={[
+                          {
+                            scaleType: "band",
+                            data: ["Male", "Female"],
+                          },
+                        ]}
+                        series={series2}
+                        width={500}
+                        height={300}
+                      />
+                    </div>
+                  </Box>
                 </Box>
+                {textComparisions?.map((element, index) => (
+                  <Box key={index}>
+                    <Typography
+                      sx={{ fontSize: 15 }}
+                      variant="body2"
+                      color="#000"
+                    >
+                      Reccomended Text for Ad {index + 1}:
+                    </Typography>
+                    <Typography
+                      sx={{ fontSize: 15 }}
+                      color="text.secondary"
+                      gutterBottom
+                    >
+                      {element.textRecommendation}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
             ))}
         </DialogContentText>
