@@ -26,6 +26,7 @@ from tqdm import tqdm
 import ijson
 from sklearn.feature_extraction.text import TfidfVectorizer
 import shap
+import torch
 from pdpbox import pdp
 import joblib
 import json
@@ -201,11 +202,11 @@ ads_dataframe
 """SEPERATE TRAIN AND TEST"""
 
 # Determine the split index
-split_value = 0.1
+split_value = 0.3
 split_index = int(split_value * len(ads_dataframe))
 
 train_data = ads_dataframe.iloc[:split_index]
-test_data = ads_dataframe.iloc[split_index:]
+test_data = ads_dataframe.iloc[split_index: split_index*2]
 
 """CHECK FOR OUTLIERS"""
 
@@ -242,6 +243,11 @@ train_data = remove_outliers(train_data, lower_outliers, 0.01, upper_outliers, 0
 # Apply log transformation only to specific columns
 train_data['spend'] = np.log(train_data['spend'])
 train_data['impressions'] = np.log(train_data['impressions'])
+
+"""(FOR TEST) LOG TRANSFORMATION FOR SKEWED DATA"""
+
+test_data['spend'] = np.log(test_data['spend'])
+test_data['impressions'] = np.log(test_data['impressions'])
 
 """# **PREDICTION WITH SUPERVISED LEARNING**
 
@@ -825,7 +831,7 @@ labels = train_data.impressions.to_numpy()[short_descriptions].astype(np.float32
 spends = train_data.spend.to_numpy()[short_descriptions].astype(np.float32) #cost'u impressions yaptım şu anlık
 
 from sklearn.model_selection import train_test_split
-validation_size = 0.1
+validation_size = 0.2
 seed = 42
 train_inputs, validation_inputs, train_labels, validation_labels = \
             train_test_split(input_ids, labels, test_size=validation_size,
@@ -850,9 +856,22 @@ cost_scaler.fit(train_spends.reshape(-1, 1))
 train_spends = cost_scaler.transform(train_spends.reshape(-1, 1))
 validation_spends = cost_scaler.transform(validation_spends.reshape(-1, 1))
 
+"""SAVE SCALER"""
+
+# Save the scalers to disk
+joblib.dump(impression_scaler, "/content/drive/MyDrive/CS491MLMODEL/us/us/impression_scaler.joblib")
+joblib.dump(cost_scaler, "/content/drive/MyDrive/CS491MLMODEL/us/us/cost_scaler.joblib")
+
+"""(LOAD) SCALER"""
+
+impression_scaler = joblib.load("/content/drive/MyDrive/CS491MLMODEL/us/us/impression_scaler.joblib")
+cost_scaler = joblib.load("/content/drive/MyDrive/CS491MLMODEL/us/us/cost_scaler.joblib")
+
+"""CREATE DATALOADER"""
+
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-batch_size = 64
+batch_size = 32
 def create_dataloaders(inputs, masks, labels, spends, batch_size):
     input_tensor = torch.tensor(inputs)
     mask_tensor = torch.tensor(masks)
@@ -863,6 +882,7 @@ def create_dataloaders(inputs, masks, labels, spends, batch_size):
     dataloader = DataLoader(dataset, batch_size=batch_size,
                             shuffle=True, pin_memory=True)
     return dataloader
+
 train_dataloader = create_dataloaders(train_inputs, train_masks,
                                       train_labels, train_spends, batch_size)
 validation_dataloader = create_dataloaders(validation_inputs, validation_masks,
@@ -881,7 +901,9 @@ class DistilBertRegressor(nn.Module):
                    DistilBertModel.from_pretrained("distilbert-base-uncased")
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
-              nn.Linear(D_in, D_out))
+            nn.BatchNorm1d(D_in),
+            nn.Linear(D_in, D_out)
+        )
 
     def forward(self, input_ids, attention_masks, spends):
         outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_masks)
@@ -893,8 +915,7 @@ class DistilBertRegressor(nn.Module):
         outputs = self.regressor(combined_input)
         return outputs
 
-
-model = DistilBertRegressor(drop_rate=0.2)
+model = DistilBertRegressor(drop_rate=0.5)
 model = model.to(torch.float)
 
 import torch
@@ -908,8 +929,9 @@ model.to(device)
 
 from transformers import AdamW
 optimizer = AdamW(model.parameters(),
-                  lr=5e-5,
-                  eps=1e-8)
+                  lr=5e-3,
+                  eps=1e-8,
+                  weight_decay=0.1)
 
 from transformers import get_linear_schedule_with_warmup
 epochs = 5
@@ -919,18 +941,19 @@ scheduler = get_linear_schedule_with_warmup(optimizer,
 
 loss_function = nn.MSELoss()
 
-import torch
 from torch.nn.utils.clip_grad import clip_grad_norm_
-from sklearn.metrics import r2_score
 
 def train(model, optimizer, scheduler, loss_function, epochs,
           train_dataloader, device, clip_value=2):
-    loss_list = []  # List to store loss values
-    r2_list = []  # List to store R2 scores
+    best_val_loss = float('inf')
+    early_stop_counter = 0
+    patience = 4
     for epoch in range(epochs):
         print(f"Epoch {epoch+1}/{epochs}")
         print("-----")
         model.train()
+        total_loss, total_mae, total_mape, total_r2, count = 0, 0, 0, 0, 0
+
         for step, batch in enumerate(train_dataloader):
             batch_inputs, batch_masks, batch_labels, batch_spends = tuple(b.to(device) for b in batch)
             model.zero_grad()
@@ -941,48 +964,97 @@ def train(model, optimizer, scheduler, loss_function, epochs,
             optimizer.step()
             scheduler.step()
 
+            total_loss += loss.item()
+            outputs_np = outputs.squeeze().detach().cpu().numpy()
+            labels_np = batch_labels.squeeze().detach().cpu().numpy()
+            total_mae += mean_absolute_error(labels_np, outputs_np)
+            total_mape += mean_absolute_percentage_error(labels_np, outputs_np)
+            total_r2 += r2_score(labels_np, outputs_np)
+            count += 1
+
             # Calculate and save metrics every 20 batches
             if step % 100 == 0:
-                # Calculate R2 score
-                outputs_np = outputs.squeeze().detach().cpu().numpy()
-                labels_np = batch_labels.squeeze().detach().cpu().numpy()
-                r2 = r2_score(labels_np, outputs_np)
-                r2_list.append((epoch, step, r2))
-                loss_list.append((epoch, step, loss.item()))
-                print(f"Batch {step}: Loss = {loss.item()}, R2 = {r2}")
+                print(f"Batch {step} in progress...")
 
-    return model, loss_list, r2_list
+        average_loss = total_loss / count
+        average_mae = total_mae / count
+        average_mape = total_mape / count
+        average_r2 = total_r2 / count
+        print(f"Training - Epoch {epoch+1}: Avg Loss = {average_loss}, Avg R2 = {average_r2}, Avg MAE = {average_mae}, Avg MAPE = {average_mape}")
+
+        val_loss, val_r2, val_mae, val_mape = validate(model, validation_dataloader, device, loss_function)
+        print(f"Validation - Epoch {epoch+1}: Avg Loss = {val_loss}, Avg R2 = {val_r2}, Avg MAE = {val_mae}, Avg MAPE = {val_mape}")
+        # Early stopping implementation
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            early_stop_counter = 0
+        else:
+            early_stop_counter += 1
+            if early_stop_counter >= patience:
+                print("Validation loss did not improve for {} epochs. Early stopping...".format(patience))
+                break
+    return model
 
 # Sample call to the modified train function
-model, loss_list, r2_list = train(model, optimizer, scheduler, loss_function, epochs,
+model = train(model, optimizer, scheduler, loss_function, epochs,
                                   train_dataloader, device, clip_value=2)
 
 """SAVE THE MODEL"""
 
-torch.save(model.state_dict(), "/content/drive/MyDrive/CS491MLMODEL/us/us/bert_regression.pth")
+torch.save(model.state_dict(), "/content/drive/MyDrive/CS491MLMODEL/us/us/bert_regression_v1.2.pth")
 
-"""EVALUATION SET"""
+"""LOAD THE MODEL"""
 
-def evaluate(model, loss_function, test_dataloader, device):
+# Initialize the model
+model = DistilBertRegressor()
+
+# Load the state dictionary
+model.load_state_dict(torch.load("/content/drive/MyDrive/CS491MLMODEL/us/us/bert_regression_v1.2.pth", map_location=torch.device('cpu'))),
+
+model.eval()
+
+"""EVALUATION"""
+
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.metrics import r2_score
+
+def validate(model, dataloader, device, loss_function):
+    model.eval()
+    total_loss, total_mae, total_mape, total_r2, count = 0, 0, 0, 0, 0
+    with torch.no_grad():
+        for batch in dataloader:
+            batch_inputs, batch_masks, batch_labels, batch_spends = tuple(b.to(device) for b in batch)
+            outputs = model(batch_inputs, batch_masks, batch_spends)
+            loss = loss_function(outputs.squeeze(), batch_labels.squeeze())
+            total_loss += loss.item()
+
+            outputs_np = outputs.squeeze().detach().cpu().numpy()
+            labels_np = batch_labels.squeeze().detach().cpu().numpy()
+            total_mae += mean_absolute_error(labels_np, outputs_np)
+            total_mape += mean_absolute_percentage_error(labels_np, outputs_np)
+            total_r2 += r2_score(labels_np, outputs_np)
+            count += 1
+
+    average_loss = total_loss / count
+    average_mae = total_mae / count
+    average_mape = total_mape / count
+    average_r2 = total_r2 / count
+    return average_loss, average_r2, average_mae, average_mape
+
+'''def evaluate(model, loss_function, test_dataloader, device):
     model.eval()
     test_loss, test_r2 = [], []
     for batch in test_dataloader:
-        batch_inputs, batch_masks, batch_labels = \
+        batch_inputs, batch_masks, batch_labels, batch_spends = \
                                  tuple(b.to(device) for b in batch)
         with torch.no_grad():
-            outputs = model(batch_inputs, batch_masks)
+            outputs = model(batch_inputs, batch_masks, batch_spends)
         loss = loss_function(outputs, batch_labels)
         test_loss.append(loss.item())
         r2 = r2_score(outputs, batch_labels)
         test_r2.append(r2.item())
-    return test_loss, test_r2
-
-def r2_score(outputs, labels):
-    labels_mean = torch.mean(labels)
-    ss_tot = torch.sum((labels - labels_mean) ** 2)
-    ss_res = torch.sum((labels - outputs) ** 2)
-    r2 = 1 - ss_res / ss_tot
-    return r2
+    return test_loss, test_r2'''
 
 """PREDICTION"""
 
@@ -997,39 +1069,47 @@ def predict(model, dataloader, device):
                             batch_masks).view(1,-1).tolist()[0]
     return output
 
-val_set = val_data[['id_annonce', 'description', 'prix']]
-val_set['cleaned_description'] = \
-                val_set.description.apply(clean_text)
-encoded_val_corpus = \
-                tokenizer(text=val_set.cleaned_description.tolist(),
-                          add_special_tokens=True,
-                          padding='max_length',
-                          truncation='longest_first',
-                          max_length=300,
-                          return_attention_mask=True)
-val_input_ids = np.array(encoded_val_corpus['input_ids'])
-val_attention_mask = np.array(encoded_val_corpus['attention_mask'])
-val_labels = val_set.prix.to_numpy()
-val_labels = price_scaler.transform(val_labels.reshape(-1, 1))
-val_dataloader = create_dataloaders(val_input_ids,
-                         val_attention_mask, val_labels, batch_size)
-y_pred_scaled = predict(model, val_dataloader, device)
+"""TEST DATA PREPERATION"""
 
-y_test = val_set.prix.to_numpy()
-y_pred = price_scaler.inverse_transform(y_pred_scaled)
+test_data['ad_creative_bodies'] = test_data.ad_creative_bodies.apply(clean_text)
 
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import median_absolute_error
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_percentage_error
-from sklearn.metrics import r2_score
-mae = mean_absolute_error(y_test, y_pred)
-mdae = median_absolute_error(y_test, y_pred)
-mse = mean_squared_error(y_test, y_pred)
-mape = mean_absolute_percentage_error(y_test, y_pred)
-mdape = ((pd.Series(y_test) - pd.Series(y_pred))\
-         / pd.Series(y_test)).abs().median()
-r_squared = r2_score(y_test, y_pred)
+from transformers import DistilBertTokenizer
+
+# Specify the model name
+model_name = "distilbert-base-uncased"
+
+# Load the tokenizer
+tokenizer_test = DistilBertTokenizer.from_pretrained(model_name)
+
+encoded_corpus_test = tokenizer_test(text=test_data.ad_creative_bodies.tolist(),
+                            add_special_tokens=True,
+                            padding='max_length',
+                            truncation='longest_first',
+                            max_length=300,
+                            return_attention_mask=True)
+
+input_ids_test = encoded_corpus_test['input_ids']
+attention_mask_test = encoded_corpus_test['attention_mask']
+
+short_descriptions_test = filter_long_descriptions(tokenizer_test,
+                               test_data.ad_creative_bodies.tolist(), 300)
+
+input_ids_test = np.array(input_ids_test)[short_descriptions_test]
+attention_mask_test = np.array(attention_mask_test)[short_descriptions_test]
+labels_test = test_data.impressions.to_numpy()[short_descriptions_test].astype(np.float32) #target'ı impressions yaptım şu anlık
+spends_test = test_data.spend.to_numpy()[short_descriptions_test].astype(np.float32) #cost'u impressions yaptım şu anl
+
+from sklearn.preprocessing import StandardScaler
+labels_test = impression_scaler.transform(labels_test.reshape(-1, 1))
+spends_test = impression_scaler.transform(spends_test.reshape(-1, 1))
+
+test_dataloader = create_dataloaders(input_ids_test, attention_mask_test,
+                                     labels_test, spends_test, batch_size)
+
+"""TEST RESULTS"""
+
+test_loss, test_r2, test_mae, test_mape = validate(model, test_dataloader, device, loss_function)
+print(f"Test Results: Avg Loss = {test_loss}, Avg R2 = {test_r2}, Avg MAE = {test_mae}, Avg MAPE = {test_mape}")
 
 """# **AGE PROBABILITY CLASSIFICATION WITH BERT**
 
@@ -1105,11 +1185,11 @@ ads_dataframe_age_filtered
 """SPLIT TRAIN & TEST"""
 
 # Determine the split index
-split_value = 0.1
+split_value = 0.3
 split_index = int(split_value * len(ads_dataframe_age_filtered))
 
 train_data_age = ads_dataframe_age_filtered.iloc[:split_index]
-test_data_age = ads_dataframe_age_filtered.iloc[split_index:]
+test_data_age = ads_dataframe_age_filtered.iloc[split_index: split_index * 2]
 
 train_data_age['ad_creative_bodies'] = train_data_age.ad_creative_bodies.apply(clean_text)
 
@@ -1143,7 +1223,7 @@ age_columns = ['age-13-17', 'age-18-24', 'age-25-34', 'age-35-44', 'age-45-54', 
 labels_age = train_data_age[age_columns].to_numpy()[short_descriptions_age].astype(np.float32)
 
 from sklearn.model_selection import train_test_split
-validation_size = 0.1
+validation_size = 0.2
 seed = 42
 train_inputs_age, validation_inputs_age, train_labels_age, validation_labels_age = \
             train_test_split(input_ids_age, labels_age, test_size=validation_size,
@@ -1155,8 +1235,8 @@ train_masks_age, validation_masks_age, _, _ = train_test_split(attention_mask_ag
 
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-batch_size = 64
-def create_dataloaders(inputs, masks, labels, batch_size):
+batch_size = 32
+def create_dataloaders_age(inputs, masks, labels, batch_size):
     input_tensor = torch.tensor(inputs)
     mask_tensor = torch.tensor(masks)
     labels_tensor = torch.tensor(labels)
@@ -1165,9 +1245,9 @@ def create_dataloaders(inputs, masks, labels, batch_size):
     dataloader = DataLoader(dataset, batch_size=batch_size,
                             shuffle=True, pin_memory=True)
     return dataloader
-train_dataloader_age = create_dataloaders(train_inputs_age, train_masks_age,
+train_dataloader_age = create_dataloaders_age(train_inputs_age, train_masks_age,
                                       train_labels_age, batch_size)
-validation_dataloader_age = create_dataloaders(validation_inputs_age, validation_masks_age,
+validation_dataloader_age = create_dataloaders_age(validation_inputs_age, validation_masks_age,
                                      validation_labels_age, batch_size)
 
 import torch
@@ -1185,7 +1265,10 @@ class DistilBertClassifierAge(nn.Module):
         # Define the regressor with a Dropout and a Linear layer
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
-            nn.Linear(D_in, D_out),
+            nn.Linear(D_in, 256),
+            nn.BatchNorm1d(256),  # Add BatchNorm layer
+            nn.ReLU(),
+            nn.Linear(256, D_out),
             nn.Softmax(dim=1)  # Ensure outputs are probabilities that sum to 1
         )
 
@@ -1199,7 +1282,7 @@ class DistilBertClassifierAge(nn.Module):
         return logits
 
 # Example of model creation and moving model to a device
-model_age = DistilBertClassifierAge(drop_rate=0.2)
+model_age = DistilBertClassifierAge(drop_rate=0.5)
 model_age = model_age.to(torch.float)
 
 import torch
@@ -1213,8 +1296,9 @@ model_age.to(device)
 
 from transformers import AdamW
 optimizer_age = AdamW(model_age.parameters(),
-                  lr=5e-5,
-                  eps=1e-8)
+                  lr=1e-4,
+                  eps=1e-8,
+                  weight_decay=0.1)
 
 from transformers import get_linear_schedule_with_warmup
 epochs_age = 5
@@ -1224,43 +1308,486 @@ scheduler_age = get_linear_schedule_with_warmup(optimizer_age,
 
 loss_function_age = nn.KLDivLoss(reduction='batchmean')
 
+"""AGE VALIDATION"""
+
+import numpy as np
+from sklearn.metrics import accuracy_score
+
+def validate_age(model, dataloader, device, loss_function):
+    model.eval()
+    total_loss, total_accuracy, count = 0, 0, 0
+
+    with torch.no_grad():
+        for batch in dataloader:
+            batch_inputs, batch_masks, batch_labels = tuple(b.to(device) for b in batch)
+            outputs = model(batch_inputs, batch_masks)
+            loss = loss_function(torch.log(outputs.squeeze() + 1e-8), batch_labels.squeeze())
+            total_loss += loss.item()
+
+            outputs_np = outputs.squeeze().detach().cpu().numpy()
+            labels_np = batch_labels.squeeze().detach().cpu().numpy()
+
+            # Convert predicted probabilities to predicted labels (indices of maximum probability)
+            predicted_labels = np.argmax(outputs_np, axis=1)
+
+            # Convert ground truth probabilities to ground truth labels (indices of maximum probability)
+            ground_truth_labels = np.argmax(labels_np, axis=1)
+
+            # Calculate accuracy for this batch
+            batch_accuracy = accuracy_score(ground_truth_labels, predicted_labels)
+            total_accuracy += batch_accuracy
+
+            count += 1
+
+    average_loss = total_loss / count
+    average_accuracy = total_accuracy / count
+
+    return average_loss, average_accuracy
+
 import torch
 from torch.nn.utils.clip_grad import clip_grad_norm_
 from sklearn.metrics import accuracy_score
 
-def train_age(model, optimizer, scheduler, loss_function, epochs,
-          train_dataloader, device, clip_value=2):
-    loss_list = []  # List to store loss values
-    accuracy_list = []  # List to store accuracy scores
+def train_age(model, optimizer, scheduler, loss_function_age, epochs,
+          train_dataloader, validation_dataloader_age, device, clip_value=2):
+    best_val_loss = float('inf')
+    early_stop_counter = 0
+    patience = 4
     for epoch in range(epochs):
         print(f"Epoch {epoch+1}/{epochs}")
         print("-----")
         model.train()
-        total_correct = 0
-        total_samples = 0
+        total_loss, total_acc, count = 0, 0, 0
         for step, batch in enumerate(train_dataloader):
             batch_inputs, batch_masks, batch_labels = tuple(b.to(device) for b in batch)
             model.zero_grad()
             outputs = model(batch_inputs, batch_masks)
-            loss = loss_function(outputs, batch_labels)
+            loss = loss_function_age(torch.log(outputs + 1e-8), batch_labels)
             loss.backward()
             clip_grad_norm_(model.parameters(), clip_value)
             optimizer.step()
             scheduler.step()
 
-            # Calculate and save metrics every 100 batches
-            if step % 50 == 0:
-                # Calculate accuracy
-                _, predicted = torch.max(outputs, 1)
-                #total_correct = (predicted == labels_indices).sum().item()
-                #total_samples = labels_indices.size(0)
-                #accuracy = total_correct / total_samples
-                #accuracy_list.append((epoch, step, accuracy))
-                loss_list.append((epoch, step, loss.item()))
-                print(f"Batch {step}: Loss = {loss.item()}")
+            total_loss += loss.item()
+            outputs_np = outputs.squeeze().detach().cpu().numpy()
+            labels_np = batch_labels.squeeze().detach().cpu().numpy()
 
-    return model, loss_list
+            # Convert predicted probabilities to predicted labels (indices of maximum probability)
+            predicted_labels = np.argmax(outputs_np, axis=1)
+
+            # Convert ground truth probabilities to ground truth labels (indices of maximum probability)
+            ground_truth_labels = np.argmax(labels_np, axis=1)
+
+            # Calculate accuracy for this batch
+            batch_accuracy = accuracy_score(ground_truth_labels, predicted_labels)
+            total_acc += batch_accuracy
+
+            count += 1
+
+            # Calculate and save metrics every 100 batches
+            if step % 100 == 0:
+                print(f"Batch {step} in progress...")
+
+        average_loss = total_loss / count
+        average_acc = total_acc / count
+        print(f"Training - Epoch {epoch+1}: Avg Loss = {average_loss}, Avg ACC = {average_acc}")
+
+        val_loss, val_acc = validate_age(model_age, validation_dataloader_age, device, loss_function_age)
+        print(f"Validation - Epoch {epoch+1}: Avg Loss = {val_loss}, Avg Acc = {val_acc}")
+        # Early stopping implementation
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            early_stop_counter = 0
+        else:
+            early_stop_counter += 1
+            if early_stop_counter >= patience:
+                print("Validation loss did not improve for {} epochs. Early stopping...".format(patience))
+                break
+
+    return model
 
 # Sample call to the modified train function
-model_age, loss_list_age = train_age(model_age, optimizer_age, scheduler_age, loss_function_age, epochs_age,
-                                  train_dataloader_age, device, clip_value=2)
+model_age= train_age(model_age, optimizer_age, scheduler_age, loss_function_age, epochs_age,
+                                  train_dataloader_age, validation_dataloader_age, device, clip_value=2)
+
+torch.save(model_age.state_dict(), "/content/drive/MyDrive/CS491MLMODEL/us/us/bert_age_classification_V1.1.pth")
+
+"""TEST AGE DATA PREPERATION"""
+
+test_data_age['ad_creative_bodies'] = test_data_age.ad_creative_bodies.apply(clean_text)
+
+from transformers import DistilBertTokenizer
+
+# Specify the model name
+model_name = "distilbert-base-uncased"
+
+# Load the tokenizer
+tokenizer_test_age = DistilBertTokenizer.from_pretrained(model_name)
+
+encoded_corpus_test_age = tokenizer_test_age(text=test_data_age.ad_creative_bodies.tolist(),
+                            add_special_tokens=True,
+                            padding='max_length',
+                            truncation='longest_first',
+                            max_length=300,
+                            return_attention_mask=True)
+
+input_ids_test_age = encoded_corpus_test_age['input_ids']
+attention_mask_test_age = encoded_corpus_test_age['attention_mask']
+
+short_descriptions_test_age = filter_long_descriptions(tokenizer_test_age,
+                               test_data_age.ad_creative_bodies.tolist(), 300)
+
+input_ids_test_age = np.array(input_ids_test_age)[short_descriptions_test_age]
+attention_mask_test_age = np.array(attention_mask_test_age)[short_descriptions_test_age]
+
+# Select the age columns as labels. Adjust the column names as needed.
+age_columns = ['age-13-17', 'age-18-24', 'age-25-34', 'age-35-44', 'age-45-54', 'age-55-64', 'age-65+']
+labels_age_test = test_data_age[age_columns].to_numpy()[short_descriptions_test_age].astype(np.float32)
+
+test_dataloader_age = create_dataloaders_age(input_ids_test_age, attention_mask_test_age,
+                                     labels_age_test, batch_size)
+
+"""TEST RESULTS"""
+
+test_loss_age, avg_acc_age = validate_age(model_age, test_dataloader_age, device, loss_function_age)
+print(f"Test Results: Avg Loss = {test_loss_age},  Avg ACC = {avg_acc_age}")
+
+print(f"Test Results: Avg Loss = {test_loss_age},  Avg ACC = {avg_acc_age}")
+
+"""# **GENDER PROBABILITY CLASSIFICATION WITH BERT**"""
+
+df_gender_filtered = pd.read_csv(ads_dataframe_age_filtered)
+print(df_gender_filtered.dtypes)
+df_gender_filtered.head()
+
+new_df_gender_filtered = pd.DataFrame()
+
+# Convert 'ad_creation_time' to datetime
+new_df_gender_filtered['ad_creation_time'] = pd.to_datetime(df_gender_filtered['ad_creation_time'])
+
+# Extract 'ad_creative_bodies'
+new_df_gender_filtered['ad_creative_bodies'] = df_gender_filtered['ad_creative_bodies'].apply(lambda x: ast.literal_eval(x)[0] if pd.notnull(x) else x).astype(str)
+
+# Create columns for age intervals
+unique_age_intervals = set()
+for item in df_gender_filtered['demographic_distribution']:
+    try:
+        demographics = ast.literal_eval(item)
+        for demographic in demographics:
+            age = demographic.get('age', None)
+            gender = demographic.get('gender', None)
+            if age is not None and gender is not None:
+                age_gender_key = f'{age}_{gender}'
+                unique_age_intervals.add(age_gender_key)
+    except (SyntaxError, ValueError):
+        pass
+
+for age_interval in unique_age_intervals:
+    new_df_gender_filtered[f'percentage_{age_interval}'] = pd.Series(dtype='float32')
+
+for i, item in enumerate(df_gender_filtered['demographic_distribution']):
+    try:
+        demographics = ast.literal_eval(item)
+        for demographic in demographics:
+            age = demographic.get('age', None)
+            gender = demographic.get('gender', None)
+            if age is not None and gender is not None:
+                age_gender_key = f'{age}_{gender}'
+                new_df_gender_filtered.at[i, f'percentage_{age_gender_key}'] = np.float32(demographic.get('percentage', 0))
+    except (SyntaxError, ValueError):
+        pass
+
+# Display data types and the head of the new DataFrame
+print(new_df_gender_filtered.dtypes)
+new_df_gender_filtered.fillna(0, inplace=True)
+new_df_gender_filtered.head()
+
+ads_dataframe_gender_filtered = pd.DataFrame()
+ads_dataframe_gender_filtered['ad_creation_time'] = new_df_gender_filtered['ad_creation_time']
+ads_dataframe_gender_filtered['ad_creative_bodies'] = new_df_gender_filtered['ad_creative_bodies']
+
+male_columns = ["percentage_13-17_male", "percentage_18-24_male", "percentage_25-34_male", "percentage_35-44_male", "percentage_45-54_male", "percentage_55-64_male", "percentage_65+_male"]
+female_columns = ["percentage_13-17_female", "percentage_18-24_female", "percentage_25-34_female", "percentage_35-44_female", "percentage_45-54_female", "percentage_55-64_female", "percentage_65+_female"]
+unknown_columns =  ["percentage_13-17_unknown", "percentage_18-24_unknown", "percentage_25-34_unknown", "percentage_35-44_unknown", "percentage_45-54_unknown", "percentage_55-64_unknown", "percentage_65+_unknown", 'percentage_Unknown_unknown']
+
+unknown_sum = new_df_gender_filtered[unknown_columns].sum(axis=1) / 2
+
+ads_dataframe_gender_filtered['male'] = new_df_gender_filtered[male_columns].sum(axis=1) + unknown_sum
+ads_dataframe_gender_filtered['female'] = new_df_gender_filtered[female_columns].sum(axis=1) + unknown_sum
+
+ads_dataframe_gender_filtered
+
+"""REMOVE ROWS WITH ZERO SUM"""
+
+ads_dataframe_gender_filtered = ads_dataframe_gender_filtered[(ads_dataframe_gender_filtered['male'] + ads_dataframe_gender_filtered['female']).round(3) == 1.0]
+
+# Determine the split index
+split_value = 0.3
+split_index = int(split_value * len(ads_dataframe_gender_filtered))
+
+train_data_gender = ads_dataframe_gender_filtered.iloc[:split_index]
+test_data_gender = ads_dataframe_gender_filtered.iloc[split_index: split_index * 2]
+
+train_data_gender['ad_creative_bodies'] = train_data_gender.ad_creative_bodies.apply(clean_text)
+
+from transformers import DistilBertTokenizer
+
+# Specify the model name
+model_name = "distilbert-base-uncased"
+
+# Load the tokenizer
+tokenizer_gender = DistilBertTokenizer.from_pretrained(model_name)
+
+encoded_corpus_gender = tokenizer_gender(text=train_data_gender.ad_creative_bodies.tolist(),
+                            add_special_tokens=True,
+                            padding='max_length',
+                            truncation='longest_first',
+                            max_length=300,
+                            return_attention_mask=True)
+
+input_ids_gender = encoded_corpus_gender['input_ids']
+attention_mask_gender = encoded_corpus_gender['attention_mask']
+
+import numpy as np
+
+short_descriptions_gender = filter_long_descriptions(tokenizer_gender,
+                               train_data_gender.ad_creative_bodies.tolist(), 300)
+
+input_ids_gender = np.array(input_ids_gender)[short_descriptions_gender]
+attention_mask_gender = np.array(attention_mask_gender)[short_descriptions_gender]
+# Select the gender columns as labels. Adjust the column names as needed.
+gender_columns = ['male', 'female']
+labels_gender = train_data_gender[gender_columns].to_numpy()[short_descriptions_gender].astype(np.float32)
+
+from sklearn.model_selection import train_test_split
+validation_size = 0.2
+seed = 42
+train_inputs_gender, validation_inputs_gender, train_labels_gender, validation_labels_gender = \
+            train_test_split(input_ids_gender, labels_gender, test_size=validation_size,
+                             random_state=seed)
+
+train_masks_gender, validation_masks_gender, _, _ = train_test_split(attention_mask_gender,
+                                        labels_gender, test_size=validation_size,
+                                        random_state=seed)
+
+import torch
+from torch.utils.data import TensorDataset, DataLoader
+batch_size = 32
+def create_dataloaders_gender(inputs, masks, labels, batch_size):
+    input_tensor = torch.tensor(inputs)
+    mask_tensor = torch.tensor(masks)
+    labels_tensor = torch.tensor(labels)
+    dataset = TensorDataset(input_tensor, mask_tensor,
+                            labels_tensor)
+    dataloader = DataLoader(dataset, batch_size=batch_size,
+                            shuffle=True, pin_memory=True)
+    return dataloader
+
+train_dataloader_gender = create_dataloaders_gender(train_inputs_gender, train_masks_gender,
+                                      train_labels_gender, batch_size)
+validation_dataloader_gender = create_dataloaders_gender(validation_inputs_gender, validation_masks_gender,
+                                     validation_labels_gender, batch_size)
+
+import torch
+import torch.nn as nn
+from transformers import DistilBertModel
+
+class DistilBertClassifierGender(nn.Module):
+
+    def __init__(self, drop_rate=0.2):
+        super(DistilBertClassifierGender, self).__init__()
+        # Input dimension for each token embedding from BERT
+        D_in, D_out = 768, 2  # Output dimension matches the number of age categories
+
+        self.distilbert = DistilBertModel.from_pretrained("distilbert-base-uncased")
+        # Define the regressor with a Dropout and a Linear layer
+        self.regressor = nn.Sequential(
+            nn.Dropout(drop_rate),
+            nn.Linear(D_in, 256),
+            nn.BatchNorm1d(256),  # Add BatchNorm layer
+            nn.ReLU(),
+            nn.Linear(256, D_out),
+            nn.Softmax(dim=1)  # Ensure outputs are probabilities that sum to 1
+        )
+
+    def forward(self, input_ids, attention_masks):
+        outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_masks)
+        hidden_state = outputs[0]  # (batch_size, seq_length, hidden_size)
+        pooled_output = hidden_state[:, 0]  # Use the first token's embeddings (CLS token)
+
+        # Pass pooled_output through regressor to get final output
+        logits = self.regressor(pooled_output)
+        return logits
+
+# Example of model creation and moving model to a device
+model_gender = DistilBertClassifierGender(drop_rate=0.5)
+model_gender = model_gender.to(torch.float)
+
+import torch
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print("Using GPU.")
+else:
+    print("No GPU available, using the CPU instead.")
+    device = torch.device("cpu")
+model_gender.to(device)
+
+from transformers import AdamW
+optimizer_gender = AdamW(model_gender.parameters(),
+                  lr=1e-4,
+                  eps=1e-8,
+                  weight_decay=0.1)
+
+from transformers import get_linear_schedule_with_warmup
+epochs_gender = 5
+total_steps_gender = len(train_dataloader_gender) * epochs_gender
+scheduler_gender = get_linear_schedule_with_warmup(optimizer_gender,
+                 num_warmup_steps=0, num_training_steps=total_steps_gender)
+
+loss_function_gender = nn.KLDivLoss(reduction='batchmean')
+
+import numpy as np
+from sklearn.metrics import accuracy_score
+
+def validate_gender(model, dataloader, device, loss_function):
+    model.eval()
+    total_loss, total_accuracy, count = 0, 0, 0
+
+    with torch.no_grad():
+        for batch in dataloader:
+            batch_inputs, batch_masks, batch_labels = tuple(b.to(device) for b in batch)
+            outputs = model(batch_inputs, batch_masks)
+            loss = loss_function(torch.log(outputs.squeeze() + 1e-8), batch_labels.squeeze())
+            total_loss += loss.item()
+
+            outputs_np = outputs.squeeze().detach().cpu().numpy()
+            labels_np = batch_labels.squeeze().detach().cpu().numpy()
+
+            # Convert predicted probabilities to predicted labels (indices of maximum probability)
+            predicted_labels = np.argmax(outputs_np, axis=1)
+
+            # Convert ground truth probabilities to ground truth labels (indices of maximum probability)
+            ground_truth_labels = np.argmax(labels_np, axis=1)
+
+            # Calculate accuracy for this batch
+            batch_accuracy = accuracy_score(ground_truth_labels, predicted_labels)
+            total_accuracy += batch_accuracy
+
+            count += 1
+
+    average_loss = total_loss / count
+    average_accuracy = total_accuracy / count
+
+    return average_loss, average_accuracy
+
+import torch
+from torch.nn.utils.clip_grad import clip_grad_norm_
+from sklearn.metrics import accuracy_score
+
+def train_gender(model, optimizer, scheduler, loss_function_gender, epochs,
+          train_dataloader_gender, validation_dataloader_gender, device, clip_value=2):
+    best_val_loss = float('inf')
+    early_stop_counter = 0
+    patience = 4
+    for epoch in range(epochs):
+        print(f"Epoch {epoch+1}/{epochs}")
+        print("-----")
+        model.train()
+        total_loss, total_acc, count = 0, 0, 0
+        for step, batch in enumerate(train_dataloader_gender):
+            batch_inputs, batch_masks, batch_labels = tuple(b.to(device) for b in batch)
+            model.zero_grad()
+            outputs = model(batch_inputs, batch_masks)
+            loss = loss_function_gender(torch.log(outputs + 1e-8), batch_labels)
+            loss.backward()
+            clip_grad_norm_(model.parameters(), clip_value)
+            optimizer.step()
+            scheduler.step()
+
+            total_loss += loss.item()
+            outputs_np = outputs.squeeze().detach().cpu().numpy()
+            labels_np = batch_labels.squeeze().detach().cpu().numpy()
+
+            # Convert predicted probabilities to predicted labels (indices of maximum probability)
+            predicted_labels = np.argmax(outputs_np, axis=1)
+
+            # Convert ground truth probabilities to ground truth labels (indices of maximum probability)
+            ground_truth_labels = np.argmax(labels_np, axis=1)
+
+            # Calculate accuracy for this batch
+            batch_accuracy = accuracy_score(ground_truth_labels, predicted_labels)
+            total_acc += batch_accuracy
+
+            count += 1
+
+            # Calculate and save metrics every 100 batches
+            if step % 100 == 0:
+                print(f"Batch {step} in progress...")
+
+        average_loss = total_loss / count
+        average_acc = total_acc / count
+        print(f"Training - Epoch {epoch+1}: Avg Loss = {average_loss}, Avg ACC = {average_acc}")
+
+        val_loss, val_acc = validate_gender(model, validation_dataloader_gender, device, loss_function_gender)
+        print(f"Validation - Epoch {epoch+1}: Avg Loss = {val_loss}, Avg Acc = {val_acc}")
+        # Early stopping implementation
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            early_stop_counter = 0
+        else:
+            early_stop_counter += 1
+            if early_stop_counter >= patience:
+                print("Validation loss did not improve for {} epochs. Early stopping...".format(patience))
+                break
+
+    return model
+
+# Sample call to the modified train function
+model_gender = train_gender(model_gender, optimizer_gender, scheduler_gender, loss_function_gender, epochs_gender,
+                                  train_dataloader_gender, validation_dataloader_gender, device, clip_value=2)
+
+torch.save(model_gender.state_dict(), "/content/drive/MyDrive/CS491MLMODEL/us/us/bert_gender_classification_v1.1.pth")
+
+# Initialize the model
+model_gender = DistilBertClassifierGender()
+
+# Load the state dictionary
+model_gender.load_state_dict(torch.load("/content/drive/MyDrive/CS491MLMODEL/us/us/bert_gender_classification_v1.1.pth")),
+
+model_gender.eval()
+
+test_data_gender['ad_creative_bodies'] = test_data_gender.ad_creative_bodies.apply(clean_text)
+
+from transformers import DistilBertTokenizer
+
+# Specify the model name
+model_name = "distilbert-base-uncased"
+
+# Load the tokenizer
+tokenizer_test_gender = DistilBertTokenizer.from_pretrained(model_name)
+
+encoded_corpus_test_gender = tokenizer_test_gender(text=test_data_gender.ad_creative_bodies.tolist(),
+                            add_special_tokens=True,
+                            padding='max_length',
+                            truncation='longest_first',
+                            max_length=300,
+                            return_attention_mask=True)
+
+input_ids_test_gender = encoded_corpus_test_gender['input_ids']
+attention_mask_test_gender = encoded_corpus_test_gender['attention_mask']
+
+short_descriptions_test_gender = filter_long_descriptions(tokenizer_test_gender,
+                               test_data_gender.ad_creative_bodies.tolist(), 300)
+
+input_ids_test_gender = np.array(input_ids_test_gender)[short_descriptions_test_gender]
+attention_mask_test_gender = np.array(attention_mask_test_gender)[short_descriptions_test_gender]
+
+# Select the age columns as labels. Adjust the column names as needed.
+gender_columns = ['male', 'female']
+labels_gender_test = test_data_gender[gender_columns].to_numpy()[short_descriptions_test_gender].astype(np.float32)
+
+test_dataloader_gender = create_dataloaders_gender(input_ids_test_gender, attention_mask_test_gender,
+                                     labels_gender_test, batch_size)
+
+test_loss_gender, avg_acc_gender = validate_gender(model_gender, test_dataloader_gender, device, loss_function_gender)
+print(f"Test Results: Avg Loss = {test_loss_gender},  Avg ACC = {avg_acc_gender}")
