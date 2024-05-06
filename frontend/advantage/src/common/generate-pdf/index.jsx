@@ -1,8 +1,20 @@
 import jsPDF from "jspdf";
+import { toPng } from "html-to-image";
+import { BarChart } from "@mui/x-charts/BarChart";
 
-export function generatePDF(report) {
+export async function generatePDF(report) {
   const reportObj = report.report;
   const doc = new jsPDF();
+  const options = {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false, // Use 24-hour format
+  };
+  const date = new Date(reportObj?.createdAt);
 
   // Set font size and type for the text
   doc.setFontSize(12); // Set font size to 12 points
@@ -10,16 +22,17 @@ export function generatePDF(report) {
 
   //here there will be variables come from APIs
   const content = [
-    { text: `Date: ${reportObj?.createdAt.substring(0, 10)}` },
+    { text: `Date: ${date.toLocaleString("en-US", options)}` },
     { text: `Report Title: ${reportObj?.title}` },
     {
       text: `Uploded by: ${reportObj?.uploader?.name} ${reportObj?.uploader?.surname}`,
     },
   ];
 
-  if (reportObj?.type === "SingleAdAnalysisReport") {
+  if (report?.type === "SingleAdAnalysisReport") {
     content.push({ text: `Advertisement Text: ${report?.advertisementText}` });
-    content.push({ text: `CPI of Ad: ${reportObj?.successPrediction}` });
+    content.push({ text: `Impression: ${reportObj?.successPrediction}` });
+    content.push({ text: `Age Distribution Plot:` });
   } else {
     report?.advertisementTexts?.map((element, index) => {
       content.push({
@@ -27,7 +40,7 @@ export function generatePDF(report) {
       });
     });
     report?.comparison?.split(" ")?.map((element, index) => {
-      content.push({ text: `CPI of Ad ${index + 1}: ${element}` });
+      content.push({ text: `Impression ${index + 1}: ${element}` });
     });
   }
   let yOffset = 20; // Initial y offset
@@ -49,6 +62,42 @@ export function generatePDF(report) {
     doc.text(textLines, 10, yOffset); // Add text to PDF
     yOffset += textHeight + 1; // Update yOffset for next text block
   });
+
+  if (report?.type === "SingleAdAnalysisReport") {
+    const plotBox = document.querySelector('[name="PlotBox"]');
+    const barChartImage = await toPng(plotBox);
+    if (yOffset + 90 > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    doc.addImage(barChartImage, "PNG", 11, yOffset, 170, 90);
+    yOffset += 90 + 1;
+    const pieBox = document.querySelector('[name="GenderBox"]');
+    const pieChartImage = await toPng(pieBox);
+    if (yOffset + pieChartImage.height > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    addText("Gender Distribution Plot:", yOffset, doc);
+    doc.addImage(pieChartImage, "PNG", 11, yOffset + 6);
+    yOffset += 50 + 10;
+    addText(`Overview: \n ${reportObj.overview}`, yOffset, doc);
+  }
+
   // Save the PDF
   doc.save(`${reportObj?.title}.pdf`);
+}
+
+function addText(text, yOffset, doc) {
+  const textLines = doc.splitTextToSize(text, doc.internal.pageSize.width - 20);
+  const textHeight = textLines.length * 7; // Calculate height of text block
+
+  // Check if text will exceed the page height
+  if (yOffset + textHeight > doc.internal.pageSize.height) {
+    doc.addPage(); // Add a new page if text exceeds page height
+    yOffset = 20; // Reset yOffset
+  }
+
+  doc.text(textLines, 10, yOffset); // Add text to PDF
+  yOffset += textHeight + 1; // Update yOffset for next text block
 }

@@ -67,7 +67,6 @@ public class SingleAnalysisReportController {
 
         if (title.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please enter a valid title");
-
         }
 
         if (createdAt == null) {
@@ -105,8 +104,6 @@ public class SingleAnalysisReportController {
         float age4554 = ageDistribution.get(4);
         float age5564 = ageDistribution.get(5);
         float age65 = ageDistribution.get(6);
-
-
 
         if (repService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, textRecommendation, spend, tone,  genderM, genderF, age1317, age1824, age2534,age3544,age4554,age5564,age65, newAd, teamId) != null) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);

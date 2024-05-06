@@ -452,6 +452,7 @@ export const TeamMemberTextualAnalysisPage = () => {
                           onClick={() => {
                             fields.push("");
                           }}
+                          disabled={fields.length ? fields.length > 2 : true}
                           sx={{
                             width: "fit-content",
                             alignSelf: "flex-end",

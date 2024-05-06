@@ -39,7 +39,8 @@ export default function ReportListCard({ report, onReportCardClick }) {
             white-space="nowrap"
             overflow="hidden"
           >
-            {report.type === "ImageAdAnalysisReport" ? (
+            {report.type === "ImageAdAnalysisReport" ||
+            report.type === "MultipleImageAdAnalysisReport" ? (
               <React.Fragment>
                 <Typography sx={{ mb: 1.2 }} color="text.secondary">
                   {

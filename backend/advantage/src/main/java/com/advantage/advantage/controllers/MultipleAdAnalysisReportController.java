@@ -2,15 +2,19 @@ package com.advantage.advantage.controllers;
 
 import com.advantage.advantage.helpers.AdRequestsWrapper;
 import com.advantage.advantage.helpers.JwtUtils;
+import com.advantage.advantage.helpers.TextModelAPIResponse;
+import com.advantage.advantage.helpers.TextModelDTO;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.repositories.MultipleAdAnalysisReportAssociationRepo;
 import com.advantage.advantage.services.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -29,6 +33,9 @@ public class MultipleAdAnalysisReportController {
     TeamService teamService;
 
     @Autowired
+    ModelService modelService;
+
+    @Autowired
     MultipleAdAnalysisReportAssociationService adReportService;
     @Autowired
     MultipleAdAnalysisReportAssociationService associationService;
@@ -43,7 +50,7 @@ public class MultipleAdAnalysisReportController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createMultipleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam AdCategory category, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
-                                                               @RequestBody AdRequestsWrapper adRequestsWrapper, @RequestParam Long teamId) {
+                                                               @RequestBody AdRequestsWrapper adRequestsWrapper, @RequestParam float spend,  @RequestParam String tone, @RequestParam Long teamId) {
 
         if (!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
@@ -82,16 +89,45 @@ public class MultipleAdAnalysisReportController {
         }
 
         String comparisons = "";
+        List<TextModelDTO> multipleAdvertisementResults = new ArrayList<>();
         Integer usages = 0;
         for (String adRequest : adRequests) {
             usages++;
-            float comparison = (float) (Math.random() * 0.9999);
-            comparisons += String.format("%.4f ", comparison);
         }
 
         if (usages > (userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
         }
+
+        for (String adRequest : adRequests) {
+            TextModelAPIResponse response = modelService.getTextualPrediction(adRequest, spend, tone);
+            float prediction = modelService.calculateCPI(response);
+            List <Float> ageDistribution = modelService.calculateAgeDistribution(response);
+            List <Float> genderDistribution = modelService.calculateGenderDistribution(response);
+            String textRecommendation = modelService.calculateTextRecommendation(response);
+            float genderM = genderDistribution.get(0);
+            float genderF = genderDistribution.get(1);
+            float age1317 = ageDistribution.get(0);
+            float age1824 = ageDistribution.get(1);
+            float age2534 = ageDistribution.get(2);
+            float age3544 = ageDistribution.get(3);
+            float age4554 = ageDistribution.get(4);
+            float age5564 = ageDistribution.get(5);
+            float age65 = ageDistribution.get(6);
+
+            TextModelDTO advertisementResult = new TextModelDTO(prediction, ageDistribution, genderDistribution,
+                    textRecommendation, genderM, genderF, age1317, age1824, age2534, age3544, age4554, age5564, age65);
+
+            multipleAdvertisementResults.add(advertisementResult);
+        }
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            comparisons = objectMapper.writeValueAsString(multipleAdvertisementResults);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
 
         MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId, comparisons.trim(), teamId);
 
