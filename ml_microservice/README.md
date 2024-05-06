@@ -3,7 +3,7 @@
 3. Navigate to the cloned GitHub Repository. Make sure Docker is running and after that, you can directly run ```docker compose up --build``` command to build your image and run the web service. 
 4. After the image is built, the web service will run automatically. You can then interact with the REST API (see more on API Usage). 
 5. When you are done, you can close the server with ```CTRL+C```.
-6. After these steps, you can directly use the ```docker compose up``` command to run the server for future usage.
+6. After these steps, you can directly use the ```  ``` command to run the server for future usage.
 
 ## API Usage.
 There are three easy ways to test out the microservice. To test manually, you can either use Postman or FastAPI's own web interface. As a third option, to automate the process, you can run the python script to validate the microservice is working as expected.
