@@ -199,6 +199,7 @@ public class AnalysisReportController {
                     List <MultipleAdAnalysisReport> report = multipleAdService.getByReportId(reportId);
                     List<AdvertisementReportAssociation> associations = associationService.getByReport(report.get(0));
                     for(AdvertisementReportAssociation association : associations) {
+                        associationService.deleteAdvertisementReportAssociationByAssociationId(association.getId());
                         TextualAdvertisement ad = advertisementService.getByAdvertisementId(association.getAdvertisement().getAdvertisementId()).get(0);
                         advertisementService.deleteAdvertisementById(ad.getAdvertisementId());
                     }
@@ -235,6 +236,7 @@ public class AnalysisReportController {
                     List <MultipleImageAdAnalysisReport> report = multipleImageAdAnalysisReportService.getByReportId(reportId);
                     List<ImageAdvertisementReportAssociation> associations = imageAssociationService.getByReport(report.get(0));
                     for(ImageAdvertisementReportAssociation association : associations) {
+                        imageAssociationService.deleteAdvertisementReportAssociationByAssociationId(association.getId());
                         ImageAdvertisement ad = imageAdvertisementService.getByAdvertisementId(association.getAdvertisement().getAdvertisementId()).get(0);
                         imageAdvertisementService.deleteAdvertisementById(ad.getAdvertisementId());
                     }
