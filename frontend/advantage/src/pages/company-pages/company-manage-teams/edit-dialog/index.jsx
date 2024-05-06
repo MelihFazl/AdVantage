@@ -35,7 +35,8 @@ export default function EditDialog({ open, handleClose, team, openSnack }) {
 
         var token = localStorage.getItem("userToken");
         fetch(
-          "http://localhost:8080/team/updateTeam?token=" +
+          BASE_URL +
+            "/team/updateTeam?token=" +
             token +
             "&teamId=" +
             team.teamId,

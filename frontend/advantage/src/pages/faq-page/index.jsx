@@ -45,6 +45,12 @@ export const FaqPage = () => {
             "Advantage stands out by focusing on advanced technologies that anticipate the future needs of digital marketing. Our approach is to shape the future of digital advertising by providing innovative tools and insights that are not only practical but also ahead of the curve."
           }
         ></QuestionItem>
+        <QuestionItem
+          question={"What is the credit in the pricing plan?"}
+          answer={
+            "Credit is the currency that you can use to perform advertisement analysis tasks in AdVantage. Basically, one credit corresponds one analysis of an advertisement."
+          }
+        ></QuestionItem>
       </div>
     </div>
   );

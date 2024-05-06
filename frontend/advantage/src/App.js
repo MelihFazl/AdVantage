@@ -12,6 +12,12 @@ import { TeamMemberTextualAnalysisPage } from "./pages/team-member-pages/team-me
 import { TeamMemberImageAnalysisPage } from "./pages/team-member-pages/team-member-image-analysis";
 import { CompanyManageTeams } from "./pages/company-pages/company-manage-teams";
 import { CompanySubscription } from "./pages/company-pages/company-subscription";
+import { PricingPage } from "./pages/pricing-page";
+import { ForbiddenPage } from "./pages/forbidden-page";
+import { ExpiredPage } from "./pages/expired-page";
+import { MemberSettingsPage } from "./pages/team-member-pages/settings-page";
+import { AdminSettingsPage } from "./pages/company-pages/settings-page";
+import ReserPasswordPage from "./pages/reset-password";
 function App() {
   return (
     <BrowserRouter>
@@ -20,6 +26,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/about-us" element={<AboutUsPage />} />
         <Route path="/faq" element={<FaqPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route
@@ -43,6 +50,26 @@ function App() {
         <Route
           path="/team-member/image-analysis"
           element={<TeamMemberImageAnalysisPage></TeamMemberImageAnalysisPage>}
+        ></Route>
+        <Route
+          path="/team-member/settings"
+          element={<MemberSettingsPage></MemberSettingsPage>}
+        ></Route>
+        <Route
+          path="/company/settings"
+          element={<AdminSettingsPage></AdminSettingsPage>}
+        ></Route>
+        <Route
+          path="/forbidden"
+          element={<ForbiddenPage></ForbiddenPage>}
+        ></Route>
+        <Route
+          path="/session-expired"
+          element={<ExpiredPage></ExpiredPage>}
+        ></Route>
+        <Route
+          path="/reset-password"
+          element={<ReserPasswordPage></ReserPasswordPage>}
         ></Route>
         <Route path="*" element={<NoPage />} />
       </Routes>

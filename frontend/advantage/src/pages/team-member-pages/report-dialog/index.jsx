@@ -15,10 +15,13 @@ import {
 } from "@mui/material";
 import { generatePDF } from "../../../common/generate-pdf";
 import { useAdImageFetch } from "../../../common/use-ad-image-fetch";
+import { BASE_URL } from "../../../common/constans";
+import { useNavigate } from "react-router-dom";
 
 export default function ReportDialog({ open, handleClose, report }) {
   const fullScreen = useMediaQuery("(max-width:750px)");
   const image = useAdImageFetch(report?.advertisementImage, open);
+  const navigate = useNavigate();
 
   return (
     <Dialog
@@ -209,6 +212,35 @@ export default function ReportDialog({ open, handleClose, report }) {
         </DialogContentText>
       </DialogContent>
       <DialogActions>
+        <Button
+          onClick={() => {
+            const requestOptions = {
+              method: "DELETE",
+              redirect: "follow",
+            };
+            var token = localStorage.getItem("userToken");
+            fetch(
+              BASE_URL +
+                "/analysisReport/delete?token=" +
+                token +
+                "&reportId=" +
+                report?.report?.reportId +
+                "&reportType=" +
+                report?.type +
+                "&teamId=" +
+                report?.report?.team?.teamId,
+              requestOptions
+            )
+              .then((response) => {
+                if (response.ok) {
+                  window.location.reload();
+                }
+              })
+              .catch((error) => console.error(error));
+          }}
+        >
+          Delete
+        </Button>
         <Button
           onClick={() => {
             generatePDF(report);

@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 public class JwtUtils {
-    private static final String SECRET_KEY = "e05a2f6a664d5bd168a648c16a14e8e07fdae61504008be167e7c52820205a18681c1b3ce4cdd18186e3e886b997a138ea3848ac3984b04588b295407dbf51f8";
+    private static final String SECRET_KEY = System.getenv("JWT_SECRET_KEY");
 
     private final UserAccountManagementService userAccountManagementService;
 

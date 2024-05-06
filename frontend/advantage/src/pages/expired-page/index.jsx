@@ -1,6 +1,6 @@
 import { Stack, Box, Typography, Link } from "@mui/material";
 
-export const NoPage = () => {
+export const ExpiredPage = () => {
   return (
     <Stack
       width={"100vw"}
@@ -24,9 +24,9 @@ export const NoPage = () => {
       >
         AdVantage
       </Typography>
-      <Box width={"400px"}>
+      <Box width={"400px"} marginTop="10px" marginBottom="10px">
         <img
-          src="https://imgur.com/oCkEbrA.png"
+          src="https://imgur.com/g3hgqe8.png"
           alt="Lost in the Wind"
           style={{ maxWidth: "400px", height: "auto" }}
         />
@@ -35,18 +35,18 @@ export const NoPage = () => {
         variant="h5"
         sx={{ color: "black", fontWeight: 700, fontFamily: "monospace" }}
       >
-        404: This Page is Lost in the Wind
+        Your session is expired.
       </Typography>
       <Typography variant="h6" sx={{ color: "black", fontFamily: "monospace" }}>
-        The page you are looking for is not available on our website.
+        Please login again.
       </Typography>
       <Link
-        href="/"
+        href="/login"
         variant="h6"
         underline="none"
         sx={{ display: "block", mt: 2, fontWeight: 700, color: "white" }}
       >
-        {"Return home"}
+        {"Login page"}
       </Link>
     </Stack>
   );

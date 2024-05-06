@@ -1,9 +1,7 @@
 package com.advantage.advantage.models;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Entity
 @Table(name="single_ad_analysis_report")

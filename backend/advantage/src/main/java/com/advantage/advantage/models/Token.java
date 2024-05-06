@@ -55,7 +55,7 @@ public class Token {
                 .claim("userId", userId)
                 .claim("userType", userType)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, "e05a2f6a664d5bd168a648c16a14e8e07fdae61504008be167e7c52820205a18681c1b3ce4cdd18186e3e886b997a138ea3848ac3984b04588b295407dbf51f8")  // replace with your secret key
+                .signWith(SignatureAlgorithm.HS512, System.getenv("JWT_SECRET_KEY"))  // replace with your secret key
                 .compact();
 
         this.token = jwtToken;
