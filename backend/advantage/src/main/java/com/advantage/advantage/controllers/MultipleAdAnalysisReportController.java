@@ -93,6 +93,13 @@ public class MultipleAdAnalysisReportController {
         Integer usages = 0;
         for (String adRequest : adRequests) {
             usages++;
+        }
+
+        if (usages > (userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
+        }
+
+        for (String adRequest : adRequests) {
             TextModelAPIResponse response = modelService.getTextualPrediction(adRequest, spend, tone);
             float prediction = modelService.calculateCPI(response);
             List <Float> ageDistribution = modelService.calculateAgeDistribution(response);
@@ -121,10 +128,6 @@ public class MultipleAdAnalysisReportController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
-
-        if (usages > (userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
-        }
 
         MultipleAdAnalysisReport newReport = repService.saveAdAnalysisReport(title, createdAt, uploaderId, comparisons.trim(), teamId);
 
