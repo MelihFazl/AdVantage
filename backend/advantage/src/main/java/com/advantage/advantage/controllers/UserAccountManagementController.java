@@ -95,14 +95,14 @@ public class UserAccountManagementController {
                 comp.setNumberOfEmployees(comp.getNumberOfEmployees() + 1);
                 companyService.saveCompany(comp);
                 String subject = "Your personal password for adVantage";
-                String text = "Welcome to advantage! \n This is your password to login to your personal account: "
-                        + randomPassword + " \n Feel free to change your password later";
+                String text = "Welcome to advantage! \nThis is your password to login to your personal account: "
+                        + randomPassword + " \nFeel free to change your password later";
                 emailService.sendSimpleMessage(teamMember.getEmail(), subject, text);
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body("Team Member with name (" + teamMember.getName() + ") and with id (" + teamMember.getId() + ") has been created.");
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("There is already an existing team member with the id" + teamMember.getId());
+                        .body("There is already an existing team member with the same email");
             }
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

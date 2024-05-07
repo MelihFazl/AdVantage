@@ -148,7 +148,7 @@ async def text_prediction(request: Request):
                         "role": "user",
                         "parts": [
                             {
-                                "text": f"Give me 2 different paragraphs with {tone} tone of the following ad text to improve its impressions. Do not change context and only keep the paragraphs in your response: {text_ad}"
+                                "text": f"Give me 1 paragraph with {tone} tone of the following ad text to improve its impressions. Do not change context and only keep the paragraphs in your response: {text_ad}"
                             }
                         ]
                     }
@@ -163,6 +163,7 @@ async def text_prediction(request: Request):
             # Navigate through the dictionary to extract the desired text
             if 'candidates' in response_data and response_data['candidates'] and 'content' in response_data['candidates'][0] and 'parts' in response_data['candidates'][0]['content']:
                 paragraphs_text = response_data['candidates'][0]['content']['parts'][0].get('text', "No text available.")
+                # Split the text by explicitly specifying the paragraph labels
             else:
                 paragraphs_text = "This content may be harmful. Check our policies for further information."
 
