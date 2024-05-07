@@ -10,7 +10,6 @@ import java.util.List;
 @Table(name="team_member")
 @PrimaryKeyJoinColumn(name = "employee_id")
 public class TeamMember extends Employee{
-    @Getter @Setter int monthlyAnalysisUsage;
     @ManyToMany
     @JoinTable(
             name = "team_member_teams",
