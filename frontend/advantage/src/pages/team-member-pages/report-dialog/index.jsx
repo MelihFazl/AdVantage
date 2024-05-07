@@ -27,7 +27,6 @@ export default function ReportDialog({ open, handleClose, report }) {
   var textComparisions = [""];
   var series = [];
   var series2 = [];
-  console.log(report);
 
   if (
     report?.type === "MultipleAdAnalysisReport" ||
@@ -52,7 +51,6 @@ export default function ReportDialog({ open, handleClose, report }) {
         label: "Advertisement " + (index + 1),
       });
     });
-    console.log(textComparisions);
   }
 
   return (
@@ -128,6 +126,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                       Analyzed Image:
                     </Typography>
                     <img
+                      name="singleImage"
                       src={image.image}
                       alt="Analyzed Image"
                       style={{
@@ -172,6 +171,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                             {`Analyzed Image ${index + 1}:`}
                           </Typography>
                           <img
+                            name={`multiImage${index}`}
                             src={element}
                             alt="Analyzed Image"
                             style={{

@@ -1,6 +1,5 @@
 import jsPDF from "jspdf";
 import { toPng } from "html-to-image";
-import { BarChart } from "@mui/x-charts/BarChart";
 
 export async function generatePDF(report) {
   const reportObj = report.report;
@@ -15,6 +14,7 @@ export async function generatePDF(report) {
     hour12: false, // Use 24-hour format
   };
   const date = new Date(reportObj?.createdAt);
+  let yOffset = 20; // Initial y offset
 
   // Set font size and type for the text
   doc.setFontSize(12); // Set font size to 12 points
@@ -42,13 +42,21 @@ export async function generatePDF(report) {
     });
     textComparisions.map((element, index) => {
       content.push({
-        text: `Impression ${index + 1}: ${element.prediction}`,
+        text: `Impression of Ad ${index + 1}: ${element.prediction}`,
       });
     });
     content.push({ text: `Age Distribution Plot:` });
+  } else if (report?.type === "ImageAdAnalysisReport") {
+    content.push({ text: `Impression: ${reportObj?.prediction}` });
+    content.push({ text: `Advertisement Image:` });
+  } else if (report?.type === "MultipleImageAdAnalysisReport") {
+    var textComparisions = JSON.parse(reportObj?.comparison);
+    textComparisions.map((element, index) => {
+      content.push({
+        text: `Impression of Ad ${index + 1}: ${element.prediction}`,
+      });
+    });
   }
-
-  let yOffset = 20; // Initial y offset
 
   // Add content to the PDF
   content.forEach(({ text }) => {
@@ -79,7 +87,7 @@ export async function generatePDF(report) {
     yOffset += 90 + 1;
     const pieBox = document.querySelector('[name="GenderBox"]');
     const pieChartImage = await toPng(pieBox);
-    if (yOffset + pieChartImage.height > doc.internal.pageSize.height) {
+    if (yOffset + 90 > doc.internal.pageSize.height) {
       doc.addPage(); // Add a new page if text exceeds page height
       yOffset = 20; // Reset yOffset
     }
@@ -98,7 +106,7 @@ export async function generatePDF(report) {
     yOffset += 90 + 1;
     const pieBox = document.querySelector('[name="GenderBox"]');
     const pieChartImage = await toPng(pieBox);
-    if (yOffset + pieChartImage.height > doc.internal.pageSize.height) {
+    if (yOffset + 90 > doc.internal.pageSize.height) {
       doc.addPage(); // Add a new page if text exceeds page height
       yOffset = 20; // Reset yOffset
     }
@@ -113,6 +121,59 @@ export async function generatePDF(report) {
         doc
       );
     });
+  } else if (report?.type === "ImageAdAnalysisReport") {
+    const image = document.querySelector('[name="singleImage"]');
+    doc.addImage(image, "PNG", 11, yOffset, 150, 70);
+    yOffset += 70 + 10;
+    if (yOffset + 90 > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    addText("Age Distribution Plot:", yOffset, doc);
+    const plotBox = document.querySelector('[name="PlotBox"]');
+    const barChartImage = await toPng(plotBox);
+    doc.addImage(barChartImage, "PNG", 11, yOffset, 170, 90);
+    yOffset += 90 + 1;
+    const pieBox = document.querySelector('[name="GenderBox"]');
+    const pieChartImage = await toPng(pieBox);
+    if (yOffset + 90 > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    addText("Gender Distribution Plot:", yOffset, doc);
+    doc.addImage(pieChartImage, "PNG", 11, yOffset + 6);
+    yOffset += 50 + 10;
+  } else if (report?.type === "MultipleImageAdAnalysisReport") {
+    var textComparisions = JSON.parse(reportObj?.comparison);
+    textComparisions.map((element, index) => {
+      if (yOffset + 90 > doc.internal.pageSize.height) {
+        doc.addPage(); // Add a new page if text exceeds page height
+        yOffset = 20; // Reset yOffset
+      }
+      addText(`Image of Advertisement ${index + 1}:`, yOffset, doc);
+      yOffset += 3;
+      const image = document.querySelector(`[name="multiImage${index}"]`);
+      doc.addImage(image, "PNG", 11, yOffset, 150, 70);
+      yOffset += 70 + 10;
+    });
+    if (yOffset + 90 > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    addText("Age Distribution Plot:", yOffset, doc);
+    const plotBox = document.querySelector('[name="AgeBox"]');
+    const barChartImage = await toPng(plotBox);
+    doc.addImage(barChartImage, "PNG", 11, yOffset, 170, 90);
+    yOffset += 90 + 1;
+    const pieBox = document.querySelector('[name="GenderBox"]');
+    const pieChartImage = await toPng(pieBox);
+    if (yOffset + 90 > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    addText("Gender Distribution Plot:", yOffset, doc);
+    doc.addImage(pieChartImage, "PNG", 11, yOffset + 6, 170, 90);
+    yOffset += 50 + 10;
   }
 
   // Save the PDF
