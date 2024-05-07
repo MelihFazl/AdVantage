@@ -33,16 +33,21 @@ export async function generatePDF(report) {
     content.push({ text: `Advertisement Text: ${report?.advertisementText}` });
     content.push({ text: `Impression: ${reportObj?.successPrediction}` });
     content.push({ text: `Age Distribution Plot:` });
-  } else {
+  } else if (report?.type === "MultipleAdAnalysisReport") {
+    var textComparisions = JSON.parse(reportObj?.comparison);
     report?.advertisementTexts?.map((element, index) => {
       content.push({
         text: `Advertisement Text of Ad ${index + 1}: ${element}`,
       });
     });
-    report?.comparison?.split(" ")?.map((element, index) => {
-      content.push({ text: `Impression ${index + 1}: ${element}` });
+    textComparisions.map((element, index) => {
+      content.push({
+        text: `Impression ${index + 1}: ${element.prediction}`,
+      });
     });
+    content.push({ text: `Age Distribution Plot:` });
   }
+
   let yOffset = 20; // Initial y offset
 
   // Add content to the PDF
@@ -82,6 +87,32 @@ export async function generatePDF(report) {
     doc.addImage(pieChartImage, "PNG", 11, yOffset + 6);
     yOffset += 50 + 10;
     addText(`Overview: \n ${reportObj.overview}`, yOffset, doc);
+  } else if (report?.type === "MultipleAdAnalysisReport") {
+    const plotBox = document.querySelector('[name="AgeBox"]');
+    const barChartImage = await toPng(plotBox);
+    if (yOffset + 90 > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    doc.addImage(barChartImage, "PNG", 11, yOffset, 170, 90);
+    yOffset += 90 + 1;
+    const pieBox = document.querySelector('[name="GenderBox"]');
+    const pieChartImage = await toPng(pieBox);
+    if (yOffset + pieChartImage.height > doc.internal.pageSize.height) {
+      doc.addPage(); // Add a new page if text exceeds page height
+      yOffset = 20; // Reset yOffset
+    }
+    yOffset = addText("Gender Distribution Plot:", yOffset, doc);
+    doc.addImage(pieChartImage, "PNG", 11, yOffset + 6, 170, 90);
+    yOffset += 90 + 10;
+    var textComparisions = JSON.parse(reportObj?.comparison);
+    textComparisions.map((element, index) => {
+      yOffset = addText(
+        `Recommendation for Ad ${index}: \n ${element.textRecommendation}`,
+        yOffset,
+        doc
+      );
+    });
   }
 
   // Save the PDF
@@ -100,4 +131,5 @@ function addText(text, yOffset, doc) {
 
   doc.text(textLines, 10, yOffset); // Add text to PDF
   yOffset += textHeight + 1; // Update yOffset for next text block
+  return yOffset;
 }
