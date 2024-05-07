@@ -148,7 +148,7 @@ async def text_prediction(request: Request):
                         "role": "user",
                         "parts": [
                             {
-                                "text": f"Give me 2 different paragraphs with {tone} tone of the following ad text to improve its impressions. Do not change context and only keep the paragraphs in your response: {text_ad}"
+                                "text": f"Give me 1 paragraph with {tone} tone of the following ad text to improve its impressions. Do not change context and only keep the paragraphs in your response: {text_ad}"
                             }
                         ]
                     }
@@ -165,13 +165,9 @@ async def text_prediction(request: Request):
                 paragraphs_text = response_data['candidates'][0]['content']['parts'][0].get('text', "No text available.")
                 # Split the text by explicitly specifying the paragraph labels
                 parts = paragraphs_text.split("**Paragraph 1:**")
-                parts = parts[1].split("**Paragraph 2:**")
+                parts = parts[1].strip()
 
-                # Strip leading and trailing whitespace
-                paragraphs = [part.strip() for part in parts if part.strip()]
-
-                # Concatenate paragraphs into a single string with a newline separating them
-                paragraphs_text = "\n".join(paragraphs)
+                paragraphs_text = parts
             else:
                 paragraphs_text = "This content may be harmful. Check our policies for further information."
 
