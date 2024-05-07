@@ -61,7 +61,16 @@ public class ImageAdAnalysisReportServiceImplementation implements ImageAdAnalys
     }
 
     @Override
-    public ImageAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt, float prediction, ImageAdvertisement ad, Long teamId) {
+    public ImageAdAnalysisReport saveAdAnalysisReport(String title, long uploaderId, Date createdAt, float prediction, ImageAdvertisement ad, Long teamId,
+                                                      float genderM,
+                                                      float genderF,
+                                                      float age1317,
+                                                      float age1824,
+                                                      float age2534,
+                                                      float age3544,
+                                                      float age4554,
+                                                      float age5564,
+                                                      float age65) {
         ImageAdAnalysisReport newReport = new ImageAdAnalysisReport();
         List<TeamMember> uploaders = teamMemberRepo.findById(uploaderId);
         if (uploaders == null || uploaders.isEmpty()){
@@ -97,6 +106,14 @@ public class ImageAdAnalysisReportServiceImplementation implements ImageAdAnalys
         newReport.setPrediction(prediction);
         newReport.setAdvertisement(ad);
         newReport.setTeam(team);
+        newReport.setGenderM(genderM);
+        newReport.setGenderF(genderF);
+        newReport.setAge65(age65);
+        newReport.setAge5564(age5564);
+        newReport.setAge4554(age4554);
+        newReport.setAge3544(age3544);
+        newReport.setAge2534(age2534);
+        newReport.setAge1824(age1824);
 
         try {
             ImageAdAnalysisReport savedReport = imageAnalysisReportRepo.save(newReport);
