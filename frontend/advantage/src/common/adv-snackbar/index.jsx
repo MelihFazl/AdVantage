@@ -1,6 +1,7 @@
 import * as React from "react";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { useEffect } from "react";
 
 export default function AdvSnackbar({
   open,
@@ -9,6 +10,18 @@ export default function AdvSnackbar({
   severity,
   text,
 }) {
+  useEffect(() => {
+    let timer;
+    if (open) {
+      timer = setTimeout(() => {
+        setOpen(false);
+      }, duration);
+    }
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [open, duration, text, setOpen]);
+
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -20,7 +33,6 @@ export default function AdvSnackbar({
     <Snackbar
       sx={{ zIndex: 1500 }}
       open={open}
-      autoHideDuration={duration}
       onClose={handleClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >

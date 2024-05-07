@@ -67,7 +67,7 @@ export default function PlanCard({ company, plan, openSnack }) {
           <Typography>{`Plan details:`}</Typography>
           <Typography>{`-${
             checked ? plan[1].paymentPeriodType : plan[0].paymentPeriodType
-          } usable cretids: ${
+          } usable credits: ${
             checked ? plan[1].usageLimit : plan[0].usageLimit
           }`}</Typography>
 
