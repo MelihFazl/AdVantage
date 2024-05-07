@@ -53,6 +53,10 @@ export const AdminSettingsPage = () => {
 
   useEffect(() => {
     var token = localStorage.getItem("userToken");
+    if (!token) {
+      navigate("/forbidden");
+      return;
+    }
     var user = jwtDecode(token);
     const unixTimestamp = user.exp * 1000;
     const date = new Date(unixTimestamp);

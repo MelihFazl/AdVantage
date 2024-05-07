@@ -14,6 +14,7 @@ import {
   Button,
   FormControl,
   FormHelperText,
+  CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import arrayMutators from "final-form-arrays";
@@ -57,6 +58,7 @@ export const TeamMemberImageAnalysisPage = () => {
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState("");
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const SNACK_DURATION = 4000;
 
   const openSnack = ({ severity, text }) => {
@@ -80,6 +82,10 @@ export const TeamMemberImageAnalysisPage = () => {
       redirect: "follow",
     };
     var token = localStorage.getItem("userToken");
+    if (!token) {
+      navigate("/forbidden");
+      return;
+    }
     var user = jwtDecode(token);
     const unixTimestamp = user.exp * 1000;
     const date = new Date(unixTimestamp);
@@ -167,6 +173,7 @@ export const TeamMemberImageAnalysisPage = () => {
         <Form
           keepDirtyOnReinitialize
           onSubmit={(values) => {
+            setLoading(true);
             const currentDate = new Date();
             const formattedCurrentDate = `${currentDate.getFullYear()}-${(
               currentDate.getMonth() + 1
@@ -187,6 +194,9 @@ export const TeamMemberImageAnalysisPage = () => {
               .padStart(2, "0")}`;
 
             console.log(values);
+            setTimeout(() => {
+              setLoading(false);
+            }, 1000);
 
             // let formData = new FormData();
             // const fileExtension = imageSrc.split(";")[0].split("/")[1];
@@ -511,8 +521,20 @@ export const TeamMemberImageAnalysisPage = () => {
                         )}
                       </FieldArray>
                     </Stack>
-                    <Button variant="contained" disableElevation type="submit">
-                      Analyze
+                    <Button
+                      variant="contained"
+                      disableElevation
+                      type="submit"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <CircularProgress
+                          style={{ height: "24.5px", width: "24.5px" }}
+                          color="inherit"
+                        ></CircularProgress>
+                      ) : (
+                        "Analyze"
+                      )}
                     </Button>
                   </Stack>
                 </Paper>

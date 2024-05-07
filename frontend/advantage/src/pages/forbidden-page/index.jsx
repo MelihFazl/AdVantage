@@ -38,7 +38,8 @@ export const ForbiddenPage = () => {
         403: You don't have keys for this page
       </Typography>
       <Typography variant="h6" sx={{ color: "black", fontFamily: "monospace" }}>
-        The page you are looking for is forbidden for your account type.
+        The page you are looking for is forbidden for your account type or your
+        token is missing.
       </Typography>
       <Link
         href="/"

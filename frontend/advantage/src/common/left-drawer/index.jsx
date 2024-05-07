@@ -170,7 +170,10 @@ export default function LeftDrawer({ drawerItems, adaptWidth }) {
             justifyContent: open ? "initial" : "center",
             px: 2.5,
           }}
-          onClick={() => navigate("/")}
+          onClick={() => {
+            localStorage.removeItem("userToken");
+            navigate("/");
+          }}
         >
           <ListItemIcon
             sx={{

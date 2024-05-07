@@ -1,16 +1,26 @@
-import { Box, Stack, Typography, TextField, Button } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  TextField,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { Form, Field } from "react-final-form";
 import * as React from "react";
 import { isFieldEmpty } from "../../../../../common/validator-functions/isFieldEmpty";
 import { isValueNumerical } from "../../../../../common/validator-functions/isValueNumerical";
 import { composeValidators } from "../../../../../common/validator-functions/composeValidators";
 import { BASE_URL } from "../../../../../common/constans";
+import { useState } from "react";
 
 export default function CreateTeamForm({ openSnack }) {
+  const [loading, setLoading] = useState(false);
   return (
     <Form
       keepDirtyOnReinitialize
       onSubmit={(values) => {
+        setLoading(true);
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
@@ -35,6 +45,7 @@ export default function CreateTeamForm({ openSnack }) {
                 severity: "success",
                 text: "Team created successfully",
               });
+              setLoading(false);
               return undefined;
             } else return response.text();
           })
@@ -42,6 +53,7 @@ export default function CreateTeamForm({ openSnack }) {
             if (result) {
               openSnack({ severity: "error", text: result });
             }
+            setLoading(false);
           })
           .catch((error) => console.error(error));
       }}
@@ -96,8 +108,21 @@ export default function CreateTeamForm({ openSnack }) {
               )}
             </Field>
             <Box alignSelf={"flex-end"} marginTop={"8px"}>
-              <Button variant="contained" disableElevation type="submit">
-                Create Team
+              <Button
+                variant="contained"
+                disableElevation
+                type="submit"
+                disabled={loading}
+                sx={{ width: "127.5px" }}
+              >
+                {loading ? (
+                  <CircularProgress
+                    style={{ height: "24.5px", width: "24.5px" }}
+                    color="inherit"
+                  ></CircularProgress>
+                ) : (
+                  "Create Team"
+                )}
               </Button>
             </Box>
           </Stack>

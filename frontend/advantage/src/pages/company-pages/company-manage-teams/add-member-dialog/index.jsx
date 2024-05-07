@@ -6,7 +6,13 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { useTheme } from "@emotion/react";
 import { useState } from "react";
-import { Box, Typography, Select, MenuItem } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  CircularProgress,
+} from "@mui/material";
 import { useEffect } from "react";
 import { BASE_URL } from "../../../../common/constans";
 import { areEquivalentMembers } from "../../../../common/areEquivalentMembers";
@@ -21,6 +27,7 @@ export default function AddMemberDialog({
   const [memberName, setMemberName] = useState([]);
   const [members, setMembers] = useState([]);
   const [isReceived, setIsReceived] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -151,7 +158,9 @@ export default function AddMemberDialog({
         <DialogActions>
           {members.length > 0 && (
             <Button
+              disabled={loading}
               onClick={() => {
+                setLoading(true);
                 memberName.map((id) => {
                   const requestOptions = {
                     method: "POST",
@@ -175,6 +184,7 @@ export default function AddMemberDialog({
                           severity: "success",
                           text: "Members are added successfully",
                         });
+                        setLoading(false);
                         return undefined;
                       } else return response.text();
                     })
@@ -182,13 +192,21 @@ export default function AddMemberDialog({
                       if (result) {
                         openSnack({ severity: "error", text: result });
                       }
+                      setLoading(false);
                     })
                     .catch((error) => console.error(error));
                 });
               }}
               color="primary"
             >
-              Add
+              {loading ? (
+                <CircularProgress
+                  style={{ height: "24.5px", width: "24.5px" }}
+                  color="inherit"
+                ></CircularProgress>
+              ) : (
+                "Add"
+              )}
             </Button>
           )}
           <Button onClick={handleClose} color="primary">
