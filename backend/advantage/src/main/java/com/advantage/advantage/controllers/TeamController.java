@@ -64,16 +64,14 @@ public class TeamController {
             team.setCompanyAdministrator(ca);
             team.setMonthlyAnalysisUsage(0);
 
-            if (teamService.saveTeam(team) != null) {
+            if(comp.getAvailableLimit() < team.getUsageLimit()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("You do not have enough usage limit!");
+            }
 
-                if(comp.getAvailableLimit() < team.getUsageLimit()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body("You do not have enough usage limit!");
-                }
+            if (teamService.saveTeam(team) != null) {
                 comp.setAvailableLimit(comp.getAvailableLimit() - team.getUsageLimit());
                 companyService.updateCompany(comp);
-
-
 
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body("Team with name (" + team.getTeamName() + ") and with id (" + team.getTeamId() + ") has been created.");
