@@ -1,11 +1,13 @@
 package com.advantage.advantage.controllers;
 
 import com.advantage.advantage.helpers.ImageModelAPIResponse;
+import com.advantage.advantage.helpers.ImageModelDTO;
 import com.advantage.advantage.helpers.JwtUtils;
 import com.advantage.advantage.models.*;
 import com.advantage.advantage.s3_exceptions.FileEmptyException;
 import com.advantage.advantage.s3_exceptions.FileUploadException;
 import com.advantage.advantage.services.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -113,8 +115,20 @@ public class ImageAdAnalysisReportController {
         //List<Long> shapleyVal = modelService.calculateShapVal(adText);
         ImageModelAPIResponse response = modelService.getImagePrediction(multipartFile);
         float prediction = modelService.calculateImageCPI(response);
+        Map<Integer, Float> ageDist = modelService.calculateImageAgeDistribution(response);
+        Map<String, Float> genderDist =  modelService.calculateImageGenderDistribution(response);
+        float genderM = genderDist.get("Male");
+        float genderF = genderDist.get("Female");
+        float age1317 = ageDist.get(0);
+        float age1824 = ageDist.get(1);
+        float age2534 = ageDist.get(2);
+        float age3544 = ageDist.get(3);
+        float age4554 = ageDist.get(4);
+        float age5564 = ageDist.get(5);
+        float age65 = ageDist.get(6);
 
-        if (imageAdAnalysisReportService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, createdAdvertisement, teamId) != null) {
+        if (imageAdAnalysisReportService.saveAdAnalysisReport(title, uploaderId, createdAt, prediction, createdAdvertisement, teamId,
+            genderM, genderF, age1317, age1824, age2534, age3544, age4554, age5564, age65) != null) {
             userTeam.setMonthlyAnalysisUsage(userTeam.getMonthlyAnalysisUsage() + 1);
             teamService.updateTeam(userTeam);
 
@@ -166,8 +180,13 @@ public class ImageAdAnalysisReportController {
         }
 
 
+        if (files.length > (userTeam.getUsageLimit() - userTeam.getMonthlyAnalysisUsage())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You do not have enough usage limit");
+        }
+
         // Loop through each file and process it
-        List<ImageAdvertisement> createdAdvertisements = new ArrayList<>();
+        List<ImageModelDTO> analyzedAdvertisements = new ArrayList<>();
+        String comparisons = "";
         try{
             for (MultipartFile file : files) {
 
@@ -181,22 +200,36 @@ public class ImageAdAnalysisReportController {
                 if (!isValidFile || !allowedFileExtensions.contains(FilenameUtils.getExtension(file.getOriginalFilename()))) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File does not have the allowed extensions");
                 }
+
+                ImageModelAPIResponse response = modelService.getImagePrediction(file);
+                float prediction = modelService.calculateImageCPI(response);
+                Map<Integer, Float> ageDist = modelService.calculateImageAgeDistribution(response);
+                Map<String, Float> genderDist =  modelService.calculateImageGenderDistribution(response);
+                float genderM = genderDist.get("Male");
+                float genderF = genderDist.get("Female");
+                float age1317 = ageDist.get(0);
+                float age1824 = ageDist.get(1);
+                float age2534 = ageDist.get(2);
+                float age3544 = ageDist.get(3);
+                float age4554 = ageDist.get(4);
+                float age5564 = ageDist.get(5);
+                float age65 = ageDist.get(6);
+
+                ImageModelDTO ad = new ImageModelDTO(prediction, genderM, genderF, age1317, age1824, age2534, age3544, age4554, age5564, age65);
+                analyzedAdvertisements.add(ad);
             }
 
         }catch(Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
 
-        // Calculate prediction... (model)
-        float prediction = 0.5f;
-
-        String comparisons = "";
-        Integer usages = 0;
-        for (MultipartFile file : files) {
-            usages++;
-            float comparison = (float) (Math.random() * 0.9999);
-            comparisons += String.format("%.4f ", comparison);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            comparisons = objectMapper.writeValueAsString(analyzedAdvertisements);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+
 
         MultipleImageAdAnalysisReport newReport = multipleImageAdAnalysisReportService.saveAdAnalysisReport(title, createdAt, uploaderId, comparisons.trim(), teamId);
 

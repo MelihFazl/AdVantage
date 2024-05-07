@@ -1,9 +1,6 @@
 package com.advantage.advantage.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +12,51 @@ public class ImageAdAnalysisReport extends  AnalysisReport{
     @Getter
     @Setter
     private ImageAdvertisement advertisement;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float genderM;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float genderF;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age1317;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age1824;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age2534;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age3544;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age4554;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age5564;
+
+    @Column(columnDefinition = "FLOAT DEFAULT 0")
+    @Getter
+    @Setter
+    private float age65;
 
     @Getter @Setter float prediction;
 }

@@ -1,40 +1,39 @@
 package com.advantage.advantage.helpers;
 
-import java.util.List;
+import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImageModelAPIResponse {
-    private float cpi;
+    private float predicted_cpi;
+    private Map<Integer, Float> age_distribution;
+    private Map<String, Float> gender_probabilities;
 
-    private List<Float> age_distribution;
-    private List<Float> gender_distribution;
-
-    @JsonProperty("impression")
+    @JsonProperty("predicted_cpi")
     public float getCpi() {
-        return cpi;
+        return predicted_cpi;
     }
 
     public void setCpi(float cpi) {
-        this.cpi = cpi;
+        this.predicted_cpi = cpi;
     }
 
     @JsonProperty("age_distribution")
-    public List<Float> getAgeDistribution() {
+    public Map<Integer, Float> getAgeDistribution() {
         return age_distribution;
     }
-    public void setAge_distribution(List<Float> age_distribution) {
+
+    public void setAgeDistribution(Map<Integer, Float> age_distribution) {
         this.age_distribution = age_distribution;
     }
 
-    public void setGender_distribution(List<Float> gender_distribution) {
-        this.gender_distribution = gender_distribution;
+    @JsonProperty("gender_probabilities")
+    public Map<String, Float> getGenderProbabilities() {
+        return gender_probabilities;
     }
 
-    @JsonProperty("gender_distribution")
-    public List<Float> getGenderDistribution() {
-        return gender_distribution;
+    public void setGenderProbabilities(Map<String, Float> gender_probabilities) {
+        this.gender_probabilities = gender_probabilities;
     }
-
 }
