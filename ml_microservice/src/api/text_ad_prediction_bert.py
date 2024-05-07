@@ -179,6 +179,15 @@ async def text_prediction(request: Request):
             # Navigate through the dictionary to extract the desired text
             if 'candidates' in response_data and response_data['candidates'] and 'content' in response_data['candidates'][0] and 'parts' in response_data['candidates'][0]['content']:
                 paragraphs_text = response_data['candidates'][0]['content']['parts'][0].get('text', "No text available.")
+                # Split the text by explicitly specifying the paragraph labels
+                parts = paragraphs_text.split("**Paragraph 1:**")
+                parts = parts[1].split("**Paragraph 2:**")
+
+                # Strip leading and trailing whitespace
+                paragraphs = [part.strip() for part in parts if part.strip()]
+
+                # Concatenate paragraphs into a single string with a newline separating them
+                paragraphs_text = "\n".join(paragraphs)
             else:
                 paragraphs_text = "Gemini API does not work currently."
 
