@@ -255,7 +255,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                     color="#1f1f1f"
                     gutterBottom
                   >
-                    {report?.report?.prediction}
+                    {parseInt(report?.report?.prediction)}
                   </Typography>
                 </Box>
 
@@ -375,7 +375,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                         color="#1f1f1f"
                         gutterBottom
                       >
-                        {element.prediction}
+                        {parseInt(element.prediction)}
                       </Typography>
                     </Box>
                   ))}
@@ -451,7 +451,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                   Impression of Ad:
                 </Typography>
                 <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
-                  {report?.report?.successPrediction}
+                  {parseInt(report?.report?.successPrediction)}
                 </Typography>
               </Box>
 
@@ -581,7 +581,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                       color="#1f1f1f"
                       gutterBottom
                     >
-                      {element.prediction}
+                      {parseInt(element.prediction)}
                     </Typography>
                   </Box>
                 ))}
