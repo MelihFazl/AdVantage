@@ -27,6 +27,18 @@ export default function ReportDialog({ open, handleClose, report }) {
   var textComparisions = [""];
   var series = [];
   var series2 = [];
+  var date = "";
+
+  if (report) {
+    date = Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Ensure 24-hour format
+    }).format(report?.report?.createdAt);
+  }
 
   if (
     report?.type === "MultipleAdAnalysisReport" ||
@@ -80,6 +92,18 @@ export default function ReportDialog({ open, handleClose, report }) {
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
+          <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
+            <Typography
+              variant="body2"
+              color={"#000080"}
+              sx={{ fontWeight: "bold" }}
+            >
+              Date:
+            </Typography>
+            <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
+              {date}
+            </Typography>
+          </Box>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
             <Typography
               variant="body2"
