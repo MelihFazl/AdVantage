@@ -100,6 +100,7 @@ public class MultipleAdAnalysisReportController {
         }
 
         for (String adRequest : adRequests) {
+            adRequest = adRequest.replace("\n", "");
             TextModelAPIResponse response = modelService.getTextualPrediction(adRequest, spend, tone);
             float prediction = modelService.calculateCPI(response);
             List <Float> ageDistribution = modelService.calculateAgeDistribution(response);

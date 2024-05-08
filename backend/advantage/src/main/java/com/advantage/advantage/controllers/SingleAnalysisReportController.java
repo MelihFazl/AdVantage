@@ -90,6 +90,7 @@ public class SingleAnalysisReportController {
         }
 
         SingleAdAnalysisReport newReport = new SingleAdAnalysisReport();
+        adText = adText.replace("\n", "");
         TextModelAPIResponse response = modelService.getTextualPrediction(adText, spend, tone);
         float prediction = modelService.calculateCPI(response);
         List <Float> ageDistribution = modelService.calculateAgeDistribution(response);
