@@ -16,7 +16,6 @@ import {
 import { generatePDF } from "../../../common/generate-pdf";
 import { useAdImageFetch } from "../../../common/use-ad-image-fetch";
 import { BASE_URL } from "../../../common/constans";
-import { useNavigate } from "react-router-dom";
 import { useMultiAdImageFetch } from "../../../common/use-multi-ad-image-fetch";
 
 export default function ReportDialog({ open, handleClose, report }) {
@@ -28,6 +27,8 @@ export default function ReportDialog({ open, handleClose, report }) {
   var series = [];
   var series2 = [];
   var date = "";
+  var overviewResult = "";
+  var overviewResults = [];
 
   if (report) {
     date = Intl.DateTimeFormat("en-GB", {
@@ -38,6 +39,16 @@ export default function ReportDialog({ open, handleClose, report }) {
       minute: "2-digit",
       hour12: false, // Ensure 24-hour format
     }).format(report?.report?.createdAt);
+
+    if (report?.type === "SingleAdAnalysisReport") {
+      overviewResult = report?.report?.overview.split("\n");
+    } else if (report?.type === "MultipleAdAnalysisReport")
+    {
+      textComparisions = JSON.parse(report?.report?.comparison);
+      textComparisions?.map((element, index) => {
+        overviewResults.push(element.textRecommendation.split("\n"));
+      });
+    }
   }
 
   if (
@@ -581,7 +592,14 @@ export default function ReportDialog({ open, handleClose, report }) {
                 Overview:
               </Typography>
               <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
-                {report?.report?.overview}
+                {overviewResult[0]}
+              </Typography>
+              <Typography
+                sx={{ fontSize: 15, fontWeight: "bold" }}
+                variant="body2"
+                color="#1f1f1f"
+              >
+                {overviewResult[1]}
               </Typography>
             </Box>
           ) : (
@@ -682,7 +700,14 @@ export default function ReportDialog({ open, handleClose, report }) {
                     color="#1f1f1f"
                     gutterBottom
                   >
-                    {element.textRecommendation}
+                    {overviewResults[index][0]}
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: 15, fontWeight: "bold" }}
+                    color="#1f1f1f"
+                    gutterBottom
+                  >
+                    {overviewResults[index][1]}
                   </Typography>
                 </Box>
               ))}
