@@ -195,10 +195,6 @@ export const TeamMemberImageAnalysisPage = () => {
               .toString()
               .padStart(2, "0")}`;
 
-            setTimeout(() => {
-              setLoading(false);
-            }, 1000);
-
             if (imageSrcs.length === 1) {
               let formData = new FormData();
               var imageSrc = imageSrcs[0];
@@ -243,7 +239,55 @@ export const TeamMemberImageAnalysisPage = () => {
                   console.error(error);
                   setLoading(false);
                 });
-            }
+            } else if (imageSrcs.length > 1) {
+              let formData = new FormData();
+              var files = [];
+              imageSrcs.map((imageSrc) => {
+                const fileExtension = imageSrc.split(";")[0].split("/")[1];
+                const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
+                const file = new File([blob], `image.${fileExtension}`, {
+                  type: `image/${fileExtension}`,
+                });
+                files.push(file);
+              });
+
+              formData.append("files", files);
+              fetch(
+                BASE_URL +
+                  `/imageanalysisreport/createMultiple?token=${localStorage.getItem(
+                    "userToken"
+                  )}&createdAt=${formattedCurrentDate}&title=${
+                    values.reportTitle
+                  }&teamId=${values.team}&category=${values.adCategory}&spend=${
+                    values.spend
+                  }`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              )
+                .then((response) => {
+                  if (response.ok) {
+                    openSnack({
+                      severity: "success",
+                      text: "Images are analyzed successfully.",
+                    });
+                    navigate("/team-member");
+                    setLoading(false);
+                    return undefined;
+                  } else return response.text();
+                })
+                .then((result) => {
+                  if (result) {
+                    setLoading(false);
+                    openSnack({ severity: "error", text: result });
+                  }
+                })
+                .catch((error) => {
+                  console.error(error);
+                  setLoading(false);
+                });
+            } else console.log("empty");
           }}
           initialValues={{ adCategory: "Political", imageSrcs: [""] }}
           mutators={{ ...arrayMutators }}
