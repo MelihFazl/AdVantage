@@ -241,17 +241,15 @@ export const TeamMemberImageAnalysisPage = () => {
                 });
             } else if (imageSrcs.length > 1) {
               let formData = new FormData();
-              var files = [];
               imageSrcs.map((imageSrc) => {
                 const fileExtension = imageSrc.split(";")[0].split("/")[1];
                 const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
                 const file = new File([blob], `image.${fileExtension}`, {
                   type: `image/${fileExtension}`,
                 });
-                files.push(file);
+                formData.append("files", file);
               });
 
-              formData.append("files", files);
               fetch(
                 BASE_URL +
                   `/imageanalysisreport/createMultiple?token=${localStorage.getItem(
