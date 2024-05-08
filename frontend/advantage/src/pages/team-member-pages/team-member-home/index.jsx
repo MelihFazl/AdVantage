@@ -99,7 +99,11 @@ export const TeamMemberHomePage = () => {
         )
           .then((response) => response.text())
           .then((result) => {
-            setReports(JSON.parse(result).reverse());
+            setReports(
+              JSON.parse(result).sort(
+                (a, b) => b.report.createdAt - a.report.createdAt
+              )
+            );
             setIsReportsReceived(true);
           })
           .catch((error) => console.log("error", error));
