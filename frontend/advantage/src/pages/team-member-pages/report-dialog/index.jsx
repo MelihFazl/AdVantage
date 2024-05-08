@@ -700,14 +700,14 @@ export default function ReportDialog({ open, handleClose, report }) {
                     color="#1f1f1f"
                     gutterBottom
                   >
-                    {overviewResults[index][0]}
+                    {overviewResults[index] ? overviewResults[index][0] : ""}
                   </Typography>
                   <Typography
                     sx={{ fontSize: 15, fontWeight: "bold" }}
                     color="#1f1f1f"
                     gutterBottom
                   >
-                    {overviewResults[index][1]}
+                    {overviewResults[index] ? overviewResults[index][1] : ""}
                   </Typography>
                 </Box>
               ))}
