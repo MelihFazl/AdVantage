@@ -197,41 +197,48 @@ export const TeamMemberImageAnalysisPage = () => {
               setLoading(false);
             }, 1000);
 
-            // let formData = new FormData();
-            // const fileExtension = imageSrc.split(";")[0].split("/")[1];
-            // const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
-            // const file = new File([blob], `image.${fileExtension}`, {
-            //   type: `image/${fileExtension}`,
-            // });
-            // formData.append("file", file);
-            // fetch(
-            //   BASE_URL +
-            //     `/imageanalysisreport/create?token=${localStorage.getItem(
-            //       "userToken"
-            //     )}&createdAt=${formattedCurrentDate}&title=${
-            //       values.reportTitle
-            //     }&teamId=${values.team}&category=${values.adCategory}`,
-            //   {
-            //     method: "POST",
-            //     body: formData,
-            //   }
-            // )
-            //   .then((response) => {
-            //     if (response.ok) {
-            //       openSnack({
-            //         severity: "success",
-            //         text: "Image is analyzed successfully.",
-            //       });
-            //       navigate("/team-member");
-            //       return undefined;
-            //     } else return response.text();
-            //   })
-            //   .then((result) => {
-            //     if (result) {
-            //       openSnack({ severity: "error", text: result });
-            //     }
-            //   })
-            //   .catch((error) => console.error(error));
+            if (imageSrcs.length === 1) {
+              let formData = new FormData();
+              const fileExtension = imageSrc.split(";")[0].split("/")[1];
+              const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
+              const file = new File([blob], `image.${fileExtension}`, {
+                type: `image/${fileExtension}`,
+              });
+              formData.append("file", file);
+              fetch(
+                BASE_URL +
+                  `/imageanalysisreport/create?token=${localStorage.getItem(
+                    "userToken"
+                  )}&createdAt=${formattedCurrentDate}&title=${
+                    values.reportTitle
+                  }&teamId=${values.team}&category=${values.adCategory}`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              )
+                .then((response) => {
+                  if (response.ok) {
+                    openSnack({
+                      severity: "success",
+                      text: "Image is analyzed successfully.",
+                    });
+                    navigate("/team-member");
+                    setLoading(false);
+                    return undefined;
+                  } else return response.text();
+                })
+                .then((result) => {
+                  if (result) {
+                    setLoading(false);
+                    openSnack({ severity: "error", text: result });
+                  }
+                })
+                .catch((error) => {
+                  console.error(error);
+                  setLoading(false);
+                });
+            }
           }}
           initialValues={{ adCategory: "Political", imageSrcs: [""] }}
           mutators={{ ...arrayMutators }}
