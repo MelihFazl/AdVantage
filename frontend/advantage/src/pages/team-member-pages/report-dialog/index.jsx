@@ -16,7 +16,6 @@ import {
 import { generatePDF } from "../../../common/generate-pdf";
 import { useAdImageFetch } from "../../../common/use-ad-image-fetch";
 import { BASE_URL } from "../../../common/constans";
-import { useNavigate } from "react-router-dom";
 import { useMultiAdImageFetch } from "../../../common/use-multi-ad-image-fetch";
 
 export default function ReportDialog({ open, handleClose, report }) {
@@ -27,6 +26,30 @@ export default function ReportDialog({ open, handleClose, report }) {
   var textComparisions = [""];
   var series = [];
   var series2 = [];
+  var date = "";
+  var overviewResult = "";
+  var overviewResults = [];
+
+  if (report) {
+    date = Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Ensure 24-hour format
+    }).format(report?.report?.createdAt);
+
+    if (report?.type === "SingleAdAnalysisReport") {
+      overviewResult = report?.report?.overview.split("\n");
+    } else if (report?.type === "MultipleAdAnalysisReport")
+    {
+      textComparisions = JSON.parse(report?.report?.comparison);
+      textComparisions?.map((element, index) => {
+        overviewResults.push(element.textRecommendation.split("\n"));
+      });
+    }
+  }
 
   if (
     report?.type === "MultipleAdAnalysisReport" ||
@@ -71,34 +94,50 @@ export default function ReportDialog({ open, handleClose, report }) {
       onClose={handleClose}
       aria-labelledby="responsive-dialog-title"
     >
-      <DialogTitle id="responsive-dialog-title">
+      <DialogTitle
+        id="responsive-dialog-title"
+        color={"#000080"}
+        fontWeight={"bold"}
+      >
         {report?.report?.title}
       </DialogTitle>
       <DialogContent>
         <DialogContentText>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
-            <Typography variant="body2" color={"#000"}>
+            <Typography
+              variant="body2"
+              color={"#000080"}
+              sx={{ fontWeight: "bold" }}
+            >
+              Date:
+            </Typography>
+            <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
+              {date}
+            </Typography>
+          </Box>
+          <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
+            <Typography
+              variant="body2"
+              color={"#000080"}
+              sx={{ fontWeight: "bold" }}
+            >
               Uploaded by:
             </Typography>
-            <Typography
-              sx={{ fontSize: 15 }}
-              color="text.secondary"
-              gutterBottom
-            >
+            <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
               {report?.report?.uploader?.name +
                 " " +
                 report?.report?.uploader?.surname}
             </Typography>
           </Box>
           <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
-            <Typography sx={{ fontSize: 15 }} variant="body2" color={"#000"}>
+            <Typography
+              sx={{ fontSize: 15, fontWeight: "bold" }}
+              variant="body2"
+              color={"#000080"}
+            >
               Category:
             </Typography>
-            <Typography
-              sx={{ fontSize: 15 }}
-              color="text.secondary"
-              gutterBottom
-            >
+            <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
               Political
             </Typography>
           </Box>
@@ -122,7 +161,11 @@ export default function ReportDialog({ open, handleClose, report }) {
                       maxWidth: "250px",
                     }}
                   >
-                    <Typography variant="body2" color={"#000"}>
+                    <Typography
+                      variant="body2"
+                      color={"#000080"}
+                      sx={{ fontWeight: "bold" }}
+                    >
                       Analyzed Image:
                     </Typography>
                     <img
@@ -167,7 +210,11 @@ export default function ReportDialog({ open, handleClose, report }) {
                             maxWidth: "250px",
                           }}
                         >
-                          <Typography variant="body2" color={"#000"}>
+                          <Typography
+                            variant="body2"
+                            color={"#000080"}
+                            sx={{ fontWeight: "bold" }}
+                          >
                             {`Analyzed Image ${index + 1}:`}
                           </Typography>
                           <img
@@ -189,13 +236,16 @@ export default function ReportDialog({ open, handleClose, report }) {
             )
           ) : report?.type === "SingleAdAnalysisReport" ? (
             <React.Fragment>
-              <Typography variant="body2" color={"#000"}>
+              <Typography
+                variant="body2"
+                color={"#000080"}
+                sx={{ fontWeight: "bold" }}
+              >
                 Content of Ad:
               </Typography>
               <Typography
                 sx={{ marginBottom: "2px", fontSize: 15 }}
-                color="text.secondary"
-                style={{ whiteSpace: "pre-line" }}
+                color="#1f1f1f"
               >
                 {report.advertisementText}
               </Typography>
@@ -204,14 +254,14 @@ export default function ReportDialog({ open, handleClose, report }) {
             report?.advertisementTexts?.map((element, index) => {
               return (
                 <React.Fragment>
-                  <Typography variant="body2" color={"#000"}>
+                  <Typography
+                    variant="body2"
+                    color={"#000080"}
+                    sx={{ fontWeight: "bold" }}
+                  >
                     Content of Ad{index + 1}:
                   </Typography>
-                  <Typography
-                    sx={{ mb: 1.2 }}
-                    color="text.secondary"
-                    style={{ whiteSpace: "pre-line" }}
-                  >
+                  <Typography sx={{ mb: 1.2 }} color="#1f1f1f">
                     {element}
                   </Typography>
                 </React.Fragment>
@@ -229,18 +279,18 @@ export default function ReportDialog({ open, handleClose, report }) {
                   sx={{ marginTop: "10px" }}
                 >
                   <Typography
-                    sx={{ fontSize: 15 }}
+                    sx={{ fontSize: 15, fontWeight: "bold" }}
                     variant="body2"
-                    color={"#000"}
+                    color={"#000080"}
                   >
                     Impression of Ad:
                   </Typography>
                   <Typography
                     sx={{ fontSize: 15 }}
-                    color="text.secondary"
+                    color="#1f1f1f"
                     gutterBottom
                   >
-                    {report?.report?.prediction}
+                    {parseInt(report?.report?.prediction)}
                   </Typography>
                 </Box>
 
@@ -251,9 +301,13 @@ export default function ReportDialog({ open, handleClose, report }) {
                 >
                   <Box>
                     <Typography
-                      sx={{ fontSize: 15, marginBottom: "3px" }}
+                      sx={{
+                        fontSize: 15,
+                        fontWeight: "bold",
+                        marginBottom: "3px",
+                      }}
                       variant="body2"
-                      color={"#000"}
+                      color={"#000080"}
                     >
                       Gender Distribution Plot:
                     </Typography>
@@ -293,9 +347,9 @@ export default function ReportDialog({ open, handleClose, report }) {
                   </Box>
                   <Box>
                     <Typography
-                      sx={{ fontSize: 15 }}
+                      sx={{ fontSize: 15, fontWeight: "bold" }}
                       variant="body2"
-                      color={"#000"}
+                      color={"#000080"}
                     >
                       Age Distribution Plot:
                     </Typography>
@@ -345,18 +399,18 @@ export default function ReportDialog({ open, handleClose, report }) {
                   {textComparisions?.map((element, index) => (
                     <Box key={index}>
                       <Typography
-                        sx={{ fontSize: 15 }}
+                        sx={{ fontSize: 15, fontWeight: "bold" }}
                         variant="body2"
-                        color="#000"
+                        color="#000080"
                       >
                         Impression of Ad {index + 1}:
                       </Typography>
                       <Typography
                         sx={{ fontSize: 15 }}
-                        color="text.secondary"
+                        color="#1f1f1f"
                         gutterBottom
                       >
-                        {element.prediction}
+                        {parseInt(element.prediction)}
                       </Typography>
                     </Box>
                   ))}
@@ -368,9 +422,9 @@ export default function ReportDialog({ open, handleClose, report }) {
                 >
                   <Box>
                     <Typography
-                      sx={{ fontSize: 15 }}
+                      sx={{ fontSize: 15, fontWeight: "bold" }}
                       variant="body2"
-                      color={"#000"}
+                      color={"#000080"}
                     >
                       Age Distribution Plot:
                     </Typography>
@@ -398,9 +452,9 @@ export default function ReportDialog({ open, handleClose, report }) {
                   </Box>
                   <Box>
                     <Typography
-                      sx={{ fontSize: 15 }}
+                      sx={{ fontSize: 15, fontWeight: "bold" }}
                       variant="body2"
-                      color={"#000"}
+                      color={"#000080"}
                     >
                       Gender Distribution Plot:
                     </Typography>
@@ -425,18 +479,14 @@ export default function ReportDialog({ open, handleClose, report }) {
             <Box display={"flex"} flexDirection={"column"} gap={"3px"}>
               <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
                 <Typography
-                  sx={{ fontSize: 15 }}
+                  sx={{ fontSize: 15, fontWeight: "bold" }}
                   variant="body2"
-                  color={"#000"}
+                  color={"#000080"}
                 >
                   Impression of Ad:
                 </Typography>
-                <Typography
-                  sx={{ fontSize: 15 }}
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  {report?.report?.successPrediction}
+                <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
+                  {parseInt(report?.report?.successPrediction)}
                 </Typography>
               </Box>
 
@@ -447,9 +497,13 @@ export default function ReportDialog({ open, handleClose, report }) {
               >
                 <Box>
                   <Typography
-                    sx={{ fontSize: 15, marginBottom: "3px" }}
+                    sx={{
+                      fontSize: 15,
+                      fontWeight: "bold",
+                      marginBottom: "3px",
+                    }}
                     variant="body2"
-                    color={"#000"}
+                    color={"#000080"}
                   >
                     Gender Distribution Plot:
                   </Typography>
@@ -488,9 +542,9 @@ export default function ReportDialog({ open, handleClose, report }) {
                 </Box>
                 <Box>
                   <Typography
-                    sx={{ fontSize: 15 }}
+                    sx={{ fontSize: 15, fontWeight: "bold" }}
                     variant="body2"
-                    color={"#000"}
+                    color={"#000080"}
                   >
                     Age Distribution Plot:
                   </Typography>
@@ -530,16 +584,22 @@ export default function ReportDialog({ open, handleClose, report }) {
                 </Box>
               </Box>
 
-              <Typography sx={{ fontSize: 15 }} variant="body2" color={"#000"}>
+              <Typography
+                sx={{ fontSize: 15, fontWeight: "bold" }}
+                variant="body2"
+                color={"#000080"}
+              >
                 Overview:
               </Typography>
+              <Typography sx={{ fontSize: 15 }} color="#1f1f1f" gutterBottom>
+                {overviewResult[0]}
+              </Typography>
               <Typography
-                sx={{ fontSize: 15 }}
-                color="text.secondary"
-                style={{ whiteSpace: "pre-line" }}
-                gutterBottom
+                sx={{ fontSize: 15, fontWeight: "bold" }}
+                variant="body2"
+                color="#1f1f1f"
               >
-                {report?.report?.overview}
+                {overviewResult[1]}
               </Typography>
             </Box>
           ) : (
@@ -552,18 +612,18 @@ export default function ReportDialog({ open, handleClose, report }) {
                 {textComparisions?.map((element, index) => (
                   <Box key={index}>
                     <Typography
-                      sx={{ fontSize: 15 }}
+                      sx={{ fontSize: 15, fontWeight: "bold" }}
                       variant="body2"
-                      color="#000"
+                      color="#000080"
                     >
                       Impression of Ad {index + 1}:
                     </Typography>
                     <Typography
                       sx={{ fontSize: 15 }}
-                      color="text.secondary"
+                      color="#1f1f1f"
                       gutterBottom
                     >
-                      {element.prediction}
+                      {parseInt(element.prediction)}
                     </Typography>
                   </Box>
                 ))}
@@ -575,9 +635,9 @@ export default function ReportDialog({ open, handleClose, report }) {
               >
                 <Box>
                   <Typography
-                    sx={{ fontSize: 15 }}
+                    sx={{ fontSize: 15, fontWeight: "bold" }}
                     variant="body2"
-                    color={"#000"}
+                    color={"#000080"}
                   >
                     Age Distribution Plot:
                   </Typography>
@@ -605,9 +665,9 @@ export default function ReportDialog({ open, handleClose, report }) {
                 </Box>
                 <Box>
                   <Typography
-                    sx={{ fontSize: 15 }}
+                    sx={{ fontSize: 15, fontWeight: "bold" }}
                     variant="body2"
-                    color={"#000"}
+                    color={"#000080"}
                   >
                     Gender Distribution Plot:
                   </Typography>
@@ -629,19 +689,25 @@ export default function ReportDialog({ open, handleClose, report }) {
               {textComparisions?.map((element, index) => (
                 <Box key={index}>
                   <Typography
-                    sx={{ fontSize: 15 }}
+                    sx={{ fontSize: 15, fontWeight: "bold" }}
                     variant="body2"
-                    color="#000"
+                    color="#000080"
                   >
                     Reccomended Text for Ad {index + 1}:
                   </Typography>
                   <Typography
                     sx={{ fontSize: 15 }}
-                    color="text.secondary"
+                    color="#1f1f1f"
                     gutterBottom
-                    style={{ whiteSpace: "pre-line" }}
                   >
-                    {element.textRecommendation}
+                    {overviewResults[index] ? overviewResults[index][0] : ""}
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: 15, fontWeight: "bold" }}
+                    color="#1f1f1f"
+                    gutterBottom
+                  >
+                    {overviewResults[index] ? overviewResults[index][1] : ""}
                   </Typography>
                 </Box>
               ))}
