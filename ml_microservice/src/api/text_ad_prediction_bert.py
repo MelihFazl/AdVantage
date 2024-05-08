@@ -37,27 +37,19 @@ bert_gender_classification_model_path = './ml_models/bert_gender_classification.
 
 # Load BERT models
 class DistilBertRegressor(nn.Module):
-
     def __init__(self, drop_rate=0.2, freeze_bert=False):
-
         super(DistilBertRegressor, self).__init__()
         D_in, D_out = 768 + 1, 1
-
-        self.distilbert = \
-                   DistilBertModel.from_pretrained("distilbert-base-uncased")
+        self.distilbert = DistilBertModel.from_pretrained("distilbert-base-uncased")
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
-            nn.BatchNorm1d(D_in),
-            nn.Linear(D_in, D_out)
-        )
+              nn.Linear(D_in, D_out))
 
     def forward(self, input_ids, attention_masks, spends):
         outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_masks)
-        hidden_state = outputs[0]  # (batch_size, seq_length, hidden_size)
-        pooled_output = hidden_state[:, 0]  # Use the first token's embeddings
-        # Concatenate pooled_output with spends
+        hidden_state = outputs[0]  
+        pooled_output = hidden_state[:, 0]  
         combined_input = torch.cat((pooled_output, spends), dim=1)
-
         outputs = self.regressor(combined_input)
         return outputs
 
