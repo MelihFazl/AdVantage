@@ -180,12 +180,23 @@ export const TeamMemberTextualAnalysisPage = () => {
                 )
                   .then((response) => {
                     if (response.ok) {
-                      navigate("/team-member");
                       setLoading(false);
+                      openSnack({
+                        severity: "success",
+                        text: "Your report is created.",
+                      });
+                      setTimeout(() => {
+                        navigate("/team-member");
+                      }, 300);
+                      return undefined;
                     } else;
                     {
                       setLoading(false);
+                      return response.text();
                     }
+                  })
+                  .then((result) => {
+                    if (result) openSnack({ severity: "error", text: result });
                   })
                   .catch((error) => console.log("error", error));
               } else if (values.adContents.length > 1) {
@@ -211,23 +222,32 @@ export const TeamMemberTextualAnalysisPage = () => {
                       "userToken"
                     )}&createdAt=${formattedCurrentDate}&title=${
                       values.reportTitle
-                    }&teamId=${values.team}`,
+                    }&teamId=${values.team}&spend=${values.spend}&tone=${
+                      values.tone
+                    }`,
                   requestOptions
                 )
                   .then((response) => {
                     if (response.ok) {
-                      navigate("/team-member");
+                      setLoading(false);
+                      openSnack({
+                        severity: "success",
+                        text: "Your report is created.",
+                      });
+                      setTimeout(() => {
+                        navigate("/team-member");
+                      }, 300);
                       return undefined;
-                    } else {
+                    } else;
+                    {
+                      setLoading(false);
                       return response.text();
                     }
                   })
                   .then((result) => {
-                    openSnack({ severity: "error", text: result });
+                    if (result) openSnack({ severity: "error", text: result });
                   })
-                  .catch((error) =>
-                    openSnack({ severity: "error", text: error })
-                  );
+                  .catch((error) => console.log("error", error));
               } else {
                 console.log("empty");
               }
