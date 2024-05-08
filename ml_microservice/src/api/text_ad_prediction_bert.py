@@ -37,58 +37,84 @@ bert_gender_classification_model_path = './ml_models/bert_gender_classification.
 
 # Load BERT models
 class DistilBertRegressor(nn.Module):
+
     def __init__(self, drop_rate=0.2, freeze_bert=False):
+
         super(DistilBertRegressor, self).__init__()
         D_in, D_out = 768 + 1, 1
-        self.distilbert = DistilBertModel.from_pretrained("distilbert-base-uncased")
+
+        self.distilbert = \
+                   DistilBertModel.from_pretrained("distilbert-base-uncased")
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
-              nn.Linear(D_in, D_out))
+            nn.BatchNorm1d(D_in),
+            nn.Linear(D_in, D_out)
+        )
 
     def forward(self, input_ids, attention_masks, spends):
         outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_masks)
-        hidden_state = outputs[0]  
-        pooled_output = hidden_state[:, 0]  
+        hidden_state = outputs[0]  # (batch_size, seq_length, hidden_size)
+        pooled_output = hidden_state[:, 0]  # Use the first token's embeddings
+        # Concatenate pooled_output with spends
         combined_input = torch.cat((pooled_output, spends), dim=1)
+
         outputs = self.regressor(combined_input)
         return outputs
 
 class DistilBertClassifierAge(nn.Module):
+
     def __init__(self, drop_rate=0.2):
         super(DistilBertClassifierAge, self).__init__()
-        D_in, D_out = 768, 7  
+        # Input dimension for each token embedding from BERT
+        D_in, D_out = 768, 7  # Output dimension matches the number of age categories
+
         self.distilbert = DistilBertModel.from_pretrained("distilbert-base-uncased")
+        # Define the regressor with a Dropout and a Linear layer
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
-            nn.Linear(D_in, D_out),
-            nn.Softmax(dim=1)  
+            nn.Linear(D_in, 256),
+            nn.BatchNorm1d(256),  # Add BatchNorm layer
+            nn.ReLU(),
+            nn.Linear(256, D_out),
+            nn.Softmax(dim=1)  # Ensure outputs are probabilities that sum to 1
         )
 
     def forward(self, input_ids, attention_masks):
         outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_masks)
-        hidden_state = outputs[0]  
-        pooled_output = hidden_state[:, 0]  
+        hidden_state = outputs[0]  # (batch_size, seq_length, hidden_size)
+        pooled_output = hidden_state[:, 0]  # Use the first token's embeddings (CLS token)
+
+        # Pass pooled_output through regressor to get final output
         logits = self.regressor(pooled_output)
         return logits
 
 class DistilBertClassifierGender(nn.Module):
+
     def __init__(self, drop_rate=0.2):
         super(DistilBertClassifierGender, self).__init__()
-        D_in, D_out = 768, 2  
+        # Input dimension for each token embedding from BERT
+        D_in, D_out = 768, 2  # Output dimension matches the number of age categories
+
         self.distilbert = DistilBertModel.from_pretrained("distilbert-base-uncased")
+        # Define the regressor with a Dropout and a Linear layer
         self.regressor = nn.Sequential(
             nn.Dropout(drop_rate),
-            nn.Linear(D_in, D_out),
-            nn.Softmax(dim=1)  
+            nn.Linear(D_in, 256),
+            nn.BatchNorm1d(256),  # Add BatchNorm layer
+            nn.ReLU(),
+            nn.Linear(256, D_out),
+            nn.Softmax(dim=1)  # Ensure outputs are probabilities that sum to 1
         )
 
     def forward(self, input_ids, attention_masks):
         outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_masks)
-        hidden_state = outputs[0]  
-        pooled_output = hidden_state[:, 0]  
+        hidden_state = outputs[0]  # (batch_size, seq_length, hidden_size)
+        pooled_output = hidden_state[:, 0]  # Use the first token's embeddings (CLS token)
+
+        # Pass pooled_output through regressor to get final output
         logits = self.regressor(pooled_output)
         return logits
-
+    
 # Load BERT models
 prediction_model = DistilBertRegressor()
 prediction_model_age = DistilBertClassifierAge()
