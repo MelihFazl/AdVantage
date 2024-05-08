@@ -175,7 +175,25 @@ export const TeamMemberImageAnalysisPage = () => {
         <Form
           keepDirtyOnReinitialize
           onSubmit={(values) => {
+            var emptyDetected = false;
+            console.log(imageSrcs);
             setLoading(true);
+            if (imageSrcs.length !== 0) {
+              imageSrcs.forEach((element) => {
+                console.log(element.length);
+                if (element.length < 1) emptyDetected = true;
+              });
+            } else {
+              openSnack({ severity: "error", text: "Image must be uploaded." });
+              setLoading(false);
+              return;
+            }
+
+            if (emptyDetected) {
+              openSnack({ severity: "error", text: "Image must be uploaded." });
+              setLoading(false);
+              return;
+            }
             const currentDate = new Date();
             const formattedCurrentDate = `${currentDate.getFullYear()}-${(
               currentDate.getMonth() + 1
@@ -436,15 +454,7 @@ export const TeamMemberImageAnalysisPage = () => {
                         {({ fields }) => (
                           <Stack direction={"column"} gap={"12px"}>
                             {fields.map((element, index) => (
-                              <Field
-                                name={element}
-                                key={index}
-                                validate={(value) => {
-                                  return imageSrcs[index]
-                                    ? undefined
-                                    : "Image must be uploaded.";
-                                }}
-                              >
+                              <Field name={element} key={index}>
                                 {({ input: { onChange, ...input }, meta }) => (
                                   <Box
                                     display={"flex"}
@@ -508,9 +518,6 @@ export const TeamMemberImageAnalysisPage = () => {
                                               handleImageChange(event, index)
                                             }
                                           />
-                                          {meta.touched && meta.error
-                                            ? meta.error
-                                            : ""}
                                         </Box>
                                       </label>
                                       <Collapse
@@ -556,6 +563,7 @@ export const TeamMemberImageAnalysisPage = () => {
                               type="button"
                               onClick={() => {
                                 fields.push("");
+                                imageSrcs.push("");
                               }}
                               disabled={
                                 fields.length ? fields.length > 2 : true
