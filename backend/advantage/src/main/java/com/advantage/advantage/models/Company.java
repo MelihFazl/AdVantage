@@ -17,8 +17,7 @@ public class Company {
     @Getter @Setter private String companyName;
 
     @Getter @Setter private int numberOfEmployees;
-    @Column(columnDefinition = "integer default 0")
-    @Getter @Setter private Integer monthlyUsage;
+
     @Column(columnDefinition = "integer default 0")
     @Getter @Setter private Integer availableLimit;
 

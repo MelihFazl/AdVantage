@@ -2,14 +2,23 @@ import * as React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import { Box, Stack, Typography, TextField, Button } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  TextField,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { Form, Field } from "react-final-form";
 import { isFieldEmpty } from "../../../../common/validator-functions/isFieldEmpty";
 import { composeValidators } from "../../../../common/validator-functions/composeValidators";
 import { isValidPassword } from "../../../../common/validator-functions/isValidPassword";
 import { BASE_URL } from "../../../../common/constans";
+import { useState } from "react";
 
 export default function PasswordDialog({ open, user, handleClose, openSnack }) {
+  const [loading, setLoading] = useState(false);
   return (
     <Form
       initialValues={{
@@ -21,6 +30,7 @@ export default function PasswordDialog({ open, user, handleClose, openSnack }) {
         if (values.newPassword !== values.reNewPassword) {
           openSnack({ severity: "error", text: "New passwords must be same." });
         } else {
+          setLoading(true);
           const requestOptions = {
             method: "POST",
             redirect: "follow",
@@ -53,20 +63,23 @@ export default function PasswordDialog({ open, user, handleClose, openSnack }) {
                   requestOptions
                 )
                   .then((response) => response.text())
-                  .then((result) =>
+                  .then((result) => {
                     openSnack({
                       severity: "success",
                       text: "Password is set correctly.",
-                    })
-                  )
-                  .catch((error) =>
-                    openSnack({ severity: "error", text: error })
-                  );
+                    });
+                    setLoading(false);
+                  })
+                  .catch((error) => {
+                    openSnack({ severity: "error", text: error });
+                    setLoading(false);
+                  });
               } else {
                 openSnack({
                   severity: "error",
                   text: "Old password is not correct.",
                 });
+                setLoading(false);
               }
             })
             .catch((error) => {
@@ -178,8 +191,15 @@ export default function PasswordDialog({ open, user, handleClose, openSnack }) {
               </Stack>
             </DialogContent>
             <DialogActions>
-              <Button color="primary" type="submit">
-                Save
+              <Button color="primary" type="submit" disabled={loading}>
+                {loading ? (
+                  <CircularProgress
+                    style={{ height: "24.5px", width: "24.5px" }}
+                    color="inherit"
+                  ></CircularProgress>
+                ) : (
+                  "Save"
+                )}
               </Button>
               <Button
                 onClick={() => {

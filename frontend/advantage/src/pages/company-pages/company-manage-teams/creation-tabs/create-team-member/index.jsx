@@ -7,6 +7,7 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import { Form, Field } from "react-final-form";
 import { useTheme } from "@emotion/react";
@@ -20,6 +21,7 @@ import { BASE_URL } from "../../../../../common/constans";
 export default function CreateTeamMemberForm({ teams, openSnack }) {
   const theme = useTheme();
   const [teamName, setTeamName] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   function getStyles(team, teamName, theme) {
     return {
@@ -44,6 +46,7 @@ export default function CreateTeamMemberForm({ teams, openSnack }) {
     <Form
       keepDirtyOnReinitialize
       onSubmit={(values) => {
+        setLoading(true);
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
         var selectedTeams = teamName.map((id) => ({
@@ -72,6 +75,7 @@ export default function CreateTeamMemberForm({ teams, openSnack }) {
                 severity: "success",
                 text: "Member created successfully and email has sent to address.",
               });
+              setLoading(false);
               return undefined;
             } else return response.text();
           })
@@ -79,6 +83,7 @@ export default function CreateTeamMemberForm({ teams, openSnack }) {
             if (result) {
               openSnack({ severity: "error", text: result });
             }
+            setLoading(false);
           })
           .catch((error) => console.error(error));
       }}
@@ -189,8 +194,21 @@ export default function CreateTeamMemberForm({ teams, openSnack }) {
               )}
             </Field>
             <Box alignSelf={"flex-end"} marginTop={"8px"}>
-              <Button variant="contained" disableElevation type="submit">
-                Create Team Member
+              <Button
+                variant="contained"
+                disableElevation
+                type="submit"
+                disabled={loading}
+                sx={{ width: "191.5px" }}
+              >
+                {loading ? (
+                  <CircularProgress
+                    style={{ height: "24.5px", width: "24.5px" }}
+                    color="inherit"
+                  ></CircularProgress>
+                ) : (
+                  "Create Team Member"
+                )}
               </Button>
             </Box>
           </Stack>

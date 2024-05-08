@@ -39,7 +39,7 @@ const CustomSwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-export default function PlanCard({ company, plan, openSnack }) {
+export default function PlanCard({ company, plan, openSnack, openDialog }) {
   const [checked, setChecked] = React.useState(false);
 
   const handleChange = (event) => {
@@ -114,59 +114,12 @@ export default function PlanCard({ company, plan, openSnack }) {
               variant="contained"
               color="warning"
               onClick={() => {
-                var token = localStorage.getItem("userToken");
-                const requestOptions = {
-                  method: "POST",
-                  redirect: "follow",
-                };
-                const currentDate = new Date();
-                const formattedCurrentDate = `${currentDate.getFullYear()}-${(
-                  currentDate.getMonth() + 1
-                )
-                  .toString()
-                  .padStart(2, "0")}-${currentDate
-                  .getDate()
-                  .toString()
-                  .padStart(2, "0")} ${currentDate
-                  .getHours()
-                  .toString()
-                  .padStart(2, "0")}:${currentDate
-                  .getMinutes()
-                  .toString()
-                  .padStart(2, "0")}:${currentDate
-                  .getSeconds()
-                  .toString()
-                  .padStart(2, "0")}`;
-                fetch(
-                  BASE_URL +
-                    "/company/updateSubscription?token=" +
-                    token +
-                    "&paymentPlanType=" +
-                    plan[0].paymentPlanType +
-                    "&paymentPeriodType=" +
-                    (checked
-                      ? plan[1].paymentPeriodType
-                      : plan[0].paymentPeriodType) +
-                    "&createdAt=" +
-                    formattedCurrentDate,
-                  requestOptions
-                )
-                  .then((response) => {
-                    if (response.ok) {
-                      window.location.reload();
-                      openSnack({
-                        severity: "success",
-                        text: "Subscription plan has changed successfully.",
-                      });
-                      return undefined;
-                    } else return response.text();
-                  })
-                  .then((result) => {
-                    if (result) {
-                      openSnack({ severity: "error", text: result });
-                    }
-                  })
-                  .catch((error) => console.error(error));
+                openDialog(
+                  plan[0].paymentPlanType,
+                  checked
+                    ? plan[1].paymentPeriodType
+                    : plan[0].paymentPeriodType
+                );
               }}
               sx={{ borderRadius: "12px" }}
             >

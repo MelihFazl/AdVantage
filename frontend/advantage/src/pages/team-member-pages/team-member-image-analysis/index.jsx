@@ -14,6 +14,7 @@ import {
   Button,
   FormControl,
   FormHelperText,
+  CircularProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import arrayMutators from "final-form-arrays";
@@ -26,6 +27,8 @@ import { useNavigate } from "react-router-dom";
 import AdvSnackbar from "../../../common/adv-snackbar";
 import { FieldArray } from "react-final-form-arrays";
 import { jwtDecode } from "jwt-decode";
+import { isValueNumerical } from "../../../common/validator-functions/isValueNumerical";
+import { composeValidators } from "../../../common/validator-functions/composeValidators";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -57,6 +60,7 @@ export const TeamMemberImageAnalysisPage = () => {
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState("");
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
   const SNACK_DURATION = 4000;
 
   const openSnack = ({ severity, text }) => {
@@ -80,6 +84,10 @@ export const TeamMemberImageAnalysisPage = () => {
       redirect: "follow",
     };
     var token = localStorage.getItem("userToken");
+    if (!token) {
+      navigate("/forbidden");
+      return;
+    }
     var user = jwtDecode(token);
     const unixTimestamp = user.exp * 1000;
     const date = new Date(unixTimestamp);
@@ -167,6 +175,25 @@ export const TeamMemberImageAnalysisPage = () => {
         <Form
           keepDirtyOnReinitialize
           onSubmit={(values) => {
+            var emptyDetected = false;
+            console.log(imageSrcs);
+            setLoading(true);
+            if (imageSrcs.length !== 0) {
+              imageSrcs.forEach((element) => {
+                console.log(element.length);
+                if (element.length < 1) emptyDetected = true;
+              });
+            } else {
+              openSnack({ severity: "error", text: "Image must be uploaded." });
+              setLoading(false);
+              return;
+            }
+
+            if (emptyDetected) {
+              openSnack({ severity: "error", text: "Image must be uploaded." });
+              setLoading(false);
+              return;
+            }
             const currentDate = new Date();
             const formattedCurrentDate = `${currentDate.getFullYear()}-${(
               currentDate.getMonth() + 1
@@ -186,43 +213,97 @@ export const TeamMemberImageAnalysisPage = () => {
               .toString()
               .padStart(2, "0")}`;
 
-            console.log(values);
+            if (imageSrcs.length === 1) {
+              let formData = new FormData();
+              var imageSrc = imageSrcs[0];
+              const fileExtension = imageSrc.split(";")[0].split("/")[1];
+              const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
+              const file = new File([blob], `image.${fileExtension}`, {
+                type: `image/${fileExtension}`,
+              });
+              formData.append("file", file);
+              fetch(
+                BASE_URL +
+                  `/imageanalysisreport/create?token=${localStorage.getItem(
+                    "userToken"
+                  )}&createdAt=${formattedCurrentDate}&title=${
+                    values.reportTitle
+                  }&teamId=${values.team}&category=${values.adCategory}&spend=${
+                    values.spend
+                  }`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              )
+                .then((response) => {
+                  if (response.ok) {
+                    openSnack({
+                      severity: "success",
+                      text: "Image is analyzed successfully.",
+                    });
+                    navigate("/team-member");
+                    setLoading(false);
+                    return undefined;
+                  } else return response.text();
+                })
+                .then((result) => {
+                  if (result) {
+                    setLoading(false);
+                    openSnack({ severity: "error", text: result });
+                  }
+                })
+                .catch((error) => {
+                  console.error(error);
+                  setLoading(false);
+                });
+            } else if (imageSrcs.length > 1) {
+              let formData = new FormData();
+              imageSrcs.map((imageSrc) => {
+                const fileExtension = imageSrc.split(";")[0].split("/")[1];
+                const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
+                const file = new File([blob], `image.${fileExtension}`, {
+                  type: `image/${fileExtension}`,
+                });
+                formData.append("files", file);
+              });
 
-            // let formData = new FormData();
-            // const fileExtension = imageSrc.split(";")[0].split("/")[1];
-            // const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
-            // const file = new File([blob], `image.${fileExtension}`, {
-            //   type: `image/${fileExtension}`,
-            // });
-            // formData.append("file", file);
-            // fetch(
-            //   BASE_URL +
-            //     `/imageanalysisreport/create?token=${localStorage.getItem(
-            //       "userToken"
-            //     )}&createdAt=${formattedCurrentDate}&title=${
-            //       values.reportTitle
-            //     }&teamId=${values.team}&category=${values.adCategory}`,
-            //   {
-            //     method: "POST",
-            //     body: formData,
-            //   }
-            // )
-            //   .then((response) => {
-            //     if (response.ok) {
-            //       openSnack({
-            //         severity: "success",
-            //         text: "Image is analyzed successfully.",
-            //       });
-            //       navigate("/team-member");
-            //       return undefined;
-            //     } else return response.text();
-            //   })
-            //   .then((result) => {
-            //     if (result) {
-            //       openSnack({ severity: "error", text: result });
-            //     }
-            //   })
-            //   .catch((error) => console.error(error));
+              fetch(
+                BASE_URL +
+                  `/imageanalysisreport/createMultiple?token=${localStorage.getItem(
+                    "userToken"
+                  )}&createdAt=${formattedCurrentDate}&title=${
+                    values.reportTitle
+                  }&teamId=${values.team}&category=${values.adCategory}&spend=${
+                    values.spend
+                  }`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              )
+                .then((response) => {
+                  if (response.ok) {
+                    openSnack({
+                      severity: "success",
+                      text: "Images are analyzed successfully.",
+                    });
+                    navigate("/team-member");
+                    setLoading(false);
+                    return undefined;
+                  } else return response.text();
+                })
+                .then((result) => {
+                  if (result) {
+                    setLoading(false);
+                    openSnack({ severity: "error", text: result });
+                  }
+                })
+                .catch((error) => {
+                  console.error(error);
+                  setLoading(false);
+                });
+            } else console.log("empty");
           }}
           initialValues={{ adCategory: "Political", imageSrcs: [""] }}
           mutators={{ ...arrayMutators }}
@@ -320,33 +401,30 @@ export const TeamMemberImageAnalysisPage = () => {
                         </Box>
                       )}
                     </Field>
-                    <Field name="targetLocation">
-                      {({ input }) => (
+                    <Field
+                      name="spend"
+                      validate={composeValidators([
+                        isFieldEmpty("Budget must be entered."),
+                        isValueNumerical("Enter a numerical value."),
+                      ])}
+                    >
+                      {({ input, meta }) => (
                         <Box
                           display={"flex"}
                           alignSelf={"stretch"}
                           flexDirection={"column"}
                           gap={"4px"}
                         >
-                          <Typography color={"text.secondary"}>
-                            Target Location (Coming soon...)
-                          </Typography>
-                          <Select {...input} size="small" disabled></Select>
-                        </Box>
-                      )}
-                    </Field>
-                    <Field name="targetAge">
-                      {({ input }) => (
-                        <Box
-                          display={"flex"}
-                          alignSelf={"stretch"}
-                          flexDirection={"column"}
-                          gap={"4px"}
-                        >
-                          <Typography color={"text.secondary"}>
-                            Target Age (Coming soon...)
-                          </Typography>
-                          <Select {...input} size="small" disabled></Select>
+                          <Typography>Budget</Typography>
+                          <TextField
+                            {...input}
+                            error={meta.touched && meta.error ? true : false}
+                            variant="outlined"
+                            helperText={
+                              meta.touched && meta.error ? meta.error : ""
+                            }
+                            size="small"
+                          />
                         </Box>
                       )}
                     </Field>
@@ -376,15 +454,7 @@ export const TeamMemberImageAnalysisPage = () => {
                         {({ fields }) => (
                           <Stack direction={"column"} gap={"12px"}>
                             {fields.map((element, index) => (
-                              <Field
-                                name={element}
-                                key={index}
-                                validate={(value) => {
-                                  return imageSrcs[index]
-                                    ? undefined
-                                    : "Image must be uploaded.";
-                                }}
-                              >
+                              <Field name={element} key={index}>
                                 {({ input: { onChange, ...input }, meta }) => (
                                   <Box
                                     display={"flex"}
@@ -448,9 +518,6 @@ export const TeamMemberImageAnalysisPage = () => {
                                               handleImageChange(event, index)
                                             }
                                           />
-                                          {meta.touched && meta.error
-                                            ? meta.error
-                                            : ""}
                                         </Box>
                                       </label>
                                       <Collapse
@@ -496,6 +563,7 @@ export const TeamMemberImageAnalysisPage = () => {
                               type="button"
                               onClick={() => {
                                 fields.push("");
+                                imageSrcs.push("");
                               }}
                               disabled={
                                 fields.length ? fields.length > 2 : true
@@ -511,8 +579,20 @@ export const TeamMemberImageAnalysisPage = () => {
                         )}
                       </FieldArray>
                     </Stack>
-                    <Button variant="contained" disableElevation type="submit">
-                      Analyze
+                    <Button
+                      variant="contained"
+                      disableElevation
+                      type="submit"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <CircularProgress
+                          style={{ height: "24.5px", width: "24.5px" }}
+                          color="inherit"
+                        ></CircularProgress>
+                      ) : (
+                        "Analyze"
+                      )}
                     </Button>
                   </Stack>
                 </Paper>

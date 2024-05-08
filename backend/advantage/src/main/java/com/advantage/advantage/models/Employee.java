@@ -18,7 +18,6 @@ public abstract class Employee
     @Column(unique = true)
     @Getter @Setter private String email;
 
-    @JsonIgnore
     @Getter @Setter private String hashedPassword;
 
     @JsonIgnore

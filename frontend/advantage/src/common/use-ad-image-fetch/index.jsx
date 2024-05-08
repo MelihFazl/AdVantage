@@ -6,7 +6,7 @@ export function useAdImageFetch(imageName, open) {
   const [isReceived, setIsReceived] = useState(false);
 
   useEffect(() => {
-    if (imageName) {
+    if (imageName && !Array.isArray(imageName)) {
       if (open) {
         const fetchData = async () => {
           try {

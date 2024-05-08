@@ -17,17 +17,21 @@ import { generatePDF } from "../../../common/generate-pdf";
 import { useAdImageFetch } from "../../../common/use-ad-image-fetch";
 import { BASE_URL } from "../../../common/constans";
 import { useNavigate } from "react-router-dom";
+import { useMultiAdImageFetch } from "../../../common/use-multi-ad-image-fetch";
 
 export default function ReportDialog({ open, handleClose, report }) {
   const fullScreen = useMediaQuery("(max-width:960px)");
   const toColumn = useMediaQuery("(max-width:1060px)");
   const image = useAdImageFetch(report?.advertisementImage, open);
-  const navigate = useNavigate();
+  const images = useMultiAdImageFetch(report?.advertisementImage, open);
   var textComparisions = [""];
   var series = [];
   var series2 = [];
 
-  if (report?.type === "MultipleAdAnalysisReport") {
+  if (
+    report?.type === "MultipleAdAnalysisReport" ||
+    report?.type == "MultipleImageAdAnalysisReport"
+  ) {
     textComparisions = JSON.parse(report?.report?.comparison);
     textComparisions?.map((element, index) => {
       series.push({
@@ -47,7 +51,6 @@ export default function ReportDialog({ open, handleClose, report }) {
         label: "Advertisement " + (index + 1),
       });
     });
-    console.log(textComparisions);
   }
 
   return (
@@ -99,39 +102,91 @@ export default function ReportDialog({ open, handleClose, report }) {
               Political
             </Typography>
           </Box>
-          {report?.type === "ImageAdAnalysisReport" ? (
-            <React.Fragment>
-              {image.image === "" ? (
-                <Box
-                  style={{
-                    display: "flex",
-                    aligItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <CircularProgress></CircularProgress>
-                </Box>
-              ) : (
-                <Box
-                  style={{
-                    maxWidth: "250px",
-                  }}
-                >
-                  <Typography variant="body2" color={"#000"}>
-                    Analyzed Image:
-                  </Typography>
-                  <img
-                    src={image.image}
-                    alt="Analyzed Image"
+          {report?.type === "ImageAdAnalysisReport" ||
+          report?.type === "MultipleImageAdAnalysisReport" ? (
+            report?.type === "ImageAdAnalysisReport" ? (
+              <React.Fragment>
+                {image.image === "" ? (
+                  <Box
                     style={{
-                      height: "100%",
-                      width: "250px",
-                      objectFit: "cover",
+                      display: "flex",
+                      aligItems: "center",
+                      justifyContent: "center",
                     }}
-                  />
-                </Box>
-              )}
-            </React.Fragment>
+                  >
+                    <CircularProgress></CircularProgress>
+                  </Box>
+                ) : (
+                  <Box
+                    style={{
+                      maxWidth: "250px",
+                    }}
+                  >
+                    <Typography variant="body2" color={"#000"}>
+                      Analyzed Image:
+                    </Typography>
+                    <img
+                      name="singleImage"
+                      src={image.image}
+                      alt="Analyzed Image"
+                      style={{
+                        height: "100%",
+                        width: "350px",
+                        objectFit: "cover",
+                        marginTop: "4px",
+                      }}
+                    />
+                  </Box>
+                )}
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                {!images.isReceived ? (
+                  <Box
+                    style={{
+                      display: "flex",
+                      aligItems: "center",
+                      justifyContent: "center",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <CircularProgress></CircularProgress>
+                  </Box>
+                ) : (
+                  <Box
+                    display="grid"
+                    gridTemplateColumns="repeat(auto-fit, minmax(250px, 1fr))"
+                    height={"auto"}
+                    marginBottom={"10px"}
+                    gap="20px"
+                  >
+                    {images.images.map((element, index) => {
+                      return (
+                        <Box
+                          style={{
+                            maxWidth: "250px",
+                          }}
+                        >
+                          <Typography variant="body2" color={"#000"}>
+                            {`Analyzed Image ${index + 1}:`}
+                          </Typography>
+                          <img
+                            name={`multiImage${index}`}
+                            src={element}
+                            alt="Analyzed Image"
+                            style={{
+                              width: "250px",
+                              objectFit: "cover",
+                              marginTop: "4px",
+                            }}
+                          />
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+              </React.Fragment>
+            )
           ) : report?.type === "SingleAdAnalysisReport" ? (
             <React.Fragment>
               <Typography variant="body2" color={"#000"}>
@@ -140,6 +195,7 @@ export default function ReportDialog({ open, handleClose, report }) {
               <Typography
                 sx={{ marginBottom: "2px", fontSize: 15 }}
                 color="text.secondary"
+                style={{ whiteSpace: "pre-line" }}
               >
                 {report.advertisementText}
               </Typography>
@@ -151,17 +207,27 @@ export default function ReportDialog({ open, handleClose, report }) {
                   <Typography variant="body2" color={"#000"}>
                     Content of Ad{index + 1}:
                   </Typography>
-                  <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  <Typography
+                    sx={{ mb: 1.2 }}
+                    color="text.secondary"
+                    style={{ whiteSpace: "pre-line" }}
+                  >
                     {element}
                   </Typography>
                 </React.Fragment>
               );
             })
           )}
-          {report?.type !== "ImageAdAnalysisReport" &&
-            (report?.type === "SingleAdAnalysisReport" ? (
+          {report?.type === "ImageAdAnalysisReport" ||
+          report?.type === "MultipleImageAdAnalysisReport" ? (
+            report?.type === "ImageAdAnalysisReport" ? (
               <Box display={"flex"} flexDirection={"column"} gap={"3px"}>
-                <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
+                <Box
+                  display={"flex"}
+                  flexDirection={"row"}
+                  gap={"3px"}
+                  sx={{ marginTop: "10px" }}
+                >
                   <Typography
                     sx={{ fontSize: 15 }}
                     variant="body2"
@@ -174,7 +240,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                     color="text.secondary"
                     gutterBottom
                   >
-                    {report?.report?.successPrediction}
+                    {report?.report?.prediction}
                   </Typography>
                 </Box>
 
@@ -183,7 +249,6 @@ export default function ReportDialog({ open, handleClose, report }) {
                   flexDirection={toColumn ? "column" : "row"}
                   gap={toColumn ? "10px" : "20px"}
                 >
-                  {" "}
                   <Box>
                     <Typography
                       sx={{ fontSize: 15, marginBottom: "3px" }}
@@ -192,8 +257,17 @@ export default function ReportDialog({ open, handleClose, report }) {
                     >
                       Gender Distribution Plot:
                     </Typography>
-                    <div name="GenderBox">
+                    <div
+                      name="GenderBox"
+                      style={{
+                        display: "flex",
+                        height: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
                       <PieChart
+                        sx={{ justifySelf: "center" }}
                         series={[
                           {
                             data: [
@@ -260,21 +334,6 @@ export default function ReportDialog({ open, handleClose, report }) {
                     </div>
                   </Box>
                 </Box>
-
-                <Typography
-                  sx={{ fontSize: 15 }}
-                  variant="body2"
-                  color={"#000"}
-                >
-                  Overview:
-                </Typography>
-                <Typography
-                  sx={{ fontSize: 15 }}
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  {report?.report?.overview}
-                </Typography>
               </Box>
             ) : (
               <Box display={"flex"} flexDirection={"column"} gap={"3px"}>
@@ -343,7 +402,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                       variant="body2"
                       color={"#000"}
                     >
-                      Age Distribution Plot:
+                      Gender Distribution Plot:
                     </Typography>
                     <div name="GenderBox">
                       <BarChart
@@ -360,6 +419,136 @@ export default function ReportDialog({ open, handleClose, report }) {
                     </div>
                   </Box>
                 </Box>
+              </Box>
+            )
+          ) : report?.type === "SingleAdAnalysisReport" ? (
+            <Box display={"flex"} flexDirection={"column"} gap={"3px"}>
+              <Box display={"flex"} flexDirection={"row"} gap={"3px"}>
+                <Typography
+                  sx={{ fontSize: 15 }}
+                  variant="body2"
+                  color={"#000"}
+                >
+                  Impression of Ad:
+                </Typography>
+                <Typography
+                  sx={{ fontSize: 15 }}
+                  color="text.secondary"
+                  gutterBottom
+                >
+                  {report?.report?.successPrediction}
+                </Typography>
+              </Box>
+
+              <Box
+                display={"flex"}
+                flexDirection={toColumn ? "column" : "row"}
+                gap={toColumn ? "10px" : "20px"}
+              >
+                <Box>
+                  <Typography
+                    sx={{ fontSize: 15, marginBottom: "3px" }}
+                    variant="body2"
+                    color={"#000"}
+                  >
+                    Gender Distribution Plot:
+                  </Typography>
+                  <div
+                    name="GenderBox"
+                    style={{
+                      display: "flex",
+                      height: "100%",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <PieChart
+                      series={[
+                        {
+                          data: [
+                            {
+                              id: 0,
+                              value: report?.report?.genderM,
+                              label: "Male",
+                              color: "orange",
+                            },
+                            {
+                              id: 1,
+                              value: report?.report?.genderF,
+                              label: "Female",
+                              color: "purple",
+                            },
+                          ],
+                        },
+                      ]}
+                      width={400}
+                      height={200}
+                    />
+                  </div>
+                </Box>
+                <Box>
+                  <Typography
+                    sx={{ fontSize: 15 }}
+                    variant="body2"
+                    color={"#000"}
+                  >
+                    Age Distribution Plot:
+                  </Typography>
+                  <div name="PlotBox">
+                    <BarChart
+                      xAxis={[
+                        {
+                          scaleType: "band",
+                          data: [
+                            "13-17",
+                            "18-24",
+                            "25-34",
+                            "35-44",
+                            "45-54",
+                            "55-64",
+                            "65+",
+                          ],
+                        },
+                      ]}
+                      series={[
+                        {
+                          data: [
+                            report.report.age1317,
+                            report.report.age1824,
+                            report.report.age2534,
+                            report.report.age3544,
+                            report.report.age4554,
+                            report.report.age5564,
+                            report.report.age65,
+                          ],
+                        },
+                      ]}
+                      width={500}
+                      height={300}
+                    />
+                  </div>
+                </Box>
+              </Box>
+
+              <Typography sx={{ fontSize: 15 }} variant="body2" color={"#000"}>
+                Overview:
+              </Typography>
+              <Typography
+                sx={{ fontSize: 15 }}
+                color="text.secondary"
+                style={{ whiteSpace: "pre-line" }}
+                gutterBottom
+              >
+                {report?.report?.overview}
+              </Typography>
+            </Box>
+          ) : (
+            <Box display={"flex"} flexDirection={"column"} gap={"3px"}>
+              <Box
+                display="grid"
+                gridTemplateColumns="repeat(auto-fit, minmax(200px, 1fr))"
+                gap="20px"
+              >
                 {textComparisions?.map((element, index) => (
                   <Box key={index}>
                     <Typography
@@ -367,19 +556,97 @@ export default function ReportDialog({ open, handleClose, report }) {
                       variant="body2"
                       color="#000"
                     >
-                      Reccomended Text for Ad {index + 1}:
+                      Impression of Ad {index + 1}:
                     </Typography>
                     <Typography
                       sx={{ fontSize: 15 }}
                       color="text.secondary"
                       gutterBottom
                     >
-                      {element.textRecommendation}
+                      {element.prediction}
                     </Typography>
                   </Box>
                 ))}
               </Box>
-            ))}
+              <Box
+                display={"flex"}
+                flexDirection={toColumn ? "column" : "row"}
+                gap={toColumn ? "10px" : "20px"}
+              >
+                <Box>
+                  <Typography
+                    sx={{ fontSize: 15 }}
+                    variant="body2"
+                    color={"#000"}
+                  >
+                    Age Distribution Plot:
+                  </Typography>
+                  <div name="AgeBox">
+                    <BarChart
+                      xAxis={[
+                        {
+                          scaleType: "band",
+                          data: [
+                            "13-17",
+                            "18-24",
+                            "25-34",
+                            "35-44",
+                            "45-54",
+                            "55-64",
+                            "65+",
+                          ],
+                        },
+                      ]}
+                      series={series}
+                      width={500}
+                      height={300}
+                    />
+                  </div>
+                </Box>
+                <Box>
+                  <Typography
+                    sx={{ fontSize: 15 }}
+                    variant="body2"
+                    color={"#000"}
+                  >
+                    Gender Distribution Plot:
+                  </Typography>
+                  <div name="GenderBox">
+                    <BarChart
+                      xAxis={[
+                        {
+                          scaleType: "band",
+                          data: ["Male", "Female"],
+                        },
+                      ]}
+                      series={series2}
+                      width={500}
+                      height={300}
+                    />
+                  </div>
+                </Box>
+              </Box>
+              {textComparisions?.map((element, index) => (
+                <Box key={index}>
+                  <Typography
+                    sx={{ fontSize: 15 }}
+                    variant="body2"
+                    color="#000"
+                  >
+                    Reccomended Text for Ad {index + 1}:
+                  </Typography>
+                  <Typography
+                    sx={{ fontSize: 15 }}
+                    color="text.secondary"
+                    gutterBottom
+                    style={{ whiteSpace: "pre-line" }}
+                  >
+                    {element.textRecommendation}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
         </DialogContentText>
       </DialogContent>
       <DialogActions>

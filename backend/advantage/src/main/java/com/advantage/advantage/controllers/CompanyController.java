@@ -72,7 +72,7 @@ public class CompanyController {
                     if( savedSubscription != null){
                         APIResponse apiResponse = APIResponse.builder().message("Subscription is updated")
                                 .statusCode(200).build();
-                        admin.getCompany().setAvailableLimit(savedSubscription.getUsageLimit());
+                        admin.getCompany().setAvailableLimit(savedSubscription.getUsageLimit() - oldSubscription.getUsageLimit() + admin.getCompany().getAvailableLimit());
                         userAccountManagementService.patchCompanyAdministrator(admin, admin.getId());
                         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
                     }

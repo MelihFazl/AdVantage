@@ -57,7 +57,7 @@ public class ImageAdAnalysisReportController {
 
     @PostMapping("/create")
     public ResponseEntity<String> createSingleAnalysisReport(@RequestParam String token, @RequestParam String title, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
-                                                             @RequestParam AdCategory category, @RequestParam("file") MultipartFile multipartFile, @RequestParam Long teamId)  throws FileEmptyException, FileUploadException, IOException {
+                                                             @RequestParam AdCategory category, @RequestParam("file") MultipartFile multipartFile, @RequestParam Long teamId, @RequestParam float spend)  throws FileEmptyException, FileUploadException, IOException {
 
         if(!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
@@ -115,6 +115,9 @@ public class ImageAdAnalysisReportController {
         //List<Long> shapleyVal = modelService.calculateShapVal(adText);
         ImageModelAPIResponse response = modelService.getImagePrediction(multipartFile);
         float prediction = modelService.calculateImageCPI(response);
+        if(prediction != 0) {
+            prediction = (1 / prediction) * spend;
+        }
         Map<Integer, Float> ageDist = modelService.calculateImageAgeDistribution(response);
         Map<String, Float> genderDist =  modelService.calculateImageGenderDistribution(response);
         float genderM = genderDist.get("Male");
@@ -144,7 +147,7 @@ public class ImageAdAnalysisReportController {
                                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date createdAt,
                                                                @RequestParam AdCategory category,
                                                                @RequestParam("files") MultipartFile[] files,
-                                                               @RequestParam Long teamId) throws FileEmptyException, FileUploadException, IOException {
+                                                               @RequestParam Long teamId, @RequestParam float spend) throws FileEmptyException, FileUploadException, IOException {
 
         if (!jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
@@ -203,6 +206,9 @@ public class ImageAdAnalysisReportController {
 
                 ImageModelAPIResponse response = modelService.getImagePrediction(file);
                 float prediction = modelService.calculateImageCPI(response);
+                if(prediction != 0) {
+                    prediction = (1 / prediction) * spend;
+                }
                 Map<Integer, Float> ageDist = modelService.calculateImageAgeDistribution(response);
                 Map<String, Float> genderDist =  modelService.calculateImageGenderDistribution(response);
                 float genderM = genderDist.get("Male");
