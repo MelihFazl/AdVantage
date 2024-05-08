@@ -11,6 +11,7 @@ import AdvSnackbar from "../../../common/adv-snackbar";
 import { LinearProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import PaymentDialog from "./payment-dialog";
 
 const BannerText = styled(Typography)({
   textAlign: "center",
@@ -49,6 +50,9 @@ export const CompanySubscription = () => {
   const [open, setOpen] = useState(false);
   const [severity, setSeverity] = useState("");
   const [text, setText] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [paymentPlanType, setPaymentPlanType] = useState("");
+  const [paymentPeriodType, setPaymentPeriodType] = useState("");
   const SNACK_DURATION = 4000;
   const navigate = useNavigate();
 
@@ -59,6 +63,17 @@ export const CompanySubscription = () => {
     setText(text);
     setOpen(true);
   };
+
+  const openDialog = (paymentPlanType, paymentPeriodType) => {
+    setPaymentPlanType(paymentPlanType);
+    setPaymentPeriodType(paymentPeriodType);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
   const options = {
     day: "2-digit",
     month: "short",
@@ -317,16 +332,20 @@ export const CompanySubscription = () => {
                 plan={SubscriptionTypes.slice(0, 2)}
                 company={company}
                 openSnack={openSnack}
+                openDialog={openDialog}
               ></PlanCard>
               <PlanCard
                 plan={SubscriptionTypes.slice(2, 4)}
                 company={company}
                 openSnack={openSnack}
+                openDialog={openDialog}
               ></PlanCard>
               <PlanCard
                 plan={SubscriptionTypes.slice(4, 6)}
                 company={company}
                 openSnack={openSnack}
+                openDialog={openDialog}
+                handleClose={handleDialogClose}
               ></PlanCard>
             </Box>
           </React.Fragment>
@@ -343,6 +362,13 @@ export const CompanySubscription = () => {
         duration={SNACK_DURATION}
         text={text}
       ></AdvSnackbar>
+      <PaymentDialog
+        open={dialogOpen}
+        handleClose={handleDialogClose}
+        openSnack={openSnack}
+        paymentPlanType={paymentPlanType}
+        paymentPeriodType={paymentPeriodType}
+      ></PaymentDialog>
     </Stack>
   );
 };
