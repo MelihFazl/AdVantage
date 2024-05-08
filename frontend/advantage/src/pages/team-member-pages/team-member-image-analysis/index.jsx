@@ -193,7 +193,6 @@ export const TeamMemberImageAnalysisPage = () => {
               .toString()
               .padStart(2, "0")}`;
 
-            console.log(values);
             setTimeout(() => {
               setLoading(false);
             }, 1000);

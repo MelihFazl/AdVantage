@@ -198,7 +198,10 @@ export const TeamMemberTextualAnalysisPage = () => {
                   .then((result) => {
                     if (result) openSnack({ severity: "error", text: result });
                   })
-                  .catch((error) => console.log("error", error));
+                  .catch((error) => {
+                    console.log("error", error);
+                    setLoading(false);
+                  });
               } else if (values.adContents.length > 1) {
                 var myHeaders = new Headers();
                 myHeaders.append("Content-Type", "application/json");
@@ -247,7 +250,10 @@ export const TeamMemberTextualAnalysisPage = () => {
                   .then((result) => {
                     if (result) openSnack({ severity: "error", text: result });
                   })
-                  .catch((error) => console.log("error", error));
+                  .catch((error) => {
+                    console.log("error", error);
+                    setLoading(false);
+                  });
               } else {
                 console.log("empty");
               }

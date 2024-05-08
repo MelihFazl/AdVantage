@@ -294,7 +294,7 @@ export default function PaymentDialog({
                     color="inherit"
                   />
                 ) : (
-                  "Save"
+                  "Subscribe"
                 )}
               </Button>
               <Button onClick={handleClose} color="primary">

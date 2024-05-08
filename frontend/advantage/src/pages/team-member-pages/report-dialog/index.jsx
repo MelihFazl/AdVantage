@@ -195,6 +195,7 @@ export default function ReportDialog({ open, handleClose, report }) {
               <Typography
                 sx={{ marginBottom: "2px", fontSize: 15 }}
                 color="text.secondary"
+                style={{ whiteSpace: "pre-line" }}
               >
                 {report.advertisementText}
               </Typography>
@@ -206,7 +207,11 @@ export default function ReportDialog({ open, handleClose, report }) {
                   <Typography variant="body2" color={"#000"}>
                     Content of Ad{index + 1}:
                   </Typography>
-                  <Typography sx={{ mb: 1.2 }} color="text.secondary">
+                  <Typography
+                    sx={{ mb: 1.2 }}
+                    color="text.secondary"
+                    style={{ whiteSpace: "pre-line" }}
+                  >
                     {element}
                   </Typography>
                 </React.Fragment>
@@ -531,6 +536,7 @@ export default function ReportDialog({ open, handleClose, report }) {
               <Typography
                 sx={{ fontSize: 15 }}
                 color="text.secondary"
+                style={{ whiteSpace: "pre-line" }}
                 gutterBottom
               >
                 {report?.report?.overview}
@@ -633,6 +639,7 @@ export default function ReportDialog({ open, handleClose, report }) {
                     sx={{ fontSize: 15 }}
                     color="text.secondary"
                     gutterBottom
+                    style={{ whiteSpace: "pre-line" }}
                   >
                     {element.textRecommendation}
                   </Typography>
