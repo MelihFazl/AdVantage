@@ -193,6 +193,17 @@ async def text_prediction(request: Request):
             predictor = TextAdPredictorBert(text_ad, spend, prediction_model, prediction_model_age, prediction_model_gender)
             # Perform text prediction
             prediction_result = predictor.text_ad_predict()
+
+            predictor_bert = TextAdPredictorBert(paragraphs_text, spend, prediction_model, prediction_model_age, prediction_model_gender)
+            prediction_result_bert = predictor_bert.text_ad_predict()
+
+            impression_improv_factor = round(float(prediction_result_bert["impression"]) / float(prediction_result["impression"]), 1)
+            if impression_improv_factor > 1.5:
+                paragraphs_text += "\n Recommended ad gets " + str(impression_improv_factor) + "x times higher impression!"
+            else:
+                paragraphs_text += "\n" + "No further improvement required, good job!"
+
+
             logger.info("Detection results: %s", prediction_result)
             return JSONResponse({"impression": float(prediction_result["impression"]),
                                  "age_distribution": prediction_result["age_distribution"][0],
