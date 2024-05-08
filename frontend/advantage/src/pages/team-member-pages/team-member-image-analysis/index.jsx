@@ -27,6 +27,8 @@ import { useNavigate } from "react-router-dom";
 import AdvSnackbar from "../../../common/adv-snackbar";
 import { FieldArray } from "react-final-form-arrays";
 import { jwtDecode } from "jwt-decode";
+import { isValueNumerical } from "../../../common/validator-functions/isValueNumerical";
+import { composeValidators } from "../../../common/validator-functions/composeValidators";
 
 const TeamText = styled(Typography)({
   textAlign: "center",
@@ -199,6 +201,7 @@ export const TeamMemberImageAnalysisPage = () => {
 
             if (imageSrcs.length === 1) {
               let formData = new FormData();
+              var imageSrc = imageSrcs[0];
               const fileExtension = imageSrc.split(";")[0].split("/")[1];
               const blob = base64ToBlob(imageSrc, `image/${fileExtension}`);
               const file = new File([blob], `image.${fileExtension}`, {
@@ -211,7 +214,9 @@ export const TeamMemberImageAnalysisPage = () => {
                     "userToken"
                   )}&createdAt=${formattedCurrentDate}&title=${
                     values.reportTitle
-                  }&teamId=${values.team}&category=${values.adCategory}`,
+                  }&teamId=${values.team}&category=${values.adCategory}&spend=${
+                    values.spend
+                  }`,
                 {
                   method: "POST",
                   body: formData,
@@ -336,33 +341,30 @@ export const TeamMemberImageAnalysisPage = () => {
                         </Box>
                       )}
                     </Field>
-                    <Field name="targetLocation">
-                      {({ input }) => (
+                    <Field
+                      name="spend"
+                      validate={composeValidators([
+                        isFieldEmpty("Budget must be entered."),
+                        isValueNumerical("Enter a numerical value."),
+                      ])}
+                    >
+                      {({ input, meta }) => (
                         <Box
                           display={"flex"}
                           alignSelf={"stretch"}
                           flexDirection={"column"}
                           gap={"4px"}
                         >
-                          <Typography color={"text.secondary"}>
-                            Target Location (Coming soon...)
-                          </Typography>
-                          <Select {...input} size="small" disabled></Select>
-                        </Box>
-                      )}
-                    </Field>
-                    <Field name="targetAge">
-                      {({ input }) => (
-                        <Box
-                          display={"flex"}
-                          alignSelf={"stretch"}
-                          flexDirection={"column"}
-                          gap={"4px"}
-                        >
-                          <Typography color={"text.secondary"}>
-                            Target Age (Coming soon...)
-                          </Typography>
-                          <Select {...input} size="small" disabled></Select>
+                          <Typography>Budget</Typography>
+                          <TextField
+                            {...input}
+                            error={meta.touched && meta.error ? true : false}
+                            variant="outlined"
+                            helperText={
+                              meta.touched && meta.error ? meta.error : ""
+                            }
+                            size="small"
+                          />
                         </Box>
                       )}
                     </Field>
