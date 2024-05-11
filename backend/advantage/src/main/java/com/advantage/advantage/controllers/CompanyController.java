@@ -24,7 +24,6 @@ public class CompanyController {
 
     private final CompanySubscriptionService subscriptionService;
 
-
     private final CompanyService companyService;
 
 

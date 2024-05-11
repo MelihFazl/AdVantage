@@ -37,7 +37,7 @@ export const ForgotPasswordPage = () => {
       .then((response) => {
         if (response.ok)
           openSnack({ severity: "success", text: "Email sent successfully." });
-        else openSnack({ severity: "error", text: "Something went wrong." });
+        else openSnack({ severity: "error", text: "No user was found with this email!" });
       })
 
       .catch((error) => console.error(error));

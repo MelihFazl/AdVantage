@@ -54,7 +54,7 @@ export const AboutUsPage = () => {
             ></DeveloperCard>
             <DeveloperCard
               name="Utku Kurtulmuş"
-              title="Full-Time Bilkent CS Senior Student"
+              title="Backend Developer @AdVantage"
               image={images.utkuImage}
             ></DeveloperCard>
             <DeveloperCard
