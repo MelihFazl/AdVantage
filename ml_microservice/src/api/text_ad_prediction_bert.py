@@ -198,10 +198,10 @@ async def text_prediction(request: Request):
             prediction_result_bert = predictor_bert.text_ad_predict()
 
             impression_improv_factor = round(float(prediction_result_bert["impression"]) / float(prediction_result["impression"]), 1)
-            if impression_improv_factor > 1.5:
+            if impression_improv_factor > 1.2:
                 paragraphs_text += "\n Recommended ad gets " + str(impression_improv_factor) + "x times higher impression!"
             else:
-                paragraphs_text += "\n" + "No further improvement required, good job!"
+                paragraphs_text = " \n" + "No further improvement required, good job!"
 
 
             logger.info("Detection results: %s", prediction_result)

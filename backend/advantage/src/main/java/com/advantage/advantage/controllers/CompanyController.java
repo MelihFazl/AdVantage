@@ -24,7 +24,6 @@ public class CompanyController {
 
     private final CompanySubscriptionService subscriptionService;
 
-
     private final CompanyService companyService;
 
 
@@ -65,14 +64,14 @@ public class CompanyController {
             case "CA":
                 CompanyAdministrator admin = userAccountManagementService.getCompanyAdministratorByID(userID).get(0);
                 CompanySubscription oldSubscription = admin.getCompany().getSubscription();
-
-
+                int oldUsageLimit = oldSubscription.getUsageLimit();
+                
                 try{
                     CompanySubscription savedSubscription = subscriptionService.updateCompanySubscription(paymentPlanType,paymentPeriodType,createdAt, oldSubscription.getSubscriptionId());
                     if( savedSubscription != null){
                         APIResponse apiResponse = APIResponse.builder().message("Subscription is updated")
                                 .statusCode(200).build();
-                        admin.getCompany().setAvailableLimit(savedSubscription.getUsageLimit() - oldSubscription.getUsageLimit() + admin.getCompany().getAvailableLimit());
+                        admin.getCompany().setAvailableLimit(savedSubscription.getUsageLimit() - oldUsageLimit + admin.getCompany().getAvailableLimit());
                         userAccountManagementService.patchCompanyAdministrator(admin, admin.getId());
                         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
                     }

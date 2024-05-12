@@ -269,34 +269,33 @@ public class UserAccountManagementController {
 
     @PostMapping("/forgetPassword")
     public ResponseEntity<String> forgetPassword(@RequestParam String email) {
-        List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
+        try{
+            List<CompanyAdministrator> companyAdministrators = userAccountManagementService.getCompanyAdministratorByEmail(email);
+            if (companyAdministrators == null || companyAdministrators.isEmpty()) {
+                List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
+                if (teamMembers == null || teamMembers.isEmpty()) {
+                    return new ResponseEntity<>("No user was found with email " + email, HttpStatus.NOT_FOUND);
+                }else{
+                    TeamMember teamMemberLoggingIn = teamMembers.get(0);
+                    Token token = new Token();
+                    token.setInUse(true);
+                    String tokenStr = token.generateToken(teamMemberLoggingIn.getId(), "TM");
+                    tokenRepository.save(token);
+                    teamMemberLoggingIn.setToken(token);
+                    userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
+                    String subject = "Your Forget Password request";
+                    String text = "Hello " +  teamMemberLoggingIn.getName() + ", \nWe received a request to reset the password " +
+                            "associated with your account. To proceed with resetting your password, please click the link below: http://localhost:3000/reset-password" +  "?token="
+                            + tokenStr + " \nIf you didn't initiate this request or believe it was sent to you in error, please ignore this email. " +
+                            "Your password will remain unchanged."  + "\nFor security reasons, this link will expire in 15 minutes. " +
+                            "If you don't reset your password within this time frame, you'll need to request a new link."
+                            + "\nThank you \nAdvantage Team";
+                    emailService.sendSimpleMessage(teamMemberLoggingIn.getEmail(), subject, text);
 
-        if (companyAdministrators == null || companyAdministrators.isEmpty()) {
-            List<TeamMember> teamMembers = userAccountManagementService.getTeamMemberByEmail(email);
-            if (teamMembers == null || teamMembers.isEmpty()) {
-                return new ResponseEntity<>("No user was found with email " + email, HttpStatus.NOT_FOUND);
-            }else{
-                TeamMember teamMemberLoggingIn = teamMembers.get(0);
-                Token token = new Token();
-                token.setInUse(true);
-                String tokenStr = token.generateToken(teamMemberLoggingIn.getId(), "TM");
-                tokenRepository.save(token);
-                teamMemberLoggingIn.setToken(token);
-                userAccountManagementService.updateTeamMember(teamMemberLoggingIn);
-                String subject = "Your Forget Password request";
-                String text = "Hello " +  teamMemberLoggingIn.getName() + ", \nWe received a request to reset the password " +
-                        "associated with your account. To proceed with resetting your password, please click the link below: http://localhost:3000/reset-password" +  "?token="
-                        + tokenStr + " \nIf you didn't initiate this request or believe it was sent to you in error, please ignore this email. " +
-                        "Your password will remain unchanged."  + "\nFor security reasons, this link will expire in 15 minutes. " +
-                        "If you don't reset your password within this time frame, you'll need to request a new link."
-                        + "\nThank you \nAdvantage Team";
-                emailService.sendSimpleMessage(teamMemberLoggingIn.getEmail(), subject, text);
-
-                return new ResponseEntity<>("Your change password link is sent to your email", HttpStatus.OK);
-            }
-        } else {
-            CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
-            if (passwordHashHandler.hashPassword().equals(companyAdministratorLoggingIn.getHashedPassword())) {
+                    return new ResponseEntity<>("Your change password link is sent to your email", HttpStatus.OK);
+                }
+            } else {
+                CompanyAdministrator companyAdministratorLoggingIn = companyAdministrators.get(0);
                 Token token = new Token();
                 token.setInUse(true);
                 String tokenStr = token.generateToken(companyAdministratorLoggingIn.getId(), "CA");
@@ -305,17 +304,17 @@ public class UserAccountManagementController {
                 userAccountManagementService.updateCompanyAdministrator(companyAdministratorLoggingIn);
                 String subject = "Your Forget Password request";
                 String text = "Hello " +  companyAdministratorLoggingIn.getName() + ", \nWe received a request to reset the password " +
-                        "associated with your account. To proceed with resetting your password, please click the link below: \n http://localhost:3000/reset-password" +  "?token="
-                        + tokenStr + " \nIf you didn't initiate this request or believe it was sent to you in error, please ignore this email. " +
-                        "Your password will remain unchanged."  + "\nFor security reasons, this link will expire in 15 minutes. " +
-                        "If you don't reset your password within this time frame, you'll need to request a new link."
-                        + "\nThank you \nAdvantage Team";
+                            "associated with your account. To proceed with resetting your password, please click the link below: \n http://localhost:3000/reset-password" +  "?token="
+                            + tokenStr + " \nIf you didn't initiate this request or believe it was sent to you in error, please ignore this email. " +
+                            "Your password will remain unchanged."  + "\nFor security reasons, this link will expire in 15 minutes. " +
+                            "If you don't reset your password within this time frame, you'll need to request a new link."
+                            + "\nThank you \nAdvantage Team";
                 emailService.sendSimpleMessage(companyAdministratorLoggingIn.getEmail(), subject, text);
 
                 return new ResponseEntity<>("Your change password link is sent to your email", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Login credentials are incorrect", HttpStatus.UNAUTHORIZED);
             }
+        }catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 

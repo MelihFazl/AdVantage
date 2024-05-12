@@ -31,7 +31,7 @@ public class Token {
 
     //private Long userId;
     //private String userType;
-    private static final int EXPIRATION_TIME = 900000 * 4; // 15 minutes in milliseconds;
+    private static final int EXPIRATION_TIME = 900000 * 2; // 15 minutes in milliseconds;
 
     /*
     public String generateToken()

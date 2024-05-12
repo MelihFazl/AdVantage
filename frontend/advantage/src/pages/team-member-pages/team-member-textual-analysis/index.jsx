@@ -372,7 +372,7 @@ export const TeamMemberTextualAnalysisPage = () => {
                             flexDirection={"column"}
                             gap={"4px"}
                           >
-                            <Typography>Budget</Typography>
+                            <Typography>Budget ($)</Typography>
                             <TextField
                               {...input}
                               error={meta.touched && meta.error ? true : false}
