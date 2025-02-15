@@ -8,6 +8,9 @@
 - [Melih Fazıl Keskin 21901831](https://github.com/MelihFazl)
 - [Miray Ayerdem 21901987](https://github.com/mirayayerdem)
 
+### 🔗 Reports & Detailed Information
+If you want to get detailed explanation on our architecture, use of machine learning models and presentations of the project, please check out our project website https://keremsahin22.github.io/ . 
+
 ### 🖋️ Description
 AdVantage is an innovative application that analyzes top-performing internet advertisements, providing advertisers with strategies in line with trends and market dynamics. It is created for marketing professionals and developers seeking optimized digital advertising. Our platform streamlines the trial-and-error process, offering data-driven insights to enhance ad content and concepts. By leveraging innovative machine learning algorithms, we predict ad success rates and revolutionize the advertising process by giving recommendations according to the current trends analyzed from related and successful ads without the need for large marketing budgets, setting us apart from the competition.  
 
